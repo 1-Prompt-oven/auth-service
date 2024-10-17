@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/auth")
 public class AuthRestController {
 
-    @PostMapping(`"/login")
+    @PostMapping("/login")
     public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO){
         return new LoginResponseVO();
     }
