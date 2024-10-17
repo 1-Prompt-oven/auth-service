@@ -22,13 +22,31 @@ import com.promptoven.authservice.application.usecase.VerifyNicknameUseCase;
 import com.promptoven.authservice.application.usecase.VerifyPhoneUseCase;
 import com.promptoven.authservice.domain.Member;
 
+/*
+ * AuthService : 인증 서비스
+ * 1. login : 로그인
+ * 2. oauthLogin : OAuth 로그인
+ * 3. logout : 로그아웃
+ * 4. register : 회원가입
+ * 5. oauthRegister : OAuth 연동
+ * 6. oauthUnregister : OAuth 연동해제
+ * 7. withdraw : 회원탈퇴
+ * 8. resetPW : 비밀번호 재설정
+ * 9. changePW : 비밀번호 변경
+ * 10. emailAuth : 이메일 인증
+ * 11. emailAuthCheck : 이메일 인증 확인
+ * 12. verifyEmail : 이메일 중복 확인
+ * 13. verifyNickname : 닉네임 중복 확인
+ * 14. verifyPhone : 전화번호 중복 확인
+ * 15. register-social : 소셜 회원가입
+ * */
+
 @Service
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl {
 
 	private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(13);
 	private static final CallMemberByEmail callMemberByEmail;
 
-	@Override
 	public LoginDTO login(LoginUseCase loginUseCase) {
 		String email = loginUseCase.getEmail();
 		String password = loginUseCase.getPassword();
@@ -41,72 +59,58 @@ public class AuthServiceImpl implements AuthService {
 		return null;
 	}
 
-	@Override
 	public LoginDTO oauthLogin(OauthLoginUseCase oauthLoginUseCase) {
 		return null;
 	}
 
-	@Override
 	public void logout() {
 
 	}
 
-	@Override
 	public LoginDTO register(RegisterUseCase registerUseCase) {
 		return null;
 	}
 
-	@Override
 	public void oauthRegister(OauthRegisterUseCase oauthRegisterUseCase) {
 
 	}
 
-	@Override
 	public void oauthUnregister(OauthUnregisterUseCase oauthUnregisterUseCase) {
 
 	}
 
-	@Override
 	public void withdraw() {
 
 	}
 
-	@Override
 	public void resetPW(ResetPWUseCase resetPWUseCase) {
 
 	}
 
-	@Override
 	public void changePW(ChangePWUseCase changePWUseCase) {
 
 	}
 
-	@Override
 	public void emailAuth(MediaRequestUseCase mediaRequestUseCase) {
 
 	}
 
-	@Override
 	public MediaCheckDTO emailAuthCheck(MediaCheckUseCase mediaCheckUseCase) {
 		return null;
 	}
 
-	@Override
 	public VerifyDTO verifyEmail(VerifyEmailUseCase verifyEmailUseCase) {
 		return null;
 	}
 
-	@Override
 	public VerifyDTO verifyNickname(VerifyNicknameUseCase verifyNicknameUseCase) {
 		return null;
 	}
 
-	@Override
 	public VerifyDTO verifyPhone(VerifyPhoneUseCase verifyPhoneUseCase) {
 		return null;
 	}
 
-	@Override
 	public LoginDTO registerSocial(RegisterFromSocialLoginUseCase registerFromSocialLoginUseCase) {
 		return null;
 	}
