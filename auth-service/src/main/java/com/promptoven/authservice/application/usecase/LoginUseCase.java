@@ -1,4 +1,4 @@
-package com.promptoven.authservice.application.port.in;
+package com.promptoven.authservice.application.usecase;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

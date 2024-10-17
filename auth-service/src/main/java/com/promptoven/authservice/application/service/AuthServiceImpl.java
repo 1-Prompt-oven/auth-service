@@ -1,32 +1,28 @@
 package com.promptoven.authservice.application.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.promptoven.authservice.application.port.in.ChangePWUseCase;
-import com.promptoven.authservice.application.port.in.LoginUseCase;
-import com.promptoven.authservice.application.port.in.MediaCheckUseCase;
-import com.promptoven.authservice.application.port.in.MediaRequestUseCase;
-import com.promptoven.authservice.application.port.in.OauthLoginUseCase;
-import com.promptoven.authservice.application.port.in.OauthRegisterUseCase;
-import com.promptoven.authservice.application.port.in.OauthUnregisterUseCase;
-import com.promptoven.authservice.application.port.in.RegisterFromSocialLoginUseCase;
-import com.promptoven.authservice.application.port.in.RegisterUseCase;
-import com.promptoven.authservice.application.port.in.ResetPWUseCase;
-import com.promptoven.authservice.application.port.in.VerifyEmailUseCase;
-import com.promptoven.authservice.application.port.in.VerifyNicknameUseCase;
-import com.promptoven.authservice.application.port.in.VerifyPhoneUseCase;
-import com.promptoven.authservice.application.port.out.call.CallMemberByEmail;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.application.port.out.dto.MediaCheckDTO;
 import com.promptoven.authservice.application.port.out.dto.VerifyDTO;
+import com.promptoven.authservice.application.port.out.outputport.CallMemberByEmail;
+import com.promptoven.authservice.application.usecase.ChangePWUseCase;
+import com.promptoven.authservice.application.usecase.LoginUseCase;
+import com.promptoven.authservice.application.usecase.MediaCheckUseCase;
+import com.promptoven.authservice.application.usecase.MediaRequestUseCase;
+import com.promptoven.authservice.application.usecase.OauthLoginUseCase;
+import com.promptoven.authservice.application.usecase.OauthRegisterUseCase;
+import com.promptoven.authservice.application.usecase.OauthUnregisterUseCase;
+import com.promptoven.authservice.application.usecase.RegisterFromSocialLoginUseCase;
+import com.promptoven.authservice.application.usecase.RegisterUseCase;
+import com.promptoven.authservice.application.usecase.ResetPWUseCase;
+import com.promptoven.authservice.application.usecase.VerifyEmailUseCase;
+import com.promptoven.authservice.application.usecase.VerifyNicknameUseCase;
+import com.promptoven.authservice.application.usecase.VerifyPhoneUseCase;
 import com.promptoven.authservice.domain.Member;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
 	private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(13);
@@ -36,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
 	public LoginDTO login(LoginUseCase loginUseCase) {
 		String email = loginUseCase.getEmail();
 		String password = loginUseCase.getPassword();
-		Member member = .getMember(email);
+		Member member = callMemberByEmail.getMember(email);
 		if (member != null) {
 			if (passwordEncoder.matches(password, member.getPassword())) {
 				return new LoginDTO();
