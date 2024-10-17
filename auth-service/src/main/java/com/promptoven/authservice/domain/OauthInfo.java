@@ -9,20 +9,19 @@ import lombok.Getter;
 @Builder
 public class OauthInfo {
 
-    private Long id;
-    private String provider;
-    private String providerID;
-    private String memberUUID;
+	private Long id;
+	private String provider;
+	private String providerID;
+	private String memberUUID;
 
-    public static OauthInfo createOauthInfo(
-            Long id, String provider,
-            String providerID, String memberUUID)
-    {
-        return OauthInfo.builder()
-                .id(id)
-                .provider(provider)
-                .providerID(providerID)
-                .memberUUID(memberUUID)
-                .build();
-    }
+	public static OauthInfo createOauthInfo(
+		Long id, String provider,
+		String providerID, String memberUUID) {
+		return OauthInfo.builder()
+			.id(id)
+			.provider(provider)
+			.providerID(providerID)
+			.memberUUID(memberUUID)
+			.build();
+	}
 }

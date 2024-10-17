@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AuthTaskEntity {
 
-    public String media;
-    public String challengeCode;
+	public String media;
+	public String challengeCode;
 
 }

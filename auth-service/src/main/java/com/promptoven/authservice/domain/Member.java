@@ -11,31 +11,30 @@ import java.time.LocalDateTime;
 @Builder
 public class Member {
 
-    private String uuid;
+	private String uuid;
 
-    private String email;
-    private String password;
-    private String nickname;
+	private String email;
+	private String password;
+	private String nickname;
 
-    private LocalDateTime createdAt;
-    private Boolean isDeleted;
-    private Boolean isBanned;
+	private LocalDateTime createdAt;
+	private Boolean isDeleted;
+	private Boolean isBanned;
 
-    private int role;
+	private int role;
 
-    public static Member createMember(
-            String uuid, String email, String password, String nickname, LocalDateTime createdAt, int role)
-    {
-        return Member.builder()
-                .uuid(uuid)
-                .email(email)
-                .password(password)
-                .nickname(nickname)
-                .createdAt(LocalDateTime.now())
-                .isDeleted(true)
-                .isBanned(true)
-                .role(role)
-                .build();
-    }
+	public static Member createMember(
+		String uuid, String email, String password, String nickname, LocalDateTime createdAt, int role) {
+		return Member.builder()
+			.uuid(uuid)
+			.email(email)
+			.password(password)
+			.nickname(nickname)
+			.createdAt(LocalDateTime.now())
+			.isDeleted(true)
+			.isBanned(true)
+			.role(role)
+			.build();
+	}
 
 }

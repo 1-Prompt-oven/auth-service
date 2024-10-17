@@ -1,6 +1,9 @@
 spring:
   application:
     name: auth-service
+  mail:
+    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME}
 
 server:
-  port: 0 # random port for security (??? ?? ?? ?? ??)
+  port: 0 # random port for security reasons
