@@ -13,9 +13,9 @@ import com.promptoven.authservice.application.port.in.ResetPWUseCase;
 import com.promptoven.authservice.application.port.in.VerifyEmailUseCase;
 import com.promptoven.authservice.application.port.in.VerifyNicknameUseCase;
 import com.promptoven.authservice.application.port.in.VerifyPhoneUseCase;
-import com.promptoven.authservice.application.port.out.LoginDTO;
-import com.promptoven.authservice.application.port.out.MediaCheckDTO;
-import com.promptoven.authservice.application.port.out.VerifyDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.MediaCheckDTO;
+import com.promptoven.authservice.application.port.out.dto.VerifyDTO;
 
 public interface AuthService {
 
