@@ -4,13 +4,26 @@ import java.time.LocalDateTime;
 
 import com.promptoven.authservice.domain.Member;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
-
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 @Getter
+@Table(name = "member")
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class MemberEntity {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private String uuid;
 	private String email;
 	private String password;
@@ -20,8 +33,8 @@ public class MemberEntity {
 	private Boolean isBanned;
 	private int role;
 
-	public MemberEntity(Member member) {
-		MemberEntity.builder()
+	public static MemberEntity fromDomain(Member member) {
+		return MemberEntity.builder()
 			.uuid(member.getUuid())
 			.email(member.getEmail())
 			.password(member.getPassword())

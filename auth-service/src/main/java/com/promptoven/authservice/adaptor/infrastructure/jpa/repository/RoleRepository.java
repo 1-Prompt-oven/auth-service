@@ -1,4 +1,10 @@
 package com.promptoven.authservice.adaptor.infrastructure.jpa.repository;
 
-public interface RoleRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.RoleEntity;
+
+public interface RoleRepository extends JpaRepository<RoleEntity, Integer> {
+    
 }
+

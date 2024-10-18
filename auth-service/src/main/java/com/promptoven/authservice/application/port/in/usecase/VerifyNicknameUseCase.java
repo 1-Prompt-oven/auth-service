@@ -1,4 +1,6 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-public class VerifyNicknameUseCase {
+public interface VerifyNicknameUseCase {
+
+	boolean verifyNickname(String nickname);
 }

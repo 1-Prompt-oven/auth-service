@@ -7,5 +7,5 @@ import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.MemberEntity
 public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 	MemberEntity findByEmail(String email);
 
-	MemberEntity findAllByUuid(String uuid);
+	MemberEntity findByUuid(String uuid);
 }

@@ -1,4 +1,6 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-public class ResetPWUseCase {
+public interface ResetPWUseCase {
+
+	void resetPW(String email, String password);
 }

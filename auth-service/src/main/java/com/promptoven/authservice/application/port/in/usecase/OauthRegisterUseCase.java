@@ -1,4 +1,6 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-public class OauthRegisterUseCase {
+public interface OauthRegisterUseCase {
+
+	void register(String provider, String providerID);
 }

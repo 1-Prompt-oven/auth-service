@@ -1,4 +1,6 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-public class VerifyEmailUseCase {
+public interface VerifyEmailUseCase {
+
+	boolean verifyEmail(String email);
 }

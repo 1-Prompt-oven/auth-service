@@ -17,7 +17,7 @@ public class AuthPersistenceImplByJpa implements AuthPersistence {
 
 	@Override
 	public void create(Member member) {
-		MemberEntity memberEntity = new MemberEntity(member);
+		MemberEntity memberEntity = MemberEntity.fromDomain(member);
 		memberRepository.save(memberEntity);
 	}
 
@@ -29,7 +29,8 @@ public class AuthPersistenceImplByJpa implements AuthPersistence {
 
 	@Override
 	public Member findByUuid(String uuid) {
-		return null;
+		MemberEntity memberEntity = memberRepository.findByUuid(uuid);
+		return memberEntity.toDomain();
 	}
 
 }

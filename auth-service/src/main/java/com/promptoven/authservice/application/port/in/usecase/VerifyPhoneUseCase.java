@@ -1,4 +1,6 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-public class VerifyPhoneUseCase {
+public interface VerifyPhoneUseCase {
+
+	boolean verifyPhone(String phone);
 }
