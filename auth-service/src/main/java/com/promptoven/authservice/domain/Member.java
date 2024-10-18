@@ -31,10 +31,88 @@ public class Member {
 			.password(password)
 			.nickname(nickname)
 			.createdAt(LocalDateTime.now())
-			.isDeleted(true)
-			.isBanned(true)
+			.isDeleted(false)
+			.isBanned(false)
 			.role(role)
 			.build();
 	}
 
+	public static Member updateMemberNickname(Member member, String nickname) {
+		return Member.builder()
+			.uuid(member.getUuid())
+			.email(member.getEmail())
+			.password(member.getPassword())
+			.nickname(nickname)
+			.createdAt(member.getCreatedAt())
+			.isDeleted(member.getIsDeleted())
+			.isBanned(member.getIsBanned())
+			.role(member.getRole())
+			.build();
+	}
+
+	public static Member updateMemberPassword(Member member, String password) {
+		return Member.builder()
+			.uuid(member.getUuid())
+			.email(member.getEmail())
+			.password(password)
+			.nickname(member.getNickname())
+			.createdAt(member.getCreatedAt())
+			.isDeleted(member.getIsDeleted())
+			.isBanned(member.getIsBanned())
+			.role(member.getRole())
+			.build();
+	}
+
+	public static Member updateMemberRole(Member member, int role) {
+		return Member.builder()
+			.uuid(member.getUuid())
+			.email(member.getEmail())
+			.password(member.getPassword())
+			.nickname(member.getNickname())
+			.createdAt(member.getCreatedAt())
+			.isDeleted(member.getIsDeleted())
+			.isBanned(member.getIsBanned())
+			.role(role)
+			.build();
+	}
+
+	public static Member deleteMember(Member member) {
+		return Member.builder()
+			.uuid(member.getUuid())
+			.email(member.getEmail())
+			.password(member.getPassword())
+			.nickname(member.getNickname())
+			.createdAt(member.getCreatedAt())
+			.isDeleted(true)
+			.isBanned(member.getIsBanned())
+			.role(member.getRole())
+			.build();
+	}
+
+	public static Member banMember(Member member) {
+		return Member.builder()
+			.uuid(member.getUuid())
+			.email(member.getEmail())
+			.password(member.getPassword())
+			.nickname(member.getNickname())
+			.createdAt(member.getCreatedAt())
+			.isDeleted(member.getIsDeleted())
+			.isBanned(true)
+			.role(member.getRole())
+			.build();
+	}
+
+	public static Member unbanMember(Member member) {
+		return Member.builder()
+			.uuid(member.getUuid())
+			.email(member.getEmail())
+			.password(member.getPassword())
+			.nickname(member.getNickname())
+			.createdAt(member.getCreatedAt())
+			.isDeleted(member.getIsDeleted())
+			.isBanned(false)
+			.role(member.getRole())
+			.build();
+	}
+	
 }
