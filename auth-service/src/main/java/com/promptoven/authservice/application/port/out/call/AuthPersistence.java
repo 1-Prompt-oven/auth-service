@@ -1,4 +1,4 @@
-package com.promptoven.authservice.adaptor.infrastructure;
+package com.promptoven.authservice.application.port.out.call;
 
 import com.promptoven.authservice.domain.Member;
 

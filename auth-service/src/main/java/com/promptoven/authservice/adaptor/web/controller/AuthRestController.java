@@ -1,10 +1,28 @@
 package com.promptoven.authservice.adaptor.web.controller;
 
-import com.promptoven.authservice.adaptor.web.controller.vo.in.*;
-import com.promptoven.authservice.adaptor.web.controller.vo.out.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.promptoven.authservice.adaptor.web.controller.vo.in.ChangePWRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailCheckRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailRequestRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.LoginRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthLoginRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthRegisterRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthUnregisterRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.RegisterRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.RegisterSocialRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.ResetPWRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyEmailRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyNicknameRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
+import com.promptoven.authservice.application.port.in.usecase.ChangePWUseCase;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -12,86 +30,84 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/auth")
 public class AuthRestController {
 
-    @PostMapping("/login")
-    public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO){
-        return new LoginResponseVO();
-    }
+	private final ChangePWUseCase changePWUseCase;
 
-    @PostMapping("/oauth/login")
-    public LoginResponseVO oauthLogin(@RequestBody OauthLoginRequestVO oauthLoginRequestVO){
-        return new LoginResponseVO();
-    }
+	@PostMapping("/login")
+	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
+		log.info("login: {}", loginRequestVO);
+		return new LoginResponseVO();
+	}
 
-    @PostMapping("/logout")
-    public void logout(@RequestHeader("Authorization") String authorizationHeader) {
-        String accessToken = authorizationHeader.replace("Bearer ", "");
-        log.info("logout token: {}", accessToken);
-    }
+	@PostMapping("/oauth/login")
+	public LoginResponseVO oauthLogin(@RequestBody OauthLoginRequestVO oauthLoginRequestVO) {
+		return new LoginResponseVO();
+	}
 
-    @PostMapping("/register")
-    public LoginResponseVO register(@RequestBody RegisterRequestVO registerRequestVO) {
-        log.info("register: {}", registerRequestVO);
-        return new LoginResponseVO();
-    }
+	@PostMapping("/logout")
+	public void logout(@RequestHeader("Authorization") String authorizationHeader) {
+		String accessToken = authorizationHeader.replace("Bearer ", "");
+		log.info("logout token: {}", accessToken);
+	}
 
-    @PostMapping("/oauth/register")
-    public void oauthRegister(@RequestBody OauthRegisterRequestVO oauthRegisterRequestVO) {
-        log.info("oauth register: {}", oauthRegisterRequestVO);
-    }
+	@PostMapping("/register")
+	public LoginResponseVO register(@RequestBody RegisterRequestVO registerRequestVO) {
+		log.info("register: {}", registerRequestVO);
+		return new LoginResponseVO();
+	}
 
-    @PostMapping("/oauth/unregister")
-    public void oauthUnregister(@RequestBody OauthUnregisterRequestVO oauthUnregisterRequestVO) {
-        log.info("oauth unregister: {}", oauthUnregisterRequestVO);
-    }
+	@PostMapping("/oauth/register")
+	public void oauthRegister(@RequestBody OauthRegisterRequestVO oauthRegisterRequestVO) {
+		log.info("oauth register: {}", oauthRegisterRequestVO);
+	}
 
-    @PostMapping("/withdraw")
-    public void withdraw(@RequestHeader("Authorization") String authorizationHeader) {
-        String accessToken = authorizationHeader.replace("Bearer ", "");
-        log.info("withdraw token: {}", accessToken);
-    }
+	@PostMapping("/oauth/unregister")
+	public void oauthUnregister(@RequestBody OauthUnregisterRequestVO oauthUnregisterRequestVO) {
+		log.info("oauth unregister: {}", oauthUnregisterRequestVO);
+	}
 
-    @PostMapping("/resetPW")
-    public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
-        log.info("reset password: {}", resetPWRequestVO);
-    }
+	@PostMapping("/withdraw")
+	public void withdraw(@RequestHeader("Authorization") String authorizationHeader) {
+		String accessToken = authorizationHeader.replace("Bearer ", "");
+		log.info("withdraw token: {}", accessToken);
+	}
 
-    @PostMapping("/changePW")
-    public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-        log.info("change password: {}", changePWRequestVO);
-    }
+	@PostMapping("/resetPW")
+	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
+		log.info("reset password: {}", resetPWRequestVO);
+	}
 
-    @PostMapping("/email/reqeust")
-    public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
-        log.info("email request: {}", emailRequestRequestVO);
-    }
+	@PostMapping("/changePW")
+	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
+		changePWUseCase.changePW(changePWRequestVO.getPassword(), changePWRequestVO.getNewPassword());
+		log.info("change password: {}", changePWRequestVO);
+	}
 
-    @PostMapping("/email/check")
-    public boolean emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
-        log.info("email check: {}", emailCheckRequestVO);
-        return true;
-    }
+	@PostMapping("/email/reqeust")
+	public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
+		log.info("email request: {}", emailRequestRequestVO);
+	}
 
-    @PostMapping("/verify/email")
-    public boolean verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
-        log.info("verify email: {}", verifyEmailRequestVO);
-        return true;
-    }
+	@PostMapping("/email/check")
+	public boolean emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
+		log.info("email check: {}", emailCheckRequestVO);
+		return true;
+	}
 
-    @PostMapping("/verify/phone")
-    public boolean verifyPhone(@RequestBody VerifyPhoneRequestVO verifyPhoneRequestVO) {
-        log.info("verify phone: {}", verifyPhoneRequestVO);
-        return true;
-    }
+	@PostMapping("/verify/email")
+	public boolean verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
+		log.info("verify email: {}", verifyEmailRequestVO);
+		return true;
+	}
 
-    @PostMapping("/verify/nickname")
-    public boolean verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
-        log.info("verify nickname: {}", verifyNicknameRequestVO);
-        return true;
-    }
+	@PostMapping("/verify/nickname")
+	public boolean verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
+		log.info("verify nickname: {}", verifyNicknameRequestVO);
+		return true;
+	}
 
-    @PostMapping("/register-social")
-    public LoginResponseVO registerSocial(@RequestBody RegisterSocialRequestVO registerSocialRequestVO) {
-        log.info("register social: {}", registerSocialRequestVO);
-        return new LoginResponseVO();
-    }
+	@PostMapping("/register-social")
+	public LoginResponseVO registerSocial(@RequestBody RegisterSocialRequestVO registerSocialRequestVO) {
+		log.info("register social: {}", registerSocialRequestVO);
+		return new LoginResponseVO();
+	}
 }

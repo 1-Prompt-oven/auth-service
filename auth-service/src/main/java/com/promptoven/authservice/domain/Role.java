@@ -29,4 +29,16 @@ public class Role {
 			.description(null)
 			.build();
 	}
+
+	public static String getRoleName(int id) {
+		// todo: Get Role Name from persistence
+		switch (id) {
+			case 1:
+				return "Member";
+			case 2:
+				return "Seller";
+			default:
+				return null;
+		}
+	}
 }

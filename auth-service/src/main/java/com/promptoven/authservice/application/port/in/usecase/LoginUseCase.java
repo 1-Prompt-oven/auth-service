@@ -1,13 +1,7 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 
-@Getter
-@AllArgsConstructor
-@Builder
-public class LoginUseCase {
-	private String email;
-	private String password;
+public interface LoginUseCase {
+	LoginDTO login(String email, String password);
 }

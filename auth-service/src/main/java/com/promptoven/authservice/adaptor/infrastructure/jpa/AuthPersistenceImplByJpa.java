@@ -1,16 +1,16 @@
 package com.promptoven.authservice.adaptor.infrastructure.jpa;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import com.promptoven.authservice.adaptor.infrastructure.AuthPersistence;
 import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.MemberEntity;
 import com.promptoven.authservice.adaptor.infrastructure.jpa.repository.MemberRepository;
+import com.promptoven.authservice.application.port.out.call.AuthPersistence;
 import com.promptoven.authservice.domain.Member;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Service
+@Component("adapterAuthPersistenceWithJpa")
 public class AuthPersistenceImplByJpa implements AuthPersistence {
 
 	private final MemberRepository memberRepository;
