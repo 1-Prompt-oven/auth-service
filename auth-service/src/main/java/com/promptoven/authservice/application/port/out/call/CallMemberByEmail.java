@@ -1,4 +1,4 @@
-package com.promptoven.authservice.application.port.out.outputport;
+package com.promptoven.authservice.application.port.out.call;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
