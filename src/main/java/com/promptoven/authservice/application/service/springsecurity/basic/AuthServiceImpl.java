@@ -11,20 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.promptoven.authservice.application.port.in.usecase.ChangePWUseCase;
-import com.promptoven.authservice.application.port.in.usecase.EmailCheckUseCase;
-import com.promptoven.authservice.application.port.in.usecase.EmailRequestUseCase;
-import com.promptoven.authservice.application.port.in.usecase.LoginUseCase;
-import com.promptoven.authservice.application.port.in.usecase.LogoutUseCase;
-import com.promptoven.authservice.application.port.in.usecase.OauthLoginUseCase;
-import com.promptoven.authservice.application.port.in.usecase.OauthRegisterUseCase;
-import com.promptoven.authservice.application.port.in.usecase.OauthUnregisterUseCase;
-import com.promptoven.authservice.application.port.in.usecase.RegisterFromSocialLoginUseCase;
-import com.promptoven.authservice.application.port.in.usecase.RegisterUseCase;
-import com.promptoven.authservice.application.port.in.usecase.ResetPWUseCase;
-import com.promptoven.authservice.application.port.in.usecase.VerifyEmailUseCase;
-import com.promptoven.authservice.application.port.in.usecase.VerifyNicknameUseCase;
-import com.promptoven.authservice.application.port.in.usecase.WithdrawUseCase;
+import com.promptoven.authservice.application.port.in.usecase.AuthUseCases;
+import com.promptoven.authservice.application.port.in.usecase.OauthUseCases;
 import com.promptoven.authservice.application.port.out.call.AuthRepository;
 import com.promptoven.authservice.application.port.out.call.MailService;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
@@ -43,10 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service("authServiceBySpringSecurity")
 @RequiredArgsConstructor
 public class AuthServiceImpl
-	implements ChangePWUseCase, EmailCheckUseCase, EmailRequestUseCase, LoginUseCase,
-	OauthLoginUseCase, OauthRegisterUseCase, OauthUnregisterUseCase,
-	RegisterFromSocialLoginUseCase, RegisterUseCase, VerifyNicknameUseCase,
-	VerifyEmailUseCase, LogoutUseCase, WithdrawUseCase, ResetPWUseCase {
+	implements AuthUseCases, OauthUseCases {
 
 	private final MemberPersistence memberPersistence;
 	private final OauthInfoPersistence oauthInfoPersistence;
