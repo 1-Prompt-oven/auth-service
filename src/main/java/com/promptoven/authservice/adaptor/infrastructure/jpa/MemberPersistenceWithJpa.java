@@ -26,19 +26,13 @@ public class MemberPersistenceWithJpa implements MemberPersistence {
 	@Override
 	public Member findByEmail(String email) {
 		MemberEntity memberEntity = memberRepository.findByEmail(email);
-		if (memberEntity == null) {
-			return null;
-		}
-		return memberEntity.toDomain();
+		return memberEntity != null ? memberEntity.toDomain() : null;
 	}
 
 	@Override
 	public Member findByUuid(String uuid) {
 		MemberEntity memberEntity = memberRepository.findByUuid(uuid);
-		if (memberEntity == null) {
-			return null;
-		}
-		return memberEntity.toDomain();
+		return memberEntity != null ? memberEntity.toDomain() : null;
 	}
 
 	@Override

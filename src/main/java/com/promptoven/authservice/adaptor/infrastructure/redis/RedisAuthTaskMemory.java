@@ -8,20 +8,20 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
-import com.promptoven.authservice.application.port.out.call.AuthRepository;
+import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
 
 @Service
 @EnableRedisRepositories
-public class RedisAuthRepository implements AuthRepository {
+public class RedisAuthTaskMemory implements AuthTaskMemory {
 
 	private final RedisTemplate<String, String> redisTemplate;
 
-	public RedisAuthRepository(@Value("${spring.data.redis.host}") String host,
-								@Value("${spring.data.redis.port}") int port) {
+	public RedisAuthTaskMemory(@Value("${spring.data.redis.host}") String host,
+		@Value("${spring.data.redis.port}") int port) {
 		this.redisTemplate = createRedisTemplate(host, port);
 	}
 

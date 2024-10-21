@@ -9,10 +9,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
-import com.promptoven.authservice.application.port.out.call.MailService;
+import com.promptoven.authservice.application.port.out.call.MailSending;
 
 @Service
-public class MailServiceImpl implements MailService {
+public class MailSendingImplWithSpringMail implements MailSending {
 
 	private static final String HOST = "smtp.gmail.com";
 	private static final int PORT = 587;
