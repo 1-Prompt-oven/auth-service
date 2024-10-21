@@ -72,7 +72,7 @@ public class AuthRestController {
 		SocialLoginDTO socialLoginDTO = oauthLoginUseCase.oauthLogin(
 			oauthLoginRequestVO.getProvider(), oauthLoginRequestVO.getProviderID(), oauthLoginRequestVO.getEmail());
 		return SocialLoginResponseVO.from(socialLoginDTO);
-		// todo: 만약에 false가 들어가있고 나머지가 들어가 null 이면 register-social로 가야합니다. @Frontend Dev
+		// todo: 만약에 false가 들어가있고 나머지가 들어가 null 이면 register-social로 가야합니다. @Frontend Dev : 302 redirect하기
 	}
 
 	@PostMapping("/logout")

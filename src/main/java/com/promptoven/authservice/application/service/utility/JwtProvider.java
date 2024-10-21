@@ -26,7 +26,6 @@ import jakarta.annotation.PostConstruct;
 public class JwtProvider {
 
 	// nimbusds's jwt claim default set's data
-	// todo: change issuer and audience to your own
 	String jwtissuer = "Prompt Oven Service development group";
 	List<String> jwtaudience = List.of("prompt oven service");
 	//Hint of JWT token Encryption type

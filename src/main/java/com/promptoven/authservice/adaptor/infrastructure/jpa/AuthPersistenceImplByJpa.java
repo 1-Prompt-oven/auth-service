@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.MemberEntity;
 import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.OauthInfoEntity;
@@ -21,11 +19,14 @@ import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
 import com.promptoven.authservice.domain.Role;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service("adapterAuthPersistenceWithJpa")
 public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPersistence, RolePersistence {
-
+	//todo: 각각 Table 별로 Repository를 만들어서 사용하도록 수정
 	private final MemberRepository memberRepository;
 	private final RoleRepository roleRepository;
 	private final OauthInfoRepository oauthInfoRepository;

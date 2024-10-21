@@ -1,6 +1,6 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-//todo: 모든 usecase는 Service method의 interface이어야 해요
+//todo: auth 계열 하나, oauth 계열 하나 식으로 Use case 묶어보기 :: Method 단위 분리는 지나친 추상화임
 
 public interface ChangePWUseCase {
 
