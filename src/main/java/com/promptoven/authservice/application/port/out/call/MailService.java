@@ -1,4 +1,4 @@
-package com.promptoven.authservice.adaptor.mail.application;
+package com.promptoven.authservice.application.port.out.call;
 
 public interface MailService {
 

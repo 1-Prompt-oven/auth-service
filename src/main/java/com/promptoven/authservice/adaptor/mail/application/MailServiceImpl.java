@@ -9,6 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.out.call.MailService;
+
 @Service
 public class MailServiceImpl implements MailService {
 

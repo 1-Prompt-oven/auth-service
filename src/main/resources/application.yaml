@@ -12,3 +12,7 @@ spring:
 server:
   port: 0 # random port for security reasons
   shutdown: graceful
+
+auth:
+  challenge:
+    expiration: 300000 # 5 minutes
