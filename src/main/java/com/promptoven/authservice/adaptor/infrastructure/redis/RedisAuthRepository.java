@@ -8,8 +8,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.out.call.AuthRepository;
@@ -18,52 +18,50 @@ import com.promptoven.authservice.application.port.out.call.AuthRepository;
 @EnableRedisRepositories
 public class RedisAuthRepository implements AuthRepository {
 
-	@Value("${spring.data.redis.host}")
-	private String host;
+	private final RedisTemplate<String, String> redisTemplate;
 
-	@Value("${spring.data.redis.port}")
-	private int port;
-
-	public RedisConnectionFactory redisConnectionFactory() {
-		RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
-		redisConfiguration.setHostName(host);
-		redisConfiguration.setPort(port);
-		return new LettuceConnectionFactory(redisConfiguration);
+	public RedisAuthRepository(@Value("${spring.data.redis.host}") String host,
+								@Value("${spring.data.redis.port}") int port) {
+		this.redisTemplate = createRedisTemplate(host, port);
 	}
 
-	public RedisTemplate<String, String> redisTemplate() {
-		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new StringRedisSerializer());
-		redisTemplate.setConnectionFactory(redisConnectionFactory());
-		return redisTemplate;
+	private RedisTemplate<String, String> createRedisTemplate(String host, int port) {
+		RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(host, port);
+		RedisConnectionFactory connectionFactory = new LettuceConnectionFactory(redisConfiguration);
+
+		RedisTemplate<String, String> template = new RedisTemplate<>();
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(new StringRedisSerializer());
+		template.setConnectionFactory(connectionFactory);
+		template.afterPropertiesSet();
+		return template;
 	}
 
+	@Override
 	public boolean isTokenBlocked(String token) {
-		RedisTemplate<String, String> redisTemplate = redisTemplate();
 		return redisTemplate.hasKey(token);
 	}
 
+	@Override
 	public void blockToken(String token, Date expires) {
-		RedisTemplate<String, String> redisTemplate = redisTemplate();
-		Date now = new Date();
-		redisTemplate.opsForValue().set(token, "1", expires.getTime() - now.getTime(), TimeUnit.MILLISECONDS);
+		long expirationTime = expires.getTime() - System.currentTimeMillis();
+		redisTemplate.opsForValue().set(token, "1", expirationTime, TimeUnit.MILLISECONDS);
 	}
 
+	@Override
 	public void recordAuthChallenge(String media, String code, Date expires) {
-		RedisTemplate<String, String> redisTemplate = redisTemplate();
-		redisTemplate.opsForValue().set(media, code,
-			expires.getTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+		long expirationTime = expires.getTime() - System.currentTimeMillis();
+		redisTemplate.opsForValue().set(media, code, expirationTime, TimeUnit.MILLISECONDS);
 	}
 
+	@Override
 	public String getAuthChallenge(String media) {
-		RedisTemplate<String, String> redisTemplate = redisTemplate();
 		return redisTemplate.opsForValue().get(media);
 	}
 
+	@Override
 	public void recordAuthChallengeSuccess(String media, Date expires) {
-		RedisTemplate<String, String> redisTemplate = redisTemplate();
-		redisTemplate.opsForValue().set(media, "Success",
-			expires.getTime() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+		long expirationTime = expires.getTime() - System.currentTimeMillis();
+		redisTemplate.opsForValue().set(media, "Success", expirationTime, TimeUnit.MILLISECONDS);
 	}
 }
