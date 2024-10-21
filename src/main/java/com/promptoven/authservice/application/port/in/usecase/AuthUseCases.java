@@ -4,7 +4,9 @@ import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 
 public interface AuthUseCases {
 
-	boolean changePW(String oldPassword, String newPassword, String memberUUID);
+	boolean checkPW(String password, String memberUUID);
+
+	void changePW(String newPassword, String memberUUID);
 
 	boolean checkMedia(String email, String code);
 

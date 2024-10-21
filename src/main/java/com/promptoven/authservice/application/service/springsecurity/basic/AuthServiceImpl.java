@@ -45,13 +45,15 @@ public class AuthServiceImpl
 	private long AUTH_CHALLENGE_EXPIRE_TIME;
 
 	@Override
-	public boolean changePW(String oldPassword, String newPassword, String memberUUID) {
+	public void changePW(String newPassword, String memberUUID) {
 		Member member = memberPersistence.findByUuid(memberUUID);
-		if (passwordEncoder.matches(oldPassword, member.getPassword())) {
-			memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(newPassword)));
-			return true;
-		}
-		return false;
+		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(newPassword)));
+	}
+
+	@Override
+	public boolean checkPW(String password, String memberUUID) {
+		Member member = memberPersistence.findByUuid(memberUUID);
+		return passwordEncoder.matches(password, member.getPassword());
 	}
 
 	@Override

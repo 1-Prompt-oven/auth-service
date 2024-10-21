@@ -7,9 +7,17 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangePWRequestVO {
-	
-	private String newPassword;
+public class CheckPWRequestVO {
+
 	private String memberUUID;
+	private String password;
+
+	public String getMemberUUID() {
+		return memberUUID;
+	}
+
+	public String getPassword() {
+		return password;
+	}
 
 }

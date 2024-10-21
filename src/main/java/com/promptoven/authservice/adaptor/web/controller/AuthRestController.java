@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ChangePWRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.CheckPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailCheckRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailRequestRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.LoginRequestVO;
@@ -90,9 +91,13 @@ public class AuthRestController {
 	}
 
 	@PostMapping("/changePW")
-	public boolean changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		return authUseCases.changePW(changePWRequestVO.getPassword(), changePWRequestVO.getNewPassword(),
-			changePWRequestVO.getMemberUUID());
+	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
+		authUseCases.changePW(changePWRequestVO.getNewPassword(), changePWRequestVO.getMemberUUID());
+	}
+
+	@PostMapping("/checkPW")
+	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
+		return authUseCases.checkPW(checkPWRequestVO.getPassword(), checkPWRequestVO.getMemberUUID());
 	}
 
 	@PostMapping("/email/reqeust")
