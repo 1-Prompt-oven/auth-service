@@ -25,4 +25,6 @@ public interface AuthUseCases {
 	boolean verifyNickname(String nickname);
 
 	void withdraw(String AccessToken);
+
+	void AdminRegister(String email, String password, String nickname);
 }

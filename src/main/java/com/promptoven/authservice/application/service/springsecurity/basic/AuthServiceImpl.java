@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.promptoven.authservice.application.port.in.usecase.AuthUseCases;
 import com.promptoven.authservice.application.port.in.usecase.OauthUseCases;
-import com.promptoven.authservice.application.port.out.call.AuthRepository;
-import com.promptoven.authservice.application.port.out.call.MailService;
+import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
+import com.promptoven.authservice.application.port.out.call.MailSending;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
@@ -36,8 +36,8 @@ public class AuthServiceImpl
 	private final MemberPersistence memberPersistence;
 	private final OauthInfoPersistence oauthInfoPersistence;
 	private final RolePersistence rolePersistence;
-	private final AuthRepository authRepository;
-	private final MailService mailService;
+	private final AuthTaskMemory authTaskMemory;
+	private final MailSending mailSending;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 
@@ -58,9 +58,9 @@ public class AuthServiceImpl
 
 	@Override
 	public boolean checkMedia(String email, String code) {
-		if (authRepository.getAuthChallenge(email).equals(code)) {
+		if (authTaskMemory.getAuthChallenge(email).equals(code)) {
 			Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-			authRepository.recordAuthChallengeSuccess(email, expires);
+			authTaskMemory.recordAuthChallengeSuccess(email, expires);
 			return true;
 		}
 		return false;
@@ -71,8 +71,8 @@ public class AuthServiceImpl
 		Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
 		String code = String.format("%06d", new Random().nextInt(1000000));
 		try {
-			mailService.sendMail(email, "Email Verification Code", "Your verification code is " + code);
-			authRepository.recordAuthChallenge(email, code, expires);
+			mailSending.sendMail(email, "Email Verification Code", "Your verification code is " + code);
+			authTaskMemory.recordAuthChallenge(email, code, expires);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -128,7 +128,7 @@ public class AuthServiceImpl
 					.build();
 			} else {
 				Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-				authRepository.recordAuthChallengeSuccess(email, expires);
+				authTaskMemory.recordAuthChallengeSuccess(email, expires);
 			}
 		}
 		return new SocialLoginDTO();
@@ -195,8 +195,8 @@ public class AuthServiceImpl
 
 	@Override
 	public void logout(String accessToken, String refreshToken) {
-		authRepository.blockToken(accessToken, jwtProvider.getTokenExpiration(accessToken));
-		authRepository.blockToken(refreshToken, jwtProvider.getTokenExpiration(refreshToken));
+		authTaskMemory.blockToken(accessToken, jwtProvider.getTokenExpiration(accessToken));
+		authTaskMemory.blockToken(refreshToken, jwtProvider.getTokenExpiration(refreshToken));
 	}
 
 	@Override
@@ -209,5 +209,17 @@ public class AuthServiceImpl
 	public void resetPW(String email, String password) {
 		Member member = memberPersistence.findByEmail(email);
 		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
+	}
+
+	@Override
+	public void AdminRegister(String email, String password, String nickname) {
+		String uuid = UUID.randomUUID().toString();
+		String encodedPassword = passwordEncoder.encode(password);
+		Member member = Member.createMember
+			(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 3);
+		while (memberPersistence.findByUuid(uuid) != null) {
+			uuid = UUID.randomUUID().toString();
+		}
+		memberPersistence.create(member);
 	}
 }
