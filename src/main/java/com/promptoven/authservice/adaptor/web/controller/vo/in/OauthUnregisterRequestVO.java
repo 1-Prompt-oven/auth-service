@@ -11,5 +11,6 @@ public class OauthUnregisterRequestVO {
 
 	private String provider;
 	private String providerId;
+	private String memberUUID;
 
 }

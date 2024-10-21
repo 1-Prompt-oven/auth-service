@@ -11,5 +11,6 @@ public class ChangePWRequestVO {
 
 	private String password;
 	private String newPassword;
+	private String memberUUID;
 
 }

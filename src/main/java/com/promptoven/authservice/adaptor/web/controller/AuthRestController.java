@@ -78,7 +78,8 @@ public class AuthRestController {
 
 	@PostMapping("/changePW")
 	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		changePWUseCase.changePW(changePWRequestVO.getPassword(), changePWRequestVO.getNewPassword());
+		changePWUseCase.changePW(changePWRequestVO.getPassword(), changePWRequestVO.getNewPassword(),
+			changePWRequestVO.getMemberUUID());
 		log.info("change password: {}", changePWRequestVO);
 	}
 

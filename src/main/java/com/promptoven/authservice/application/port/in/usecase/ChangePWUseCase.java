@@ -4,5 +4,5 @@ package com.promptoven.authservice.application.port.in.usecase;
 
 public interface ChangePWUseCase {
 
-	void changePW(String oldPassword, String newPassword);
+	void changePW(String oldPassword, String newPassword, String memberUUID);
 }

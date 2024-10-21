@@ -1,9 +1,12 @@
 package com.promptoven.authservice.application.service.springsecurity.basic;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Random;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.usecase.ChangePWUseCase;
@@ -17,13 +20,15 @@ import com.promptoven.authservice.application.port.in.usecase.RegisterFromSocial
 import com.promptoven.authservice.application.port.in.usecase.RegisterUseCase;
 import com.promptoven.authservice.application.port.in.usecase.VerifyEmailUseCase;
 import com.promptoven.authservice.application.port.in.usecase.VerifyNicknameUseCase;
-import com.promptoven.authservice.application.port.out.call.AuthPersistence;
 import com.promptoven.authservice.application.port.out.call.AuthRepository;
 import com.promptoven.authservice.application.port.out.call.MailService;
+import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
+import com.promptoven.authservice.application.service.utility.JwtProvider;
+import com.promptoven.authservice.domain.Member;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,18 +40,20 @@ public class AuthServiceImpl
 	RegisterFromSocialLoginUseCase, RegisterUseCase, VerifyNicknameUseCase,
 	VerifyEmailUseCase {
 
-	private final AuthPersistence authPersistence;
+	private final MemberPersistence memberPersistence;
 	private final OauthInfoPersistence oauthInfoPersistence;
 	private final RolePersistence rolePersistence;
 	private final AuthRepository authRepository;
 	private final MailService mailService;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtProvider jwtProvider;
 
 	@Value("${auth.challenge.expiration}")
 	private long AUTH_CHALLENGE_EXPIRE_TIME;
 
 	@Override
-	public void changePW(String oldPassword, String newPassword) {
-		// TODO Auto-generated method stub
+	public void changePW(String oldPassword, String newPassword, String memberUUID) {
+
 		System.out.println("ChangePWUseCase");
 	}
 
@@ -74,6 +81,16 @@ public class AuthServiceImpl
 
 	@Override
 	public LoginDTO login(String email, String password) {
+		Member member = memberPersistence.findByEmail(email);
+		if (member != null && passwordEncoder.matches(password, member.getPassword())) {
+			return LoginDTO.builder()
+				.accessToken("accessToken")
+				.refreshToken("refreshToken")
+				.role(rolePersistence.findRoleById(member.getRole()).getName())
+				.uuid(member.getUuid())
+				.nickname(member.getNickname())
+				.build();
+		}
 		return null;
 	}
 
@@ -83,12 +100,12 @@ public class AuthServiceImpl
 	}
 
 	@Override
-	public void register(String provider, String providerID) {
+	public void OauthRegister(String provider, String providerID, String memberUUID) {
 
 	}
 
 	@Override
-	public void unregister(String provider, String providerID) {
+	public void OauthUnregister(String provider, String providerID, String memberUUID) {
 
 	}
 
@@ -100,7 +117,20 @@ public class AuthServiceImpl
 
 	@Override
 	public LoginDTO register(String email, String password, String nickname) {
-		return null;
+		String uuid = UUID.randomUUID().toString();
+		Member member = Member.createMember
+			(uuid, email, passwordEncoder.encode(password), nickname, LocalDateTime.now(), 1);
+		while (memberPersistence.findByUuid(uuid) != null) {
+			uuid = UUID.randomUUID().toString();
+		}
+		memberPersistence.create(member);
+		return LoginDTO.builder()
+			.accessToken("accessToken")
+			.refreshToken("refreshToken")
+			.role(rolePersistence.findRoleById(member.getRole()).getName())
+			.uuid(member.getUuid())
+			.nickname(member.getNickname())
+			.build();
 	}
 
 	@Override

@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OauthRegisterRequestVO {
-	
+
 	private String provider;
 	private String providerId;
+	private String memberUUID;
 
 }

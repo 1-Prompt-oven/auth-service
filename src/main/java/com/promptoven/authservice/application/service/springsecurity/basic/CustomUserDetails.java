@@ -7,13 +7,16 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.promptoven.authservice.domain.Member;
+import com.promptoven.authservice.domain.Role;
 
 public class CustomUserDetails implements UserDetails {
 
 	Member member;
+	String role;
 
-	public CustomUserDetails(Member member) {
+	public CustomUserDetails(Member member, Role role) {
 		this.member = member;
+		this.role = role.getName();
 	}
 
 	@Override
@@ -23,7 +26,15 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of();
+		GrantedAuthority Role = new GrantedAuthority() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String getAuthority() {
+				return CustomUserDetails.this.role;
+			}
+		};
+		return List.of(Role);
 	}
 
 	@Override

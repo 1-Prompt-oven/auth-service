@@ -13,5 +13,6 @@ public class LoginResponseVO {
 	private String refreshtoken;
 	private String nickname;
 	private int role;
+	private String memberUUID;
 
 }
