@@ -20,6 +20,8 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyEmailReques
 import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyNicknameRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.ChangePWUseCase;
+import com.promptoven.authservice.application.port.in.usecase.LoginUseCase;
+import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthRestController {
 
 	private final ChangePWUseCase changePWUseCase;
+	private final LoginUseCase loginUseCase;
 
 	@PostMapping("/login")
 	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
-		log.info("login: {}", loginRequestVO);
-		return new LoginResponseVO();
+		LoginDTO loginDTO = loginUseCase.login(loginRequestVO.getEmail(), loginRequestVO.getPassword());
+		return LoginResponseVO.from(loginDTO);
 	}
 
 	@PostMapping("/oauth/login")

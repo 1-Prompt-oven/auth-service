@@ -13,4 +13,6 @@ public interface OauthInfoRepository extends JpaRepository<OauthInfoEntity, Long
 	String findByProviderAndProviderID(String provider, String providerID);
 
 	List<OauthInfoEntity> findAllByMemberUUID(String memberUUID);
+
+	void deleteByMemberUUIDAndProviderAndProviderID(String memberUUID, String provider, String providerID);
 }

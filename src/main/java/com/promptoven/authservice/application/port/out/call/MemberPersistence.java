@@ -10,4 +10,10 @@ public interface MemberPersistence {
 
 	Member findByUuid(String uuid);
 
+	boolean existsByEmail(String email);
+
+	boolean existsByNickname(String nickname);
+
+	void updatePassword(Member updatedMember);
+
 }

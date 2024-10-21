@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.nimbusds.jose.EncryptionMethod;
@@ -23,6 +24,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 public class JwtProvider {
 
 	// nimbusds's jwt claim default set's data
+	// todo: change issuer and audience to your own
 	String jwtissuer = "Prompt Oven Service development group";
 	List<String> jwtaudience = List.of("prompt oven service");
 	//Hint of JWT token Encryption type
@@ -31,7 +33,10 @@ public class JwtProvider {
 		JWEAlgorithm.RSA_OAEP_512,
 		EncryptionMethod.A256GCM
 	);
-	
+	@Value("${jwt.expiration.refresh}")
+	long refreshExpiration;
+	@Value("${jwt.expiration.access}")
+	long accessTokenExpiration;
 	@Autowired
 	private JwtSecret jwtSecret;
 	RSAPrivateKey privateKey = jwtSecret.getPrivateKey();
@@ -50,7 +55,7 @@ public class JwtProvider {
 			.notBeforeTime(now)
 			.issueTime(now)
 			.expirationTime(new Date(now.getTime() +
-				1000L * 86400 * requestedExpiration))
+				refreshExpiration * requestedExpiration))
 			//Token is usable for user request days
 			.jwtID(UUID.randomUUID().toString())
 			.build();
@@ -81,7 +86,7 @@ public class JwtProvider {
 			.notBeforeTime(now)
 			.issueTime(now)
 			.expirationTime(new Date(now.getTime() +
-				1000 * 86400))
+				refreshExpiration))
 			//Token is usable for user default refresh token life is 1 day
 			.jwtID(UUID.randomUUID().toString())
 			.build();
@@ -102,13 +107,13 @@ public class JwtProvider {
 	public String refreshByToken(String refreshToken) {
 		try {
 			String userUID = getClaimOfToken(refreshToken, "subject");
-			return issueJwt(userUID, false);
+			return issueJwt(userUID);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public String issueJwt(String userUID, Boolean is2ndAuthed) {
+	public String issueJwt(String userUID) {
 
 		Date now = new Date();
 
@@ -119,10 +124,9 @@ public class JwtProvider {
 			.audience(jwtaudience)
 			.notBeforeTime(now)
 			.issueTime(now)
-			.expirationTime(new Date(now.getTime() + 1000 * 1800))
+			.expirationTime(new Date(now.getTime() + accessTokenExpiration))
 			//Token is usable for 30 minutes
 			.jwtID(UUID.randomUUID().toString())
-			.claim("2nd-authed", is2ndAuthed)
 			.build();
 
 		EncryptedJWT jwt = new EncryptedJWT(header, jwtClaims);

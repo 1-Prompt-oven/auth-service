@@ -14,8 +14,7 @@ public class OauthInfo {
 	private String memberUUID;
 
 	public static OauthInfo createOauthInfo(
-		Long id, String provider,
-		String providerID, String memberUUID) {
+		String provider, String providerID, String memberUUID) {
 		return OauthInfo.builder()
 			.provider(provider)
 			.providerID(providerID)

@@ -47,6 +47,23 @@ public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPer
 	}
 
 	@Override
+	public boolean existsByEmail(String email) {
+		return memberRepository.existsByEmail(email);
+	}
+
+	@Override
+	public boolean existsByNickname(String nickname) {
+		return memberRepository.existsByNickname(nickname);
+	}
+
+	@Override
+	public void updatePassword(Member updatedMember) {
+		MemberEntity memberEntity = MemberEntity.fromDomain(updatedMember);
+		memberEntity.setId(memberRepository.findByUuid(updatedMember.getUuid()).getId());
+		memberRepository.save(memberEntity);
+	}
+
+	@Override
 	public void create(Role role) {
 		RoleEntity roleEntity = RoleEntity.fromDomain(role);
 		roleRepository.save(roleEntity);
@@ -74,5 +91,10 @@ public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPer
 		return oauthInfoEntities.stream()
 			.map(OauthInfoEntity::toDomain)
 			.collect(Collectors.toList());
+	}
+
+	@Override
+	public void deleteOauthInfo(String memberUUID, String provider, String providerID) {
+		oauthInfoRepository.deleteByMemberUUIDAndProviderAndProviderID(memberUUID, provider, providerID);
 	}
 }

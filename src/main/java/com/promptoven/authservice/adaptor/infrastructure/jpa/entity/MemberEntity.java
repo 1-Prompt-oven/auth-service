@@ -9,10 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 @Getter
 @Table(name = "member")
 @Entity
@@ -44,6 +45,10 @@ public class MemberEntity {
 			.isBanned(member.getIsBanned())
 			.role(member.getRole())
 			.build();
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Member toDomain() {

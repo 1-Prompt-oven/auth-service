@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
+import com.promptoven.authservice.domain.OauthInfo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +48,7 @@ public class AuthServiceImpl
 	private final AuthRepository authRepository;
 	private final MailService mailService;
 	private final PasswordEncoder passwordEncoder;
+	@Autowired
 	private final JwtProvider jwtProvider;
 
 	@Value("${auth.challenge.expiration}")
@@ -53,7 +56,10 @@ public class AuthServiceImpl
 
 	@Override
 	public void changePW(String oldPassword, String newPassword, String memberUUID) {
-
+		Member member = memberPersistence.findByUuid(memberUUID);
+		if (passwordEncoder.matches(oldPassword, member.getPassword())) {
+			memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(newPassword)));
+		}
 		System.out.println("ChangePWUseCase");
 	}
 
@@ -83,10 +89,13 @@ public class AuthServiceImpl
 	public LoginDTO login(String email, String password) {
 		Member member = memberPersistence.findByEmail(email);
 		if (member != null && passwordEncoder.matches(password, member.getPassword())) {
+			String role = rolePersistence.findRoleById(member.getRole()).getName();
+			String accessToken = jwtProvider.issueJwt(member.getUuid());
+			String refreshToken = jwtProvider.issueRefresh(accessToken);
 			return LoginDTO.builder()
-				.accessToken("accessToken")
-				.refreshToken("refreshToken")
-				.role(rolePersistence.findRoleById(member.getRole()).getName())
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.role(role)
 				.uuid(member.getUuid())
 				.nickname(member.getNickname())
 				.build();
@@ -96,50 +105,60 @@ public class AuthServiceImpl
 
 	@Override
 	public SocialLoginDTO oauthLogin(String provider, String providerID) {
-		return null;
+		String memberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
+		if (memberUUID != null) {
+
+		}
+		return new SocialLoginDTO();
 	}
 
 	@Override
 	public void OauthRegister(String provider, String providerID, String memberUUID) {
-
+		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, memberUUID);
+		oauthInfoPersistence.recordOauthInfo(oauthInfo);
 	}
 
 	@Override
 	public void OauthUnregister(String provider, String providerID, String memberUUID) {
-
+		oauthInfoPersistence.deleteOauthInfo(provider, providerID, memberUUID);
 	}
 
 	@Override
 	public LoginDTO registerFromSocialLogin(String email, String nickname, String password, String provider,
 		String providerID) {
-		return null;
+		String uuid = UUID.randomUUID().toString();
+		String encodedPassword = passwordEncoder.encode(password);
+		Member member = Member.createMember
+			(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 1);
+		while (memberPersistence.findByUuid(uuid) != null) {
+			uuid = UUID.randomUUID().toString();
+		}
+		memberPersistence.create(member);
+		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
+		oauthInfoPersistence.recordOauthInfo(oauthInfo);
+		return login(email, encodedPassword);
 	}
 
 	@Override
 	public LoginDTO register(String email, String password, String nickname) {
 		String uuid = UUID.randomUUID().toString();
+		String encodedPassword = passwordEncoder.encode(password);
 		Member member = Member.createMember
-			(uuid, email, passwordEncoder.encode(password), nickname, LocalDateTime.now(), 1);
+			(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 1);
 		while (memberPersistence.findByUuid(uuid) != null) {
 			uuid = UUID.randomUUID().toString();
 		}
 		memberPersistence.create(member);
-		return LoginDTO.builder()
-			.accessToken("accessToken")
-			.refreshToken("refreshToken")
-			.role(rolePersistence.findRoleById(member.getRole()).getName())
-			.uuid(member.getUuid())
-			.nickname(member.getNickname())
-			.build();
+		return login(email, encodedPassword);
 	}
 
 	@Override
 	public boolean verifyNickname(String nickname) {
-		return false;
+		return memberPersistence.existsByNickname(nickname);
 	}
 
 	@Override
 	public boolean verifyEmail(String email) {
-		return false;
+		return memberPersistence.existsByEmail(email);
 	}
 }
