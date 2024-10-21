@@ -52,6 +52,11 @@ public class AuthServiceImpl
 
 	@Override
 	public boolean checkMedia(String email, String code) {
+		if (authRepository.getAuthChallenge(email).equals(code)) {
+			Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
+			authRepository.recordAuthChallengeSuccess(email, expires);
+			return true;
+		}
 		return false;
 	}
 
