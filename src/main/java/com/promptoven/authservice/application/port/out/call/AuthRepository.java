@@ -6,7 +6,7 @@ public interface AuthRepository {
 
 	boolean isTokenBlocked(String token);
 
-	void blockToken(String token);
+	void blockToken(String token, Date expires);
 
 	void recordAuthChallenge(String media, String code, Date expires);
 

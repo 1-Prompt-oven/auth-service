@@ -5,22 +5,26 @@ import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.promptoven.authservice.application.port.in.usecase.ChangePWUseCase;
 import com.promptoven.authservice.application.port.in.usecase.EmailCheckUseCase;
 import com.promptoven.authservice.application.port.in.usecase.EmailRequestUseCase;
 import com.promptoven.authservice.application.port.in.usecase.LoginUseCase;
+import com.promptoven.authservice.application.port.in.usecase.LogoutUseCase;
 import com.promptoven.authservice.application.port.in.usecase.OauthLoginUseCase;
 import com.promptoven.authservice.application.port.in.usecase.OauthRegisterUseCase;
 import com.promptoven.authservice.application.port.in.usecase.OauthUnregisterUseCase;
 import com.promptoven.authservice.application.port.in.usecase.RegisterFromSocialLoginUseCase;
 import com.promptoven.authservice.application.port.in.usecase.RegisterUseCase;
+import com.promptoven.authservice.application.port.in.usecase.ResetPWUseCase;
 import com.promptoven.authservice.application.port.in.usecase.VerifyEmailUseCase;
 import com.promptoven.authservice.application.port.in.usecase.VerifyNicknameUseCase;
+import com.promptoven.authservice.application.port.in.usecase.WithdrawUseCase;
 import com.promptoven.authservice.application.port.out.call.AuthRepository;
 import com.promptoven.authservice.application.port.out.call.MailService;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
@@ -33,14 +37,16 @@ import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service("authServiceBySpringSecurity")
 @RequiredArgsConstructor
 public class AuthServiceImpl
 	implements ChangePWUseCase, EmailCheckUseCase, EmailRequestUseCase, LoginUseCase,
 	OauthLoginUseCase, OauthRegisterUseCase, OauthUnregisterUseCase,
 	RegisterFromSocialLoginUseCase, RegisterUseCase, VerifyNicknameUseCase,
-	VerifyEmailUseCase {
+	VerifyEmailUseCase, LogoutUseCase, WithdrawUseCase, ResetPWUseCase {
 
 	private final MemberPersistence memberPersistence;
 	private final OauthInfoPersistence oauthInfoPersistence;
@@ -48,19 +54,19 @@ public class AuthServiceImpl
 	private final AuthRepository authRepository;
 	private final MailService mailService;
 	private final PasswordEncoder passwordEncoder;
-	@Autowired
 	private final JwtProvider jwtProvider;
 
 	@Value("${auth.challenge.expiration}")
 	private long AUTH_CHALLENGE_EXPIRE_TIME;
 
 	@Override
-	public void changePW(String oldPassword, String newPassword, String memberUUID) {
+	public boolean changePW(String oldPassword, String newPassword, String memberUUID) {
 		Member member = memberPersistence.findByUuid(memberUUID);
 		if (passwordEncoder.matches(oldPassword, member.getPassword())) {
 			memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(newPassword)));
+			return true;
 		}
-		System.out.println("ChangePWUseCase");
+		return false;
 	}
 
 	@Override
@@ -104,10 +110,39 @@ public class AuthServiceImpl
 	}
 
 	@Override
-	public SocialLoginDTO oauthLogin(String provider, String providerID) {
+	public SocialLoginDTO oauthLogin(String provider, String providerID, @Nullable String email) {
 		String memberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
 		if (memberUUID != null) {
-
+			Member member = memberPersistence.findByUuid(memberUUID);
+			String role = rolePersistence.findRoleById(member.getRole()).getName();
+			String accessToken = jwtProvider.issueJwt(member.getUuid());
+			String refreshToken = jwtProvider.issueRefresh(accessToken);
+			return SocialLoginDTO.builder()
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.role(role)
+				.uuid(member.getUuid())
+				.nickname(member.getNickname())
+				.build();
+		} else if (email != null) {
+			Member member = memberPersistence.findByEmail(email);
+			if (member != null) {
+				OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
+				oauthInfoPersistence.recordOauthInfo(oauthInfo);
+				String role = rolePersistence.findRoleById(member.getRole()).getName();
+				String accessToken = jwtProvider.issueJwt(member.getUuid());
+				String refreshToken = jwtProvider.issueRefresh(accessToken);
+				return SocialLoginDTO.builder()
+					.accessToken(accessToken)
+					.refreshToken(refreshToken)
+					.role(role)
+					.uuid(member.getUuid())
+					.nickname(member.getNickname())
+					.build();
+			} else {
+				Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
+				authRepository.recordAuthChallengeSuccess(email, expires);
+			}
 		}
 		return new SocialLoginDTO();
 	}
@@ -119,8 +154,17 @@ public class AuthServiceImpl
 	}
 
 	@Override
+	@Transactional
 	public void OauthUnregister(String provider, String providerID, String memberUUID) {
-		oauthInfoPersistence.deleteOauthInfo(provider, providerID, memberUUID);
+		log.info("Attempting to unregister OAuth: provider={}, providerID={}, memberUUID={}", provider, providerID,
+			memberUUID);
+		try {
+			oauthInfoPersistence.deleteOauthInfo(memberUUID, provider, providerID);
+			log.info("OAuth unregistration successful");
+		} catch (Exception e) {
+			log.error("Error during OAuth unregistration", e);
+			throw e;
+		}
 	}
 
 	@Override
@@ -136,7 +180,7 @@ public class AuthServiceImpl
 		memberPersistence.create(member);
 		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
 		oauthInfoPersistence.recordOauthInfo(oauthInfo);
-		return login(email, encodedPassword);
+		return login(email, password);
 	}
 
 	@Override
@@ -149,16 +193,34 @@ public class AuthServiceImpl
 			uuid = UUID.randomUUID().toString();
 		}
 		memberPersistence.create(member);
-		return login(email, encodedPassword);
+		return login(email, password);
 	}
 
 	@Override
 	public boolean verifyNickname(String nickname) {
-		return memberPersistence.existsByNickname(nickname);
+		return !memberPersistence.existsByNickname(nickname);
 	}
 
 	@Override
 	public boolean verifyEmail(String email) {
-		return memberPersistence.existsByEmail(email);
+		return !memberPersistence.existsByEmail(email);
+	}
+
+	@Override
+	public void logout(String accessToken, String refreshToken) {
+		authRepository.blockToken(accessToken, jwtProvider.getTokenExpiration(accessToken));
+		authRepository.blockToken(refreshToken, jwtProvider.getTokenExpiration(refreshToken));
+	}
+
+	@Override
+	public void withdraw(String accessToken) {
+		memberPersistence.remove(Member.deleteMember(memberPersistence.findByUuid(
+			jwtProvider.getClaimOfToken(accessToken, "subject"))));
+	}
+
+	@Override
+	public void resetPW(String email, String password) {
+		Member member = memberPersistence.findByEmail(email);
+		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
 	}
 }

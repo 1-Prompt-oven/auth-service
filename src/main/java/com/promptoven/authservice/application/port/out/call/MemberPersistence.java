@@ -16,4 +16,6 @@ public interface MemberPersistence {
 
 	void updatePassword(Member updatedMember);
 
+	void remove(Member member);
+
 }

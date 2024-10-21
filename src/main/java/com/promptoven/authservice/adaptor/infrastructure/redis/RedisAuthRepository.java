@@ -44,9 +44,10 @@ public class RedisAuthRepository implements AuthRepository {
 		return redisTemplate.hasKey(token);
 	}
 
-	public void blockToken(String token) {
+	public void blockToken(String token, Date expires) {
 		RedisTemplate<String, String> redisTemplate = redisTemplate();
-		redisTemplate.opsForValue().set(token, "1", 1, TimeUnit.DAYS);
+		Date now = new Date();
+		redisTemplate.opsForValue().set(token, "1", expires.getTime() - now.getTime(), TimeUnit.MILLISECONDS);
 	}
 
 	public void recordAuthChallenge(String media, String code, Date expires) {

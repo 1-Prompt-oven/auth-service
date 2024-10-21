@@ -3,7 +3,10 @@ package com.promptoven.authservice.adaptor.infrastructure.jpa;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.MemberEntity;
 import com.promptoven.authservice.adaptor.infrastructure.jpa.entity.OauthInfoEntity;
@@ -18,10 +21,9 @@ import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
 import com.promptoven.authservice.domain.Role;
 
-import lombok.RequiredArgsConstructor;
-
+@Slf4j
 @RequiredArgsConstructor
-@Component("adapterAuthPersistenceWithJpa")
+@Service("adapterAuthPersistenceWithJpa")
 public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPersistence, RolePersistence {
 
 	private final MemberRepository memberRepository;
@@ -37,12 +39,18 @@ public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPer
 	@Override
 	public Member findByEmail(String email) {
 		MemberEntity memberEntity = memberRepository.findByEmail(email);
+		if (memberEntity == null) {
+			return null;
+		}
 		return memberEntity.toDomain();
 	}
 
 	@Override
 	public Member findByUuid(String uuid) {
 		MemberEntity memberEntity = memberRepository.findByUuid(uuid);
+		if (memberEntity == null) {
+			return null;
+		}
 		return memberEntity.toDomain();
 	}
 
@@ -60,6 +68,13 @@ public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPer
 	public void updatePassword(Member updatedMember) {
 		MemberEntity memberEntity = MemberEntity.fromDomain(updatedMember);
 		memberEntity.setId(memberRepository.findByUuid(updatedMember.getUuid()).getId());
+		memberRepository.save(memberEntity);
+	}
+
+	@Override
+	public void remove(Member member) {
+		MemberEntity memberEntity = MemberEntity.fromDomain(member);
+		memberEntity.setId(memberRepository.findByUuid(member.getUuid()).getId());
 		memberRepository.save(memberEntity);
 	}
 
@@ -94,6 +109,7 @@ public class AuthPersistenceImplByJpa implements MemberPersistence, OauthInfoPer
 	}
 
 	@Override
+	@Transactional
 	public void deleteOauthInfo(String memberUUID, String provider, String providerID) {
 		oauthInfoRepository.deleteByMemberUUIDAndProviderAndProviderID(memberUUID, provider, providerID);
 	}

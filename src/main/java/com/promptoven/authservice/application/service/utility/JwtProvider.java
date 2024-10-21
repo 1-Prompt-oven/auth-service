@@ -20,6 +20,8 @@ import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 
+import jakarta.annotation.PostConstruct;
+
 @Component
 public class JwtProvider {
 
@@ -39,13 +41,19 @@ public class JwtProvider {
 	long accessTokenExpiration;
 	@Autowired
 	private JwtSecret jwtSecret;
-	RSAPrivateKey privateKey = jwtSecret.getPrivateKey();
-	RSAPublicKey publicKey = jwtSecret.getPublicKey();
+	private RSAPrivateKey privateKey;
+	private RSAPublicKey publicKey;
+
+	@PostConstruct
+	public void init() {
+		this.privateKey = jwtSecret.getPrivateKey();
+		this.publicKey = jwtSecret.getPublicKey();
+	}
 
 	public String issueRefresh(int requestedExpiration, String authJWT) {
 
 		Date now = new Date();
-		String userUID = getClaimOfToken(authJWT, "subject");
+		String userUID = getClaimOfToken(authJWT, "sub");
 
 		//Create JWT claims
 		JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
@@ -76,7 +84,7 @@ public class JwtProvider {
 	public String issueRefresh(String authJWT) {
 
 		Date now = new Date();
-		String userUID = getClaimOfToken(authJWT, "subject");
+		String userUID = getClaimOfToken(authJWT, "sub");
 
 		//Create JWT claims
 		JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
@@ -106,7 +114,7 @@ public class JwtProvider {
 
 	public String refreshByToken(String refreshToken) {
 		try {
-			String userUID = getClaimOfToken(refreshToken, "subject");
+			String userUID = getClaimOfToken(refreshToken, "sub");
 			return issueJwt(userUID);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -175,7 +183,7 @@ public class JwtProvider {
 		Date expire = claims.getExpirationTime();
 		Date now = new Date();
 		List<String> audience = claims.getAudience();
-		if (issuer == jwtissuer && audience.equals(jwtaudience) && expire.before(now)) {
+		if (issuer.equals(jwtissuer) && audience.equals(jwtaudience) && now.before(expire)) {
 			vaildation = true;
 		}
 		return vaildation;
@@ -187,7 +195,22 @@ public class JwtProvider {
 			EncryptedJWT targetToken = decryptToken(parseToken(recievedToken));
 			JWTClaimsSet claimsSet = targetToken.getJWTClaimsSet();
 			if (validateToken(claimsSet)) {
+				System.out.println(claimsSet);
 				return claimsSet.getClaim(typeOfClaim).toString();
+			} else {
+				throw new RuntimeException("token expired");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public Date getTokenExpiration(String recievedToken) {
+		try {
+			EncryptedJWT targetToken = decryptToken(parseToken(recievedToken));
+			JWTClaimsSet claimsSet = targetToken.getJWTClaimsSet();
+			if (validateToken(claimsSet)) {
+				return claimsSet.getExpirationTime();
 			} else {
 				throw new RuntimeException("token expired");
 			}

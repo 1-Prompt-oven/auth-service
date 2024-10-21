@@ -6,18 +6,22 @@ import java.security.interfaces.RSAPublicKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
+
 @Component
 public class JwtSecret {
 
-	@Value("jwt.rsa.privatekey")
-	String stringPrivateKey;
-	@Value("jwt.rsa.publickey")
-	String stringPublicKey;
+	@Value("${jwt.rsa.private}")
+	private String stringPrivateKey;
 
-	RSAPrivateKey privateKey = null;
-	RSAPublicKey publicKey = null;
+	@Value("${jwt.rsa.public}")
+	private String stringPublicKey;
 
-	public JwtSecret() throws Exception {
+	private RSAPrivateKey privateKey;
+	private RSAPublicKey publicKey;
+
+	@PostConstruct
+	public void init() throws Exception {
 		privateKey = RSAKeyConverter.stringToPrivateKey(stringPrivateKey);
 		publicKey = RSAKeyConverter.stringToPublicKey(stringPublicKey);
 	}
