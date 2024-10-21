@@ -12,9 +12,11 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.out.call.AuthRepository;
+
 @Service
 @EnableRedisRepositories
-public class RedisAuthRepository {
+public class RedisAuthRepository implements AuthRepository {
 
 	@Value("${spring.data.redis.host}")
 	private String host;
