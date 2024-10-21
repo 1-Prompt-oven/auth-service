@@ -18,4 +18,6 @@ public interface MemberPersistence {
 
 	void remove(Member member);
 
+	void updateMember(Member updatedMember);
+
 }

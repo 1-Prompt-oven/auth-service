@@ -53,6 +53,13 @@ public class MemberPersistenceWithJpa implements MemberPersistence {
 	}
 
 	@Override
+	public void updateMember(Member updatedMember) {
+		MemberEntity memberEntity = MemberEntity.fromDomain(updatedMember);
+		memberEntity.setId(memberRepository.findByUuid(updatedMember.getUuid()).getId());
+		memberRepository.save(memberEntity);
+	}
+
+	@Override
 	public void remove(Member member) {
 		MemberEntity memberEntity = MemberEntity.fromDomain(member);
 		memberEntity.setId(memberRepository.findByUuid(member.getUuid()).getId());

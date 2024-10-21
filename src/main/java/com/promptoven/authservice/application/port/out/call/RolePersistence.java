@@ -8,4 +8,5 @@ public interface RolePersistence {
 
 	Role findRoleById(int roleID);
 
+	Role findByName(String roleName);
 }
