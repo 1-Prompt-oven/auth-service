@@ -26,5 +26,4 @@ public interface AuthUseCases {
 
 	void withdraw(String AccessToken);
 
-	void AdminRegister(String email, String password, String nickname);
 }

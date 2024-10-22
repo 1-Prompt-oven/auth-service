@@ -210,16 +210,5 @@ public class AuthServiceImpl
 		Member member = memberPersistence.findByEmail(email);
 		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
 	}
-
-	@Override
-	public void AdminRegister(String email, String password, String nickname) {
-		String uuid = UUID.randomUUID().toString();
-		String encodedPassword = passwordEncoder.encode(password);
-		Member member = Member.createMember
-			(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 3);
-		while (memberPersistence.findByUuid(uuid) != null) {
-			uuid = UUID.randomUUID().toString();
-		}
-		memberPersistence.create(member);
-	}
+	
 }

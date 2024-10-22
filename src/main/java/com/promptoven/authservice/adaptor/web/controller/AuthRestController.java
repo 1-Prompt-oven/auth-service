@@ -134,9 +134,4 @@ public class AuthRestController {
 				registerSocialRequestVO.getProviderId()));
 	}
 
-	@PostMapping("/admin/register")
-	public void adminRegister(@RequestBody RegisterRequestVO registerRequestVO) {
-		authUseCases.AdminRegister(registerRequestVO.getEmail(), registerRequestVO.getPassword(),
-			registerRequestVO.getNickname());
-	}
 }
