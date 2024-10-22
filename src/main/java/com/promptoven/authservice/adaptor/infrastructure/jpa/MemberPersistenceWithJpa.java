@@ -36,6 +36,12 @@ public class MemberPersistenceWithJpa implements MemberPersistence {
 	}
 
 	@Override
+	public Member findByNickname(String nickname) {
+		MemberEntity memberEntity = memberRepository.findByNickname(nickname);
+		return memberEntity != null ? memberEntity.toDomain() : null;
+	}
+
+	@Override
 	public boolean existsByEmail(String email) {
 		return memberRepository.existsByEmail(email);
 	}
