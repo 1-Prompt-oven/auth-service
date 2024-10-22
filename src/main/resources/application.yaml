@@ -19,10 +19,20 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        
+
 server:
   port: 8080 # random port for security reasons
   shutdown: graceful
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 auth:
   challenge:
