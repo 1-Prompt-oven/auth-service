@@ -212,4 +212,9 @@ public class AuthServiceImpl
 		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
 	}
 
+	@Override
+	public String refresh(String refreshToken) {
+		return jwtProvider.refreshByToken(refreshToken);
+	}
+
 }

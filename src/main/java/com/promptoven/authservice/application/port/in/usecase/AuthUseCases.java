@@ -26,4 +26,5 @@ public interface AuthUseCases {
 
 	void withdraw(String AccessToken);
 
+	String refresh(String RefreshToken);
 }
