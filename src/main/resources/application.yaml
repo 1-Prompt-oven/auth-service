@@ -16,8 +16,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    format_sql: true
-
+    properties:
+      hibernate:
+        format_sql: true
+        
 server:
   port: 8080 # random port for security reasons
   shutdown: graceful

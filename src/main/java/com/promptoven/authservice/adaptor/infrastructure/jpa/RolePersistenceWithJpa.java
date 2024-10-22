@@ -34,4 +34,19 @@ public class RolePersistenceWithJpa implements RolePersistence {
 		RoleEntity roleEntity = roleRepository.findByName(roleName);
 		return roleEntity != null ? roleEntity.toDomain() : null;
 	}
+
+	@Override
+	public int findMaxRoleID() {
+		return roleRepository.findMaxRoleID();
+	}
+
+	@Override
+	public void deleteRoleById(int roleID) {
+		roleRepository.deleteById(roleID);
+	}
+
+	@Override
+	public void updateRole(Role updatedRole) {
+		roleRepository.save(RoleEntity.fromDomain(updatedRole));
+	}
 }

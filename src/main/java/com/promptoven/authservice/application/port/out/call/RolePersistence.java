@@ -9,4 +9,10 @@ public interface RolePersistence {
 	Role findRoleById(int roleID);
 
 	Role findByName(String roleName);
+
+	int findMaxRoleID();
+
+	void deleteRoleById(int roleID);
+
+	void updateRole(Role role);
 }
