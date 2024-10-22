@@ -22,11 +22,4 @@ public class Role {
 			.build();
 	}
 
-	public static Role createRole(String name, int id) {
-		return Role.builder()
-			.name(name)
-			.id(id)
-			.description(null)
-			.build();
-	}
 }
