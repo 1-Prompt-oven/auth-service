@@ -54,10 +54,8 @@ public class AuthRestController {
 	}
 
 	@PostMapping("/logout")
-	public void logout(@RequestHeader("Authorization") String authorizationHeader,
-		@RequestHeader("RefreshToken") String refreshTokenHeader) {
-		String accessToken = authorizationHeader.replace("Bearer ", "");
-		String refreshToken = refreshTokenHeader.replace("Bearer ", "");
+	public void logout(@RequestHeader("Authorization") String accessToken,
+		@RequestHeader("RefreshToken") String refreshToken) {
 		authUseCases.logout(accessToken, refreshToken);
 	}
 
@@ -136,8 +134,7 @@ public class AuthRestController {
 	}
 
 	@GetMapping("/refresh")
-	public void tokenUpdate(@RequestHeader("RefreshToken") String refreshTokenHeader) {
-		String refreshToken = refreshTokenHeader.replace("Bearer ", "");
+	public void tokenUpdate(@RequestHeader("RefreshToken") String refreshToken) {
 		authUseCases.refresh(refreshToken);
 	}
 
