@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +38,7 @@ public class AuthServiceImpl
 	private final RolePersistence rolePersistence;
 	private final AuthTaskMemory authTaskMemory;
 	private final MailSending mailSending;
-	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(13);
+	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 
 	@Value("${auth.challenge.expiration}")
