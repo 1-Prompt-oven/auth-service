@@ -39,6 +39,7 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 
 	@Override
 	public boolean isTokenBlocked(String token) {
+
 		return redisTemplate.hasKey(token);
 	}
 

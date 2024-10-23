@@ -136,7 +136,8 @@ public class AuthRestController {
 	}
 
 	@GetMapping("/refresh")
-	public void tokenUpdate(@RequestBody String refreshToken) {
+	public void tokenUpdate(@RequestHeader("RefreshToken") String refreshTokenHeader) {
+		String refreshToken = refreshTokenHeader.replace("Bearer ", "");
 		authUseCases.refresh(refreshToken);
 	}
 
