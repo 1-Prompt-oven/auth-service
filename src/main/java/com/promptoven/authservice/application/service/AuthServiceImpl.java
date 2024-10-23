@@ -71,12 +71,8 @@ public class AuthServiceImpl
 	public void requestEmail(String email) {
 		Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
 		String code = String.format("%06d", new Random().nextInt(1000000));
-		try {
-			mailSending.sendMail(email, "Email Verification Code", "Your verification code is " + code);
-			authTaskMemory.recordAuthChallenge(email, code, expires);
-		} catch (Exception e) {
-			throw e;
-		}
+		mailSending.sendMail(email, "Email Verification Code", "Your verification code is " + code);
+		authTaskMemory.recordAuthChallenge(email, code, expires);
 	}
 
 	@Override
@@ -100,7 +96,19 @@ public class AuthServiceImpl
 	@Override
 	public SocialLoginDTO oauthLogin(String provider, String providerID, @Nullable String email) {
 		String memberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
-		if (memberUUID != null) {
+		boolean a = memberUUID != null;
+		if (email != null) {
+			Member member = memberPersistence.findByEmail(email);
+			if (member != null) {
+				OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
+				oauthInfoPersistence.recordOauthInfo(oauthInfo);
+				a = true;
+			} else {
+				Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
+				authTaskMemory.recordAuthChallengeSuccess(email, expires);
+			}
+		}
+		if (a) {
 			Member member = memberPersistence.findByUuid(memberUUID);
 			String role = rolePersistence.findRoleById(member.getRole()).getName();
 			String accessToken = jwtProvider.issueJwt(member.getUuid());
@@ -112,25 +120,6 @@ public class AuthServiceImpl
 				.uuid(member.getUuid())
 				.nickname(member.getNickname())
 				.build();
-		} else if (email != null) {
-			Member member = memberPersistence.findByEmail(email);
-			if (member != null) {
-				OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
-				oauthInfoPersistence.recordOauthInfo(oauthInfo);
-				String role = rolePersistence.findRoleById(member.getRole()).getName();
-				String accessToken = jwtProvider.issueJwt(member.getUuid());
-				String refreshToken = jwtProvider.issueRefresh(accessToken);
-				return SocialLoginDTO.builder()
-					.accessToken(accessToken)
-					.refreshToken(refreshToken)
-					.role(role)
-					.uuid(member.getUuid())
-					.nickname(member.getNickname())
-					.build();
-			} else {
-				Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-				authTaskMemory.recordAuthChallengeSuccess(email, expires);
-			}
 		}
 		return new SocialLoginDTO();
 	}
@@ -155,9 +144,7 @@ public class AuthServiceImpl
 		}
 	}
 
-	@Override
-	public LoginDTO registerFromSocialLogin(String email, String nickname, String password, String provider,
-		String providerID) {
+	private String makeMember(String email, String password, String nickname) {
 		String uuid = UUID.randomUUID().toString();
 		String encodedPassword = passwordEncoder.encode(password);
 		Member member = Member.createMember
@@ -166,6 +153,13 @@ public class AuthServiceImpl
 			uuid = UUID.randomUUID().toString();
 		}
 		memberPersistence.create(member);
+		return uuid;
+	}
+
+	@Override
+	public LoginDTO registerFromSocialLogin(String email, String nickname, String password, String provider,
+		String providerID) {
+		String uuid = makeMember(email, password, nickname);
 		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
 		oauthInfoPersistence.recordOauthInfo(oauthInfo);
 		return login(email, password);
@@ -173,14 +167,7 @@ public class AuthServiceImpl
 
 	@Override
 	public LoginDTO register(String email, String password, String nickname) {
-		String uuid = UUID.randomUUID().toString();
-		String encodedPassword = passwordEncoder.encode(password);
-		Member member = Member.createMember
-			(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 1);
-		while (memberPersistence.findByUuid(uuid) != null) {
-			uuid = UUID.randomUUID().toString();
-		}
-		memberPersistence.create(member);
+		makeMember(email, password, nickname);
 		return login(email, password);
 	}
 
