@@ -50,7 +50,7 @@ public class AuthRestController {
 		SocialLoginDTO socialLoginDTO = oauthUseCases.oauthLogin(
 			oauthLoginRequestVO.getProvider(), oauthLoginRequestVO.getProviderID(), oauthLoginRequestVO.getEmail());
 		return SocialLoginResponseVO.from(socialLoginDTO);
-		// todo: 만약에 false가 들어가있고 나머지가 들어가 null 이면 register-social로 가야합니다. @Frontend Dev : 302 redirect하기
+		// todo: 만약에 false 들어가있고 나머지가 들어가 null 이면 register-social 가야합니다. @Frontend Dev : 302 redirect
 	}
 
 	@PostMapping("/logout")
@@ -99,7 +99,7 @@ public class AuthRestController {
 		return authUseCases.checkPW(checkPWRequestVO.getPassword(), checkPWRequestVO.getMemberUUID());
 	}
 
-	@PostMapping("/email/reqeust")
+	@PostMapping("/email/request")
 	public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
 		log.info("email request: {}", emailRequestRequestVO);
 		authUseCases.requestEmail(emailRequestRequestVO.getEmail());
