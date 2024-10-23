@@ -1,4 +1,4 @@
-package com.promptoven.authservice.application.service.springsecurity.basic;
+package com.promptoven.authservice.application.service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service("authServiceBySpringSecurity")
+@Service
 @RequiredArgsConstructor
 public class AuthServiceImpl
 	implements AuthUseCases, OauthUseCases {
