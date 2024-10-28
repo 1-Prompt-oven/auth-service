@@ -22,4 +22,12 @@ public class Role {
 			.build();
 	}
 
+	public static Role updateRole(Role role, String name, String description) {
+		return Role.builder()
+				.name(name)
+				.id(role.getId())
+				.description(description)
+				.build();
+	}
+
 }
