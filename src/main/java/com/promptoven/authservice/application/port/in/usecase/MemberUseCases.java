@@ -1,5 +1,7 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
+import org.springframework.lang.Nullable;
+
 public interface MemberUseCases {
 
 	void promoteToSeller(String memberUUID);

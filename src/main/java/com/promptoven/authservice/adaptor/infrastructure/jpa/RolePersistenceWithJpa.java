@@ -32,7 +32,7 @@ public class RolePersistenceWithJpa implements RolePersistence {
 	@Override
 	public Role findByName(String roleName) {
 		RoleEntity roleEntity = roleRepository.findByName(roleName);
-		return roleEntity != null ? roleEntity.toDomain() : null;
+		return null != roleEntity ? roleEntity.toDomain() : null;
 	}
 
 	@Override
