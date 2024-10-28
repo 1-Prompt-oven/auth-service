@@ -1,6 +1,5 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
 import org.springframework.lang.Nullable;
 
