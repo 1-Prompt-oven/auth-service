@@ -2,6 +2,7 @@ package com.promptoven.authservice.application.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.Nullable;
 
 import com.promptoven.authservice.application.port.in.usecase.MemberUseCases;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberUseCases {
+
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
 	private final PasswordEncoder passwordEncoder;
@@ -61,7 +63,7 @@ public class MemberServiceImpl implements MemberUseCases {
 	}
 
 	@Override
-	public void createRole(String name, String description) {
+	public void createRole(String name, @Nullable String description) {
 		int newRoleID = 1 + rolePersistence.findMaxRoleID();
 		rolePersistence.create(Role.createRole(name, newRoleID, description));
 	}
@@ -83,7 +85,7 @@ public class MemberServiceImpl implements MemberUseCases {
 		String encodedPassword = passwordEncoder.encode(password);
 		Member member = Member.createMember
 				(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 3);
-		while (memberPersistence.findByUuid(uuid) != null) {
+		while (null != memberPersistence.findByUuid(uuid)) {
 			uuid = UUID.randomUUID().toString();
 		}
 		memberPersistence.create(member);

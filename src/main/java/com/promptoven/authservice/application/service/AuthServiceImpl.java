@@ -47,7 +47,10 @@ public class AuthServiceImpl
 	@Override
 	public void changePW(String newPassword, String memberUUID) {
 		Member member = memberPersistence.findByUuid(memberUUID);
-		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(newPassword)));
+
+		Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
+
+		memberPersistence.updatePassword(updatedMember);
 	}
 
 	@Override
@@ -77,10 +80,11 @@ public class AuthServiceImpl
 	@Override
 	public LoginDTO login(String email, String password) {
 		Member member = memberPersistence.findByEmail(email);
-		if (member != null && passwordEncoder.matches(password, member.getPassword())) {
+		if (null != member && passwordEncoder.matches(password, member.getPassword())) {
 			String role = rolePersistence.findRoleById(member.getRole()).getName();
 			String accessToken = jwtProvider.issueJwt(member.getUuid());
 			String refreshToken = jwtProvider.issueRefresh(accessToken);
+
 			return LoginDTO.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
@@ -94,33 +98,47 @@ public class AuthServiceImpl
 
 	@Override
 	public SocialLoginDTO oauthLogin(String provider, String providerID, @Nullable String email) {
-		String memberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
-		boolean a = memberUUID != null;
+		// Check if user already exists with this OAuth provider
+		String existingMemberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
+		boolean isExistingMember = existingMemberUUID != null;
+
+		// Handle email linking if provided
 		if (email != null) {
-			Member member = memberPersistence.findByEmail(email);
-			if (member != null) {
-				OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
-				oauthInfoPersistence.recordOauthInfo(oauthInfo);
-				a = true;
-			} else {
-				Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-				authTaskMemory.recordAuthChallengeSuccess(email, expires);
-			}
+			handleEmailLinking(email, provider, providerID);
 		}
-		if (a) {
-			Member member = memberPersistence.findByUuid(memberUUID);
-			String role = rolePersistence.findRoleById(member.getRole()).getName();
-			String accessToken = jwtProvider.issueJwt(member.getUuid());
-			String refreshToken = jwtProvider.issueRefresh(accessToken);
-			return SocialLoginDTO.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.role(role)
-				.uuid(member.getUuid())
-				.nickname(member.getNickname())
-				.build();
+
+		// Return login response if member exists
+		if (isExistingMember) {
+			return createLoginResponse(existingMemberUUID);
 		}
+
 		return new SocialLoginDTO();
+	}
+
+	private void handleEmailLinking(String email, String provider, String providerID) {
+		Member member = memberPersistence.findByEmail(email);
+		if (member != null) {
+			OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
+			oauthInfoPersistence.recordOauthInfo(oauthInfo);
+		} else {
+			Date expiryTime = new Date(System.currentTimeMillis() + AUTH_CHALLENGE_EXPIRE_TIME);
+			authTaskMemory.recordAuthChallengeSuccess(email, expiryTime);
+		}
+	}
+
+	private SocialLoginDTO createLoginResponse(String memberUUID) {
+		Member member = memberPersistence.findByUuid(memberUUID);
+		String role = rolePersistence.findRoleById(member.getRole()).getName();
+		String accessToken = jwtProvider.issueJwt(member.getUuid());
+		String refreshToken = jwtProvider.issueRefresh(accessToken);
+
+		return SocialLoginDTO.builder()
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.role(role)
+			.uuid(member.getUuid())
+			.nickname(member.getNickname())
+			.build();
 	}
 
 	@Override
