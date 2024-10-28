@@ -3,7 +3,6 @@ package com.promptoven.authservice.application.service;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
-import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
