@@ -38,18 +38,26 @@ public class MediaAuthService implements MediaAuthUseCase {
 		authTaskMemory.recordAuthChallengeSuccess(email, expires);
 	}
 
+	private String makeRandomCode() {
+		return String.format("%06d", new Random().nextInt(1000000));
+	}
+
+	private Date makeExpire() {
+		return new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
+	}
+
 	@Override
 	public void requestEmail(String email) {
-		Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-		String code = String.format("%06d", new Random().nextInt(1000000));
+		Date expires = makeExpire();
+		String code = makeRandomCode();
 		mailSending.sendMail(email, "Email Verification Code", "Your verification code is " + code);
 		authTaskMemory.recordAuthChallenge(email, code, expires);
 	}
 
     @Override
 	public void requestPhone(String phone) {
-		Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-		String code = String.format("%06d", new Random().nextInt(1000000));
+		Date expires = makeExpire();
+		String code = makeRandomCode();
 		// todo: Send SMS or Kakaotalk Alert talk
 		authTaskMemory.recordAuthChallenge(phone, code, expires);
     }
