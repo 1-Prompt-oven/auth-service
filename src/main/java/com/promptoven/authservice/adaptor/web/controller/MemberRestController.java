@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/auth/member")
+@RequestMapping("/v1/member/auth")
 public class MemberRestController {
 
 	private final MemberManagementUseCase memberUseCases;
