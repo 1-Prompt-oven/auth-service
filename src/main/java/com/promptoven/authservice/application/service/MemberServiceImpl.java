@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberServiceImpl implements MemberUseCases {
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
+	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(13);
 
 	@Override
 	public void promoteToSeller(String memberUUID) {
@@ -47,5 +48,40 @@ public class MemberServiceImpl implements MemberUseCases {
 	public void updateNickname(String memberUUID, String nickname) {
 		Member member = memberPersistence.findByUuid(memberUUID);
 		memberPersistence.updateMember(Member.updateMemberNickname(member, nickname));
+	}
+
+	@Override
+	public void clearPassword(String memberUUID) {
+		Member member = memberPersistence.findByUuid(memberUUID);
+		memberPersistence.updateMember(Member.updateMemberPassword(member, "clear"));
+	}
+
+	@Override
+	public void createRole(String name, String description) {
+		int newRoleID = 1 + rolePersistence.findMaxRoleID();
+		rolePersistence.create(Role.createRole(name, newRoleID, description));
+	}
+
+	@Override
+	public void deleteRole(int ID) {
+		rolePersistence.deleteRoleById(ID);
+	}
+
+	@Override
+	public void updateRole(int ID, String name, String description) {
+		Role role = rolePersistence.findRoleById(ID);
+		rolePersistence.updateRole(Role.updateRole(role, name, description));
+	}
+
+	@Override
+	public void AdminRegister(String email, String password, String nickname) {
+		String uuid = UUID.randomUUID().toString();
+		String encodedPassword = passwordEncoder.encode(password);
+		Member member = Member.createMember
+				(uuid, email, encodedPassword, nickname, LocalDateTime.now(), 3);
+		while (memberPersistence.findByUuid(uuid) != null) {
+			uuid = UUID.randomUUID().toString();
+		}
+		memberPersistence.create(member);
 	}
 }
