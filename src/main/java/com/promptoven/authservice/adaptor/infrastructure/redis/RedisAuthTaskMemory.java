@@ -57,7 +57,8 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 
 	@Override
 	public String getAuthChallenge(String media) {
-		return redisTemplate.opsForValue().get(media);
+		String value = redisTemplate.opsForValue().get(media);
+		return value != null ? value : "";
 	}
 
 	@Override
