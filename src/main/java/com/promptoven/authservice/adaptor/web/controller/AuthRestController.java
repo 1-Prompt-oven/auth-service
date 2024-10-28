@@ -1,5 +1,9 @@
 package com.promptoven.authservice.adaptor.web.controller;
 
+import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
+import com.promptoven.authservice.application.port.in.usecase.MediaAuthUseCase;
+import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
+import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,8 +26,6 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyEmailReques
 import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyNicknameRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.SocialLoginResponseVO;
-import com.promptoven.authservice.application.port.in.usecase.AuthUseCases;
-import com.promptoven.authservice.application.port.in.usecase.OauthUseCases;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
 
@@ -36,18 +38,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/auth")
 public class AuthRestController {
 
-	private final AuthUseCases authUseCases;
-	private final OauthUseCases oauthUseCases;
+	private final AuthenticationUseCase authenticationUseCase;
+	private final MediaAuthUseCase mediaAuthUseCase;
+	private final MemberRegistrationUseCase memberRegistrationUseCase;
+	private final SocialLoginUseCase socialLoginUseCase;
 
 	@PostMapping("/login")
 	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
-		LoginDTO loginDTO = authUseCases.login(loginRequestVO.getEmail(), loginRequestVO.getPassword());
+		LoginDTO loginDTO = authenticationUseCase.login(loginRequestVO.getEmail(), loginRequestVO.getPassword());
 		return LoginResponseVO.from(loginDTO);
 	}
 
 	@PostMapping("/oauth/login")
 	public SocialLoginResponseVO oauthLogin(@RequestBody OauthLoginRequestVO oauthLoginRequestVO) {
-		SocialLoginDTO socialLoginDTO = oauthUseCases.oauthLogin(
+		SocialLoginDTO socialLoginDTO = socialLoginUseCase.oauthLogin(
 			oauthLoginRequestVO.getProvider(), oauthLoginRequestVO.getProviderID(), oauthLoginRequestVO.getEmail());
 		return SocialLoginResponseVO.from(socialLoginDTO);
 		// todo: 만약에 false 들어가있고 나머지가 들어가 null 이면 register-social 가야합니다. @Frontend Dev : 302 redirect
@@ -56,86 +60,86 @@ public class AuthRestController {
 	@PostMapping("/logout")
 	public void logout(@RequestHeader("Authorization") String accessToken,
 		@RequestHeader("RefreshToken") String refreshToken) {
-		authUseCases.logout(accessToken, refreshToken);
+		authenticationUseCase.logout(accessToken, refreshToken);
 	}
 
 	@PostMapping("/register")
 	public LoginResponseVO register(@RequestBody RegisterRequestVO registerRequestVO) {
-		LoginDTO loginDTO = authUseCases.register(registerRequestVO.getEmail(), registerRequestVO.getPassword(),
+		LoginDTO loginDTO = memberRegistrationUseCase.register(registerRequestVO.getEmail(), registerRequestVO.getPassword(),
 			registerRequestVO.getNickname());
 		return LoginResponseVO.from(loginDTO);
 	}
 
 	@PostMapping("/oauth/register")
 	public void oauthRegister(@RequestBody OauthRegisterRequestVO oauthRegisterRequestVO) {
-		oauthUseCases.OauthRegister(oauthRegisterRequestVO.getProvider(), oauthRegisterRequestVO.getProviderId(),
+		socialLoginUseCase.OauthRegister(oauthRegisterRequestVO.getProvider(), oauthRegisterRequestVO.getProviderId(),
 			oauthRegisterRequestVO.getMemberUUID());
 	}
 
 	@PostMapping("/oauth/unregister")
 	public void oauthUnregister(@RequestBody OauthUnregisterRequestVO oauthUnregisterRequestVO) {
-		oauthUseCases.OauthUnregister(oauthUnregisterRequestVO.getProvider(),
+		socialLoginUseCase.OauthUnregister(oauthUnregisterRequestVO.getProvider(),
 			oauthUnregisterRequestVO.getProviderId(), oauthUnregisterRequestVO.getMemberUUID());
 	}
 
 	@PostMapping("/withdraw")
 	public void withdraw(@RequestHeader("Authorization") String authorizationHeader) {
 		String accessToken = authorizationHeader.replace("Bearer ", "");
-		authUseCases.withdraw(accessToken);
+		authenticationUseCase.withdraw(accessToken);
 	}
 
 	@PostMapping("/resetPW")
 	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
-		authUseCases.resetPW(resetPWRequestVO.getEmail(), resetPWRequestVO.getPassword());
+		authenticationUseCase.resetPW(resetPWRequestVO.getEmail(), resetPWRequestVO.getPassword());
 	}
 
 	@PostMapping("/changePW")
 	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		authUseCases.changePW(changePWRequestVO.getNewPassword(), changePWRequestVO.getMemberUUID());
+		authenticationUseCase.changePW(changePWRequestVO.getNewPassword(), changePWRequestVO.getMemberUUID());
 	}
 
 	@PostMapping("/checkPW")
 	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
-		return authUseCases.checkPW(checkPWRequestVO.getPassword(), checkPWRequestVO.getMemberUUID());
+		return authenticationUseCase.checkPW(checkPWRequestVO.getPassword(), checkPWRequestVO.getMemberUUID());
 	}
 
 	@PostMapping("/email/request")
 	public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
 		log.info("email request: {}", emailRequestRequestVO);
-		authUseCases.requestEmail(emailRequestRequestVO.getEmail());
+		mediaAuthUseCase.requestEmail(emailRequestRequestVO.getEmail());
 	}
 
 	@PostMapping("/email/check")
 	public boolean emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
 		log.info("email check: {}", emailCheckRequestVO);
-		return authUseCases.checkMedia(emailCheckRequestVO.getEmail(), emailCheckRequestVO.getCode());
+		return mediaAuthUseCase.checkMedia(emailCheckRequestVO.getEmail(), emailCheckRequestVO.getCode());
 	}
 
 	@PostMapping("/verify/email")
 	public boolean verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
-		log.info("verify email: {}", verifyEmailRequestVO);
-		return authUseCases.verifyEmail(verifyEmailRequestVO.getEmail());
+		return memberRegistrationUseCase.verifyEmail(verifyEmailRequestVO.getEmail());
 	}
 
 	@PostMapping("/verify/nickname")
 	public boolean verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
-		log.info("verify nickname: {}", verifyNicknameRequestVO);
-		return authUseCases.verifyNickname(verifyNicknameRequestVO.getNickname());
+		return memberRegistrationUseCase.verifyNickname(verifyNicknameRequestVO.getNickname());
 	}
 
 	@PostMapping("/register-social")
 	public LoginResponseVO registerSocial(@RequestBody RegisterSocialRequestVO registerSocialRequestVO) {
-		log.info("register social: {}", registerSocialRequestVO);
-		return LoginResponseVO.from(
-			oauthUseCases.registerFromSocialLogin(registerSocialRequestVO.getEmail(),
-				registerSocialRequestVO.getNickname(), registerSocialRequestVO.getPassword(),
+		return LoginResponseVO.from(memberRegistrationUseCase.registerFromSocialLogin(
+				registerSocialRequestVO.getEmail(),
+				registerSocialRequestVO.getNickname(),
+				registerSocialRequestVO.getPassword(),
 				registerSocialRequestVO.getProvider(),
-				registerSocialRequestVO.getProviderId()));
+				registerSocialRequestVO.getProviderId()
+		));
+
 	}
 
 	@GetMapping("/refresh")
 	public String tokenUpdate(@RequestHeader("RefreshToken") String refreshToken) {
-		return authUseCases.refresh(refreshToken);
+		return authenticationUseCase.refresh(refreshToken);
 	}
 
 }
