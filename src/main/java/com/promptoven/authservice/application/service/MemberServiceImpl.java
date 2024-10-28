@@ -1,5 +1,6 @@
 package com.promptoven.authservice.application.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.usecase.MemberUseCases;
@@ -11,13 +12,16 @@ import com.promptoven.authservice.domain.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberUseCases {
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
-	private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(13);
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public void promoteToSeller(String memberUUID) {
