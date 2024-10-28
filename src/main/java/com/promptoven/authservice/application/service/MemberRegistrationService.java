@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -57,7 +56,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
         String uuid = UUID.randomUUID().toString();
         String encodedPassword = passwordEncoder.encode(password);
         Member member = Member.createMember
-                (uuid, email, encodedPassword, nickname, LocalDateTime.now(), role);
+                (uuid, email, encodedPassword, nickname, role);
         while (memberPersistence.findByUuid(uuid) != null) {
             uuid = UUID.randomUUID().toString();
         }

@@ -24,7 +24,7 @@ public class Member {
 	private int role;
 
 	public static Member createMember(
-		String uuid, String email, String password, String nickname, LocalDateTime createdAt, int role) {
+		String uuid, String email, String password, String nickname, int role) {
 		return Member.builder()
 			.uuid(uuid)
 			.email(email)
