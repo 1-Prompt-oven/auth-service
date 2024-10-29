@@ -1,7 +1,9 @@
 package com.promptoven.authservice.adaptor.web.controller;
 
-import com.promptoven.authservice.application.port.in.usecase.MemberUseCases;
+import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
+import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.*;
+import com.promptoven.authservice.application.port.in.usecase.RoleManagementUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/admin/member")
 public class MemberAdminRestController {
 
-	private final MemberUseCases memberManagementUseCases;
+	private final MemberManagementUseCase memberManagementUseCases;
+	private final MemberRegistrationUseCase memberRegistrationUseCase;
+	private final RoleManagementUseCase roleManagementUseCase;
 
 	@PostMapping("/admin-register")
 	public void adminRegister(@RequestBody RegisterRequestVO registerRequestVO) {
-		memberManagementUseCases.AdminRegister(registerRequestVO.getEmail(), registerRequestVO.getPassword(),
+		memberRegistrationUseCase.AdminRegister(registerRequestVO.getEmail(), registerRequestVO.getPassword(),
 			registerRequestVO.getNickname());
 	}
 
@@ -49,18 +53,18 @@ public class MemberAdminRestController {
 
 	@PostMapping("/role")
 	public void createRole(@RequestBody CreateRoleRequestVO createRoleRequestVO) {
-		memberManagementUseCases.createRole(createRoleRequestVO.getName(), createRoleRequestVO.getDescription());
+		roleManagementUseCase.createRole(createRoleRequestVO.getName(), createRoleRequestVO.getDescription());
 	}
 
 	@PutMapping("/role")
 	public void updateRole(@RequestBody UpdateRoleRequestVO updateRoleRequestVO) {
-		memberManagementUseCases.updateRole(updateRoleRequestVO.getId(), updateRoleRequestVO.getName(),
+		roleManagementUseCase.updateRole(updateRoleRequestVO.getId(), updateRoleRequestVO.getName(),
 			updateRoleRequestVO.getDescription());
 	}
 
 	@DeleteMapping("/role")
 	public void deleteRole(@RequestBody DeleteRoleRequestVO deleteRoleRequestVO) {
-		memberManagementUseCases.deleteRole(deleteRoleRequestVO.getRoleID());
+		roleManagementUseCase.deleteRole(deleteRoleRequestVO.getRoleID());
 	}
 
 }

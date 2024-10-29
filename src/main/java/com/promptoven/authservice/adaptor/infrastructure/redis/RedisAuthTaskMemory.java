@@ -40,7 +40,7 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 	@Override
 	public boolean isTokenBlocked(String token) {
 
-		return redisTemplate.hasKey(token);
+		return Boolean.TRUE.equals(redisTemplate.hasKey(token));
 	}
 
 	@Override
@@ -57,7 +57,8 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 
 	@Override
 	public String getAuthChallenge(String media) {
-		return redisTemplate.opsForValue().get(media);
+		String value = redisTemplate.opsForValue().get(media);
+		return null != value ? value : "";
 	}
 
 	@Override
