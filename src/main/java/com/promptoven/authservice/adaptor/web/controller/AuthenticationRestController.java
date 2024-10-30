@@ -23,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/auth")
 public class AuthenticationRestController {
 
+	final String AuthHeader = "Authorization";
+	final String RefreshHeader = "RefreshToken";
+
 	private final AuthenticationUseCase authenticationUseCase;
 
 	@PostMapping("/login")
@@ -32,13 +35,13 @@ public class AuthenticationRestController {
 	}
 
 	@PostMapping("/logout")
-	public void logout(@RequestHeader("Authorization") String accessToken,
+	public void logout(@RequestHeader(AuthHeader) String accessToken,
 		@RequestHeader("RefreshToken") String refreshToken) {
 		authenticationUseCase.logout(accessToken, refreshToken);
 	}
 
 	@PostMapping("/withdraw")
-	public void withdraw(@RequestHeader("Authorization") String authorizationHeader) {
+	public void withdraw(@RequestHeader(AuthHeader) String authorizationHeader) {
 		String accessToken = authorizationHeader.replace("Bearer ", "");
 		authenticationUseCase.withdraw(accessToken);
 	}
@@ -54,7 +57,7 @@ public class AuthenticationRestController {
 	}
 
 	@GetMapping("/refresh")
-	public String tokenUpdate(@RequestHeader("RefreshToken") String refreshToken) {
+	public String tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
 		return authenticationUseCase.refresh(refreshToken);
 	}
 
