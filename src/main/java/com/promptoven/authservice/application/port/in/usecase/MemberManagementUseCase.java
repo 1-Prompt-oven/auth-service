@@ -1,5 +1,7 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
+import com.promptoven.authservice.application.service.annotation.FindMemberOperation;
+
 public interface MemberManagementUseCase {
 
     void promoteToSeller(String memberUUID);

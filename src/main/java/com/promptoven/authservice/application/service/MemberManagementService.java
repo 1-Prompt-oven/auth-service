@@ -3,6 +3,7 @@ package com.promptoven.authservice.application.service;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
+import com.promptoven.authservice.application.service.annotation.FindMemberOperation;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.Role;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,10 @@ public class MemberManagementService implements MemberManagementUseCase {
     private final MemberPersistence memberPersistence;
     private final RolePersistence rolePersistence;
 
+
     @Override
+    @FindMemberOperation
     public void promoteToSeller(String memberUUID) {
-        Member member = memberPersistence.findByUuid(memberUUID);
         memberPersistence.updateMember(Member.updateMemberRole(member, 2));
     }
 
