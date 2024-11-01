@@ -25,7 +25,8 @@ public class MemberRestController {
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		memberUseCases.updateNickname(updateNicknameRequestVO.getMemberUUID(), updateNicknameRequestVO.getNickname());
+		memberUseCases.updateNickname(updateNicknameRequestVO.getMemberUUID(), updateNicknameRequestVO.getNickname(),
+			null);
 	}
 
 	@PostMapping("/changePW")
