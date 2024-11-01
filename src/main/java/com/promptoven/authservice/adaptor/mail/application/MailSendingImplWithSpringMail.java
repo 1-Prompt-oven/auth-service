@@ -54,8 +54,6 @@ public class MailSendingImplWithSpringMail implements MailSending {
 			mailSender.send(message);
 		} catch (MailSendException e) {
 			throw e;
-		} catch (Exception e) {
-			throw e;
 		}
 	}
 }

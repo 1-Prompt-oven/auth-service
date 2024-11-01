@@ -1,16 +1,25 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
+import com.promptoven.authservice.application.service.annotation.FindMemberOperation;
+import com.promptoven.authservice.domain.Member;
+
 public interface MemberManagementUseCase {
 
-    void promoteToSeller(String memberUUID);
+	@FindMemberOperation
+	void promoteToSeller(String memberUUID, Member member);
 
-    void setMemberRole(String memberUUID, String roleName);
+	@FindMemberOperation
+	void setMemberRole(String memberUUID, String roleName, Member member);
 
-    void banMember(String memberUUID);
+	@FindMemberOperation
+	void banMember(String memberUUID, Member member);
 
-    void unbanMember(String memberUUID);
+	@FindMemberOperation
+	void unbanMember(String memberUUID, Member member);
 
-    void updateNickname(String memberUUID, String nickname);
+	@FindMemberOperation
+	void updateNickname(String memberUUID, String nickname, Member member);
 
-    void clearPassword(String memberUUID);
+	@FindMemberOperation
+	void clearPassword(String memberUUID, Member member);
 }
