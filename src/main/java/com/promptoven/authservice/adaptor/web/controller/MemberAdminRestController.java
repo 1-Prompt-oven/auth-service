@@ -18,7 +18,7 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateNicknameReq
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateRoleRequestVO;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.in.usecase.RoleManagementUseCase;
-import com.promptoven.authservice.application.service.annotation.MemberManagementProxy;
+import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +51,8 @@ public class MemberAdminRestController {
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		 memberManagementProxy.updateNickname(
-			updateNicknameRequestVO.getMemberUUID(), 
+		memberManagementProxy.updateNickname(
+			updateNicknameRequestVO.getMemberUUID(),
 			updateNicknameRequestVO.getNickname()
 		);
 	}
@@ -60,7 +60,7 @@ public class MemberAdminRestController {
 	@PutMapping("/member-role")
 	public void updateMemberRole(@RequestBody SetMemberRoleRequestVO setMemberRoleRequestVO) {
 		memberManagementProxy.setMemberRole(
-			setMemberRoleRequestVO.getMemberNickname(), 
+			setMemberRoleRequestVO.getMemberNickname(),
 			setMemberRoleRequestVO.getRoleName()
 		);
 	}
