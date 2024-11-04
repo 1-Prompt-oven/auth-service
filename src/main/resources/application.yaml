@@ -71,7 +71,7 @@ spring:
       host: garnet
       port: 6379
   datasource:
-    url: jdbc:mysql://mysql-auth:3306/auth
+    url: jdbc:mysql://mysql:3306/auth
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
