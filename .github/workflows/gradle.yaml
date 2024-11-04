@@ -55,6 +55,7 @@ jobs:
             mkdir /home/ubuntu/auth-service
             cd ~/auth-service
             echo "SPRING_PROFILES_ACTIVE=prod" > .env
+            rm -rf docker-compose.yml
             echo ${{ secrets.docker_compose }} > docker-compose.yml
             sudo docker-compose up -d
             sudo docker image prune -f
