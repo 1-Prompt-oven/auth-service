@@ -16,9 +16,9 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.SetMemberRoleRequ
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UnbanRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateNicknameRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateRoleRequestVO;
-import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.in.usecase.RoleManagementUseCase;
+import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/admin/member")
 public class MemberAdminRestController {
 
-	private final MemberManagementUseCase memberManagementUseCases;
+	private final MemberManagementProxy memberManagementProxy;
 	private final MemberRegistrationUseCase memberRegistrationUseCase;
 	private final RoleManagementUseCase roleManagementUseCase;
 
@@ -41,29 +41,33 @@ public class MemberAdminRestController {
 
 	@PutMapping("/ban")
 	public void banMember(@RequestBody BanRequestVO banRequestVO) {
-		memberManagementUseCases.banMember(banRequestVO.getMemberUUID(), null);
+		memberManagementProxy.banMember(banRequestVO.getMemberUUID());
 	}
 
 	@PutMapping("/unban")
 	public void unbanMember(@RequestBody UnbanRequestVO unbanRequestVO) {
-		memberManagementUseCases.unbanMember(unbanRequestVO.getMemberUUID(), null);
+		memberManagementProxy.unbanMember(unbanRequestVO.getMemberUUID());
 	}
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		memberManagementUseCases.updateNickname(
-			updateNicknameRequestVO.getMemberUUID(), updateNicknameRequestVO.getNickname(), null);
+		memberManagementProxy.updateNickname(
+			updateNicknameRequestVO.getMemberUUID(),
+			updateNicknameRequestVO.getNickname()
+		);
 	}
 
 	@PutMapping("/member-role")
 	public void updateMemberRole(@RequestBody SetMemberRoleRequestVO setMemberRoleRequestVO) {
-		memberManagementUseCases.setMemberRole(
-			setMemberRoleRequestVO.getMemberNickname(), setMemberRoleRequestVO.getRoleName(), null);
+		memberManagementProxy.setMemberRole(
+			setMemberRoleRequestVO.getMemberNickname(),
+			setMemberRoleRequestVO.getRoleName()
+		);
 	}
 
 	@PutMapping("/clearPW")
 	public void clearPassword(@RequestBody ClearPasswordRequestVO clearPasswordRequestVO) {
-		memberManagementUseCases.clearPassword(clearPasswordRequestVO.getMemberUUID(), null);
+		memberManagementProxy.clearPassword(clearPasswordRequestVO.getMemberUUID());
 	}
 
 	@PostMapping("/role")
