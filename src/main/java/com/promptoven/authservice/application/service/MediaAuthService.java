@@ -1,30 +1,29 @@
 package com.promptoven.authservice.application.service;
 
-import com.promptoven.authservice.application.port.in.usecase.MediaAuthUseCase;
-import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
-import com.promptoven.authservice.application.port.out.call.MailSending;
-
 import java.util.Date;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
+import com.promptoven.authservice.application.port.in.usecase.MediaAuthUseCase;
+import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
+import com.promptoven.authservice.application.port.out.call.MailSending;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class MediaAuthService implements MediaAuthUseCase {
 
-    @Value("${auth.challenge.expiration}")
-    private long AUTH_CHALLENGE_EXPIRE_TIME;
+	private final AuthTaskMemory authTaskMemory;
+	private final MailSending mailSending;
+	@Value("${auth.challenge.expiration}")
+	private long AUTH_CHALLENGE_EXPIRE_TIME;
 
-    private final AuthTaskMemory authTaskMemory;
-    private final MailSending mailSending;
-
-    @Override
+	@Override
 	public boolean checkMedia(String email, String code) {
 		if (authTaskMemory.getAuthChallenge(email).equals(code)) {
 			saveSuccessAuthChallenge(email);
@@ -54,11 +53,11 @@ public class MediaAuthService implements MediaAuthUseCase {
 		authTaskMemory.recordAuthChallenge(email, code, expires);
 	}
 
-    @Override
+	@Override
 	public void requestPhone(String phone) {
 		Date expires = makeExpire();
 		String code = makeRandomCode();
 		// todo: Send SMS or Kakaotalk Alert talk
 		authTaskMemory.recordAuthChallenge(phone, code, expires);
-    }
+	}
 }
