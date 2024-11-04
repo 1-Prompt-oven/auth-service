@@ -23,10 +23,6 @@ services:
     networks:
       - msa-network
 
-
-volumes:
-  mysql-auth:
-
 networks:
   msa-network:
     external: true
