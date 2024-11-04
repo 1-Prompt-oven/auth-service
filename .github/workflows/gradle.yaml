@@ -52,11 +52,11 @@ jobs:
           script: |
             sudo docker rm -f auth-service || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth-service
-            mkdir /home/ubuntu/auth-service
             cd /home/ubuntu/auth-service
             echo "SPRING_PROFILES_ACTIVE=prod" > .env
             rm -rf docker-compose.yml
-            echo ${{ secrets.docker_compose }} > docker-compose.yml
+            touch ./docker-compose.yml
+            echo ${{ secrets.docker_compose }} > ./docker-compose.yml
             sudo docker-compose up -d
             sudo docker image prune -f
 
