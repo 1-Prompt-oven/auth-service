@@ -31,7 +31,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
-    prefer-ip-address: true
+    prefer-ip-address: false
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 auth:
@@ -45,6 +45,12 @@ jwt:
   expiration:
     refresh: 86400000 # 24 hours
     access: 600000 # 10 minutes
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
 
 corsconfig:
   allowed-origins:
