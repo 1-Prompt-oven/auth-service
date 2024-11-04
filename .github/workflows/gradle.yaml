@@ -50,7 +50,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            sudo docker rm -f product-service || true
+            sudo docker rm -f auth-service || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth-service
             mkdir /home/ubuntu/auth-service
             cd ~/auth-service
