@@ -12,13 +12,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/auth
     networks:
       - msa-network
-  garnet:
-    image: ghcr.io/microsoft/garnet:latest
-    container_name: garnet
-    ports:
-      - "6379:6379"
-    networks:
-      - msa-network
 networks:
   msa-network:
     external: true
