@@ -21,6 +21,11 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: auth-service
+
 
 server:
   port: 0 # random port for security reasons
@@ -84,6 +89,11 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
     generate-ddl: true
+  kafka:
+    bootstrap-servers: kafka-1:9092,kafka-2:9092,kafka-3:9092
+    consumer:
+      group-id: auth-service
+
 server:
   port: 8080
   shutdown: graceful
