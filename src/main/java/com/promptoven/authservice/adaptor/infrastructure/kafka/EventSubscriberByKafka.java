@@ -15,9 +15,8 @@ public class EventSubscriberByKafka {
 
 	private final MemberManagementProxy memberManagementProxy;
 
-	@KafkaListener(topics = "first-Settlement-Registered")
+	@KafkaListener(topics = "${settlement-first-create-event}")
 	public void listen(String memberUuid) {
 		memberManagementProxy.promoteToSeller(memberUuid);
 	}
-
 }

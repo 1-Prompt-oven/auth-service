@@ -25,7 +25,8 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: auth-service
-
+  config:
+    import: classpath:eventTopic.yaml
 
 server:
   port: 0 # random port for security reasons
@@ -69,6 +70,7 @@ logging:
 # application-prod.yml
 spring:
   config:
+    import: classpath:eventTopic.yaml
     activate:
       on-profile: prod
   data:
