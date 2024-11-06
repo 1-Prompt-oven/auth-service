@@ -2,6 +2,7 @@ package com.promptoven.authservice.adaptor.infrastructure.redis;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
 
@@ -10,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-// @Service
+@Service
 public class EventSubscriberByRedis implements MessageListener {
 
 	private final MemberManagementProxy memberManagementProxy;
