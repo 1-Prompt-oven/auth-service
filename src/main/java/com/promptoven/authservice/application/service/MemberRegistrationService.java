@@ -2,6 +2,7 @@ package com.promptoven.authservice.application.service;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,10 @@ import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 	private final MemberPersistence memberPersistence;
@@ -26,6 +25,16 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final OauthInfoPersistence oauthInfoPersistence;
 	private final AuthenticationService authenticationService;
 	private final EventPublisher eventPublisher;
+
+	public MemberRegistrationService(MemberPersistence memberPersistence, PasswordEncoder passwordEncoder,
+		OauthInfoPersistence oauthInfoPersistence, AuthenticationService authenticationService,
+		@Qualifier("eventPublisherByKafka") EventPublisher eventPublisher) {
+		this.memberPersistence = memberPersistence;
+		this.passwordEncoder = passwordEncoder;
+		this.oauthInfoPersistence = oauthInfoPersistence;
+		this.authenticationService = authenticationService;
+		this.eventPublisher = eventPublisher;
+	}
 
 	@Override
 	public LoginDTO register(String email, String password, String nickname) {
