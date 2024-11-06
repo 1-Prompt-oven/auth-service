@@ -23,21 +23,21 @@ public class MemberManagementProxy {
 
 	@FindMemberOperation
 	public void unbanMember(String memberUUID) {
-		// Method body not needed as aspect will handle the service call
 	}
 
 	@FindMemberOperation
 	public void updateNickname(String memberUUID, String nickname) {
-		// Method body not needed as aspect will handle the service call
 	}
 
 	@FindMemberOperation
 	public void setMemberRole(String memberUUID, String roleName) {
-		// Method body not needed as aspect will handle the service call
 	}
 
 	@FindMemberOperation
 	public void clearPassword(String memberUUID) {
-		// Method body not needed as aspect will handle the service call
+	}
+
+	@FindMemberOperation
+	public void promoteToSeller(String memberUuid) {
 	}
 } 
