@@ -1,6 +1,5 @@
 package com.promptoven.authservice.application.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +11,12 @@ import com.promptoven.authservice.application.port.out.dto.MemberNicknameUpdateE
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.Role;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MemberManagementService implements MemberManagementUseCase {
 
 	private final MemberPersistence memberPersistence;
@@ -28,13 +29,6 @@ public class MemberManagementService implements MemberManagementUseCase {
 	private String memberUnbanTopic;
 	@Value("${member-nickname-update-event}")
 	private String memberNicknameUpdatedTopic;
-
-	public MemberManagementService(MemberPersistence memberPersistence, RolePersistence rolePersistence,
-		@Qualifier("eventPublisherByKafka") EventPublisher eventPublisher) {
-		this.memberPersistence = memberPersistence;
-		this.rolePersistence = rolePersistence;
-		this.eventPublisher = eventPublisher;
-	}
 
 	@Override
 	public void promoteToSeller(Member member) {

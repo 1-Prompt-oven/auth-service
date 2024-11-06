@@ -1,6 +1,5 @@
 package com.promptoven.authservice.application.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,10 +13,12 @@ import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService implements AuthenticationUseCase {
 
 	private final MemberPersistence memberPersistence;
@@ -27,22 +28,11 @@ public class AuthenticationService implements AuthenticationUseCase {
 
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
-	
+
 	private final EventPublisher eventPublisher;
 
 	@Value("${member-withdraw-event}")
 	private String memberWithdrawEvent;
-
-	public AuthenticationService(MemberPersistence memberPersistence, RolePersistence rolePersistence,
-		AuthTaskMemory authTaskMemory, PasswordEncoder passwordEncoder, JwtProvider jwtProvider,
-		@Qualifier("eventPublisherByKafka") EventPublisher eventPublisher) {
-		this.memberPersistence = memberPersistence;
-		this.rolePersistence = rolePersistence;
-		this.authTaskMemory = authTaskMemory;
-		this.passwordEncoder = passwordEncoder;
-		this.jwtProvider = jwtProvider;
-		this.eventPublisher = eventPublisher;
-	}
 
 	@Override
 	public boolean checkPW(String password, String memberUUID) {
