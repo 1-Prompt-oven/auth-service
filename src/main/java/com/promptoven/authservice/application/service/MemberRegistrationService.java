@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
+import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
@@ -24,10 +25,12 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final PasswordEncoder passwordEncoder;
 	private final OauthInfoPersistence oauthInfoPersistence;
 	private final AuthenticationService authenticationService;
+	private final EventPublisher eventPublisher;
 
 	@Override
 	public LoginDTO register(String email, String password, String nickname) {
-		makeMember(email, password, nickname, 1);
+		String uuid = makeMember(email, password, nickname, 1);
+		eventPublisher.publish("member-registered", uuid);
 		return authenticationService.login(email, password);
 	}
 
@@ -47,6 +50,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 		String uuid = makeMember(email, password, nickname, 1);
 		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
 		oauthInfoPersistence.recordOauthInfo(oauthInfo);
+		eventPublisher.publish("member-registered", uuid);
 		return authenticationService.login(email, password);
 	}
 
