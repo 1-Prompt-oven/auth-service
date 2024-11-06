@@ -49,4 +49,9 @@ public class RolePersistenceWithJpa implements RolePersistence {
 	public void updateRole(Role updatedRole) {
 		roleRepository.save(RoleEntity.fromDomain(updatedRole));
 	}
+
+	@Override
+	public long count() {
+		return roleRepository.count();
+	}
 }
