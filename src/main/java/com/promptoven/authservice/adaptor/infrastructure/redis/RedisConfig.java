@@ -18,6 +18,8 @@ public class RedisConfig {
 	String host;
 	@Value("${spring.data.redis.port}")
 	int port;
+	@Value("${settlement-first-create-event}")
+	String firstSettlementRegisteredTopic;
 
 	@Bean
 	public RedisTemplate<String, String> redisTemplate() {
@@ -35,15 +37,17 @@ public class RedisConfig {
 		template.afterPropertiesSet();
 		return template;
 	}
-	
+
+	@Bean
 	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
 		MessageListenerAdapter listenerAdapter) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(listenerAdapter, new ChannelTopic("first-Settlement-Registered"));
+		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
 		return container;
 	}
 
+	@Bean
 	MessageListenerAdapter listenerAdapter(EventSubscriberByRedis subscriber) {
 		return new MessageListenerAdapter(subscriber, "onMessage");
 	}
