@@ -1,11 +1,13 @@
 package com.promptoven.authservice.application.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
+import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
-import com.promptoven.authservice.application.service.annotation.FindMemberOperation;
+import com.promptoven.authservice.application.port.out.dto.MemberNicknameUpdateEvent;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.Role;
 
@@ -19,46 +21,49 @@ public class MemberManagementService implements MemberManagementUseCase {
 
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
+	private final EventPublisher eventPublisher;
+
+	@Value("${member-ban-event}")
+	private String memberBannedTopic;
+	@Value("${member-unban-event}")
+	private String memberUnbanTopic;
+	@Value("${member-nickname-update-event}")
+	private String memberNicknameUpdatedTopic;
 
 	@Override
-	@FindMemberOperation
-	public void promoteToSeller(String memberUUID, Member member) {
+	public void promoteToSeller(Member member) {
 		memberPersistence.updateMember(Member.updateMemberRole(member, 2));
 	}
 
 	@Override
-	@FindMemberOperation
-	public void setMemberRole(String memberUUID, String roleName, Member member) {
-		// The aspect will convert the UUID to a Member object
+	public void setMemberRole(Member member, String roleName) {
 		Role role = rolePersistence.findByName(roleName);
 		memberPersistence.updateMember(Member.updateMemberRole(member, role.getId()));
 	}
 
 	@Override
-	@FindMemberOperation
-	public void banMember(String memberUUID, Member member) {
-		// The aspect will convert the UUID to a Member object
+	public void banMember(Member member) {
+		eventPublisher.publish(memberBannedTopic, member.getUuid());
 		memberPersistence.updateMember(Member.banMember(member));
 	}
 
 	@Override
-	@FindMemberOperation
-	public void unbanMember(String memberUUID, Member member) {
-		// The aspect will convert the UUID to a Member object
+	public void unbanMember(Member member) {
+		eventPublisher.publish(memberUnbanTopic, member.getUuid());
 		memberPersistence.updateMember(Member.unbanMember(member));
 	}
 
 	@Override
-	@FindMemberOperation
-	public void updateNickname(String memberUUID, String nickname, Member member) {
-		// The aspect will convert the UUID to a Member object
+	public void updateNickname(Member member, String nickname) {
 		memberPersistence.updateMember(Member.updateMemberNickname(member, nickname));
+		eventPublisher.publish(
+			memberNicknameUpdatedTopic,
+			new MemberNicknameUpdateEvent(member.getUuid(), nickname)
+		);
 	}
 
 	@Override
-	@FindMemberOperation
-	public void clearPassword(String memberUUID, Member member) {
-		// The aspect will convert the UUID to a Member object
+	public void clearPassword(Member member) {
 		memberPersistence.updateMember(Member.updateMemberPassword(member, "clear"));
 	}
 }
