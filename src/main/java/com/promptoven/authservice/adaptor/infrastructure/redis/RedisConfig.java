@@ -22,31 +22,34 @@ public class RedisConfig {
 	String firstSettlementRegisteredTopic;
 
 	@Bean
-	public RedisTemplate<String, String> redisTemplate() {
-		return createRedisTemplate(host, port);
+	public RedisConnectionFactory redisConnectionFactory() {
+		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
+		LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfig);
+		factory.afterPropertiesSet();
+		return factory;
 	}
 
-	protected RedisTemplate<String, String> createRedisTemplate(String host, int port) {
-		RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(host, port);
-		RedisConnectionFactory connectionFactory = new LettuceConnectionFactory(redisConfiguration);
-
+	@Bean
+	public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new StringRedisSerializer());
-		template.setConnectionFactory(connectionFactory);
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(new StringRedisSerializer());
 		template.afterPropertiesSet();
 		return template;
 	}
 
 	@Bean
-	RedisMessageListenerContainer container(MessageListenerAdapter listenerAdapter) {
-		RedisConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
-		((LettuceConnectionFactory)connectionFactory).start();
+	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory, 
+											MessageListenerAdapter listenerAdapter,
+											RedisTemplate<String, String> redisTemplate) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
-
-		if (!redisTemplate().hasKey(firstSettlementRegisteredTopic)) {
-			redisTemplate().opsForValue().set(firstSettlementRegisteredTopic, "");
+		
+		if (!Boolean.TRUE.equals(redisTemplate.hasKey(firstSettlementRegisteredTopic))) {
+			redisTemplate.opsForValue().set(firstSettlementRegisteredTopic, "");
 		}
 
 		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
