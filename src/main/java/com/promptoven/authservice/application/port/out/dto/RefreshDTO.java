@@ -7,6 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 @Builder
-public record RefreshDTO(String accessToken, String nickname, String role) {
-
+public class RefreshDTO {
+	private String accessToken;
+	private String nickname;
+	private String role;
 }
