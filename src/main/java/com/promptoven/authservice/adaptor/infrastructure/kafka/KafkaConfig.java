@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-	@Value("${spring.kafka.bootstrap-servers}")
+	@Value("${spring.kafka.text-bootstrap-servers}")
 	private String bootstrapServers;
 	@Value("${spring.kafka.consumer.group-id}")
 	private String groupId;
