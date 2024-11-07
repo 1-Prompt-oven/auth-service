@@ -39,10 +39,15 @@ public class RedisConfig {
 	}
 
 	@Bean
-	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-		MessageListenerAdapter listenerAdapter) {
+	RedisMessageListenerContainer container(MessageListenerAdapter listenerAdapter) {
+		RedisConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
+
+		if (!redisTemplate().hasKey(firstSettlementRegisteredTopic)) {
+			redisTemplate().opsForValue().set(firstSettlementRegisteredTopic, "");
+		}
+
 		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
 		return container;
 	}
