@@ -40,7 +40,7 @@ jobs:
       - name: Docker build and push
         run: |
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/auth-service
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/auth-service .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/auth-service
 
       - name: docker-compose yaml update
