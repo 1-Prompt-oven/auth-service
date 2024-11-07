@@ -17,9 +17,9 @@ public class RefreshResponseVO {
 
 	public static RefreshResponseVO from(RefreshDTO refreshDTO) {
 		return RefreshResponseVO.builder()
-			.accessToken(refreshDTO.accessToken())
-			.nickname(refreshDTO.nickname())
-			.role(refreshDTO.role())
+			.accessToken(refreshDTO.getAccessToken())
+			.nickname(refreshDTO.getNickname())
+			.role(refreshDTO.getRole())
 			.build();
 	}
 }
