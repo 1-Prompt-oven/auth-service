@@ -7,9 +7,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -22,33 +19,40 @@ public class RedisConfig {
 	String firstSettlementRegisteredTopic;
 
 	@Bean
-	public RedisTemplate<String, String> redisTemplate() {
-		return createRedisTemplate(host, port);
+	public RedisConnectionFactory redisConnectionFactory() {
+		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
+		LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfig);
+		factory.afterPropertiesSet();
+		return factory;
 	}
 
-	protected RedisTemplate<String, String> createRedisTemplate(String host, int port) {
-		RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration(host, port);
-		RedisConnectionFactory connectionFactory = new LettuceConnectionFactory(redisConfiguration);
-
+	@Bean
+	public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new StringRedisSerializer());
-		template.setConnectionFactory(connectionFactory);
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(new StringRedisSerializer());
 		template.afterPropertiesSet();
 		return template;
 	}
-
-	@Bean
-	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-		MessageListenerAdapter listenerAdapter) {
-		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
-		return container;
-	}
-
-	@Bean
-	MessageListenerAdapter listenerAdapter(EventSubscriberByRedis subscriber) {
-		return new MessageListenerAdapter(subscriber, "onMessage");
-	}
+	//
+	// 	@Bean
+	// 	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
+	// 		MessageListenerAdapter listenerAdapter,
+	// 		RedisTemplate<String, String> redisTemplate) {
+	// 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+	// 		container.setConnectionFactory(connectionFactory);
+	// 		if (!Boolean.TRUE.equals(redisTemplate.hasKey(firstSettlementRegisteredTopic))) {
+	// 			redisTemplate.opsForValue().set(firstSettlementRegisteredTopic, "");
+	// 		}
+	// 		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
+	// 		return container;
+	// 	}
+	//
+	// 	@Bean
+	// 	MessageListenerAdapter listenerAdapter(EventSubscriberByRedis subscriber) {
+	// 		return new MessageListenerAdapter(subscriber, "onMessage");
+	// 	}
 }
