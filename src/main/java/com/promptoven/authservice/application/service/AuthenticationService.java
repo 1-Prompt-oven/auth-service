@@ -1,100 +1,117 @@
 package com.promptoven.authservice.application.service;
 
-import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
-import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
-import com.promptoven.authservice.application.port.out.call.MemberPersistence;
-import com.promptoven.authservice.application.port.out.call.RolePersistence;
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
-import com.promptoven.authservice.application.service.utility.JwtProvider;
-import com.promptoven.authservice.domain.Member;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
+import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
+import com.promptoven.authservice.application.port.out.call.EventPublisher;
+import com.promptoven.authservice.application.port.out.call.MemberPersistence;
+import com.promptoven.authservice.application.port.out.call.RolePersistence;
+import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.RefreshDTO;
+import com.promptoven.authservice.application.service.utility.JwtProvider;
+import com.promptoven.authservice.domain.Member;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService implements AuthenticationUseCase {
 
-    private final MemberPersistence memberPersistence;
-    private final RolePersistence rolePersistence;
+	private final MemberPersistence memberPersistence;
+	private final RolePersistence rolePersistence;
 
-    private final AuthTaskMemory authTaskMemory;
+	private final AuthTaskMemory authTaskMemory;
 
-    private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtProvider;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtProvider jwtProvider;
 
+	private final EventPublisher eventPublisher;
 
-    @Override
-    public boolean checkPW(String password, String memberUUID) {
+	@Value("${member-withdraw-event}")
+	private String memberWithdrawEvent;
 
-        Member member = memberPersistence.findByUuid(memberUUID);
+	@Override
+	public boolean checkPW(String password, String memberUUID) {
 
-        return passwordEncoder.matches(password, member.getPassword());
-    }
+		Member member = memberPersistence.findByUuid(memberUUID);
 
-    @Override
-    public void changePW(String newPassword, String memberUUID) {
+		return passwordEncoder.matches(password, member.getPassword());
+	}
 
-        Member member = memberPersistence.findByUuid(memberUUID);
+	@Override
+	public void changePW(String newPassword, String memberUUID) {
 
-        Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
+		Member member = memberPersistence.findByUuid(memberUUID);
 
-        memberPersistence.updatePassword(updatedMember);
-    }
+		Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
 
-    @Override
-    public LoginDTO login(String email, String password) {
+		memberPersistence.updatePassword(updatedMember);
+	}
 
-        Member member = memberPersistence.findByEmail(email);
+	@Override
+	public LoginDTO login(String email, String password) {
 
-        if (null != member && passwordEncoder.matches(password, member.getPassword())) {
+		Member member = memberPersistence.findByEmail(email);
 
-            String role = rolePersistence.findRoleById(member.getRole()).getName();
+		if (null != member && passwordEncoder.matches(password, member.getPassword())) {
 
-            String accessToken = jwtProvider.issueJwt(member.getUuid());
-            String refreshToken = jwtProvider.issueRefresh(accessToken);
+			String role = rolePersistence.findRoleById(member.getRole()).getName();
 
-            return LoginDTO.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .role(role)
-                    .uuid(member.getUuid())
-                    .nickname(member.getNickname())
-                    .build();
-        }
-        return null;
-    }
+			String accessToken = jwtProvider.issueJwt(member.getUuid());
+			String refreshToken = jwtProvider.issueRefresh(accessToken);
 
-    @Override
-    public void logout(String AccessToken, String RefreshToken) {
-        authTaskMemory.blockToken(AccessToken, jwtProvider.getTokenExpiration(AccessToken));
-        authTaskMemory.blockToken(RefreshToken, jwtProvider.getTokenExpiration(RefreshToken));
-    }
+			return LoginDTO.builder()
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.role(role)
+				.uuid(member.getUuid())
+				.nickname(member.getNickname())
+				.build();
+		}
+		return null;
+	}
 
-    @Override
-    public void resetPW(String email, String password) {
+	@Override
+	public void logout(String AccessToken, String RefreshToken) {
+		authTaskMemory.blockToken(AccessToken, jwtProvider.getTokenExpiration(AccessToken));
+		authTaskMemory.blockToken(RefreshToken, jwtProvider.getTokenExpiration(RefreshToken));
+	}
 
-        Member member = memberPersistence.findByEmail(email);
+	@Override
+	public void resetPW(String email, String password) {
 
-        memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
-    }
+		Member member = memberPersistence.findByEmail(email);
 
-    @Override
-    public void withdraw(String accessToken) {
+		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
+	}
 
-        memberPersistence.remove(Member.deleteMember(
-                memberPersistence.findByUuid(
-                jwtProvider.getClaimOfToken(accessToken, "subject")
-                )
-            )
-        );
-    }
+	@Override
+	public void withdraw(String accessToken) {
 
-    @Override
-    public String refresh(String refreshToken) {
-        return jwtProvider.refreshByToken(refreshToken);
-    }
+		String extractedMemberUUID = jwtProvider.getClaimOfToken(accessToken, "sub");
+		memberPersistence.remove(Member.deleteMember(
+				memberPersistence.findByUuid(extractedMemberUUID)
+			)
+		);
+		eventPublisher.publish(memberWithdrawEvent, extractedMemberUUID);
+	}
+
+	@Override
+	public RefreshDTO refresh(String refreshToken) {
+		String accessToken = jwtProvider.refreshByToken(refreshToken);
+		String memberUUID = jwtProvider.getClaimOfToken(accessToken, "sub");
+		Member member = memberPersistence.findByUuid(memberUUID);
+		String nickname = member.getNickname();
+		String role = rolePersistence.findRoleById(member.getRole()).getName();
+		return RefreshDTO.builder()
+			.accessToken(accessToken)
+			.nickname(nickname)
+			.role(role)
+			.build();
+	}
 }

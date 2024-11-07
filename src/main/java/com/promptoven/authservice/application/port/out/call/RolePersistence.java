@@ -15,4 +15,6 @@ public interface RolePersistence {
 	void deleteRoleById(int roleID);
 
 	void updateRole(Role role);
+
+	long count();
 }
