@@ -41,6 +41,7 @@ public class RedisConfig {
 	@Bean
 	RedisMessageListenerContainer container(MessageListenerAdapter listenerAdapter) {
 		RedisConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
+		((LettuceConnectionFactory)connectionFactory).afterPropertiesSet();
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
 
