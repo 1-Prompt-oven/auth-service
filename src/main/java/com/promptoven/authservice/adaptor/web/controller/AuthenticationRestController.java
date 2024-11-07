@@ -11,6 +11,7 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.CheckPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.LoginRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ResetPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.out.RefreshResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
 
@@ -57,8 +58,8 @@ public class AuthenticationRestController {
 	}
 
 	@GetMapping("/refresh")
-	public String tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
-		return authenticationUseCase.refresh(refreshToken);
+	public RefreshResponseVO tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
+		return RefreshResponseVO.from(authenticationUseCase.refresh(refreshToken));
 	}
 
 }
