@@ -22,14 +22,20 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
     consumer:
       group-id: auth-service
   config:
-    import: classpath:eventTopic.yaml
+    import:
+      - classpath:eventTopic.yaml
+      - "optional:configserver:http://localhost:8888"
+      - "optional:configserver:http://localhost:8888/eventTopic.yaml"
   cloud:
     config:
-      uri: http://config-server:8888
+      uri: http://localhost:8888
       fail-fast: false
 
 server:
@@ -75,6 +81,7 @@ logging:
 spring:
   config:
     import:
+      - classpath:eventTopic.yaml
       - "optional:configserver:http://config-server:8888"
       - "optional:configserver:http://config-server:8888/eventTopic.yaml"
     activate:
@@ -98,7 +105,10 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
     generate-ddl: true
   kafka:
-    bootstrap-servers: kafka-1:9092,kafka-2:9092,kafka-3:9092
+    bootstrap-servers:
+      - kafka-1:9092
+      - kafka-2:9092
+      - kafka-3:9092
     consumer:
       group-id: auth-service
   cloud:
