@@ -10,6 +10,7 @@ import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.RefreshDTO;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
 
@@ -92,7 +93,7 @@ public class AuthenticationService implements AuthenticationUseCase {
 	@Override
 	public void withdraw(String accessToken) {
 
-		String extractedMemberUUID = jwtProvider.getClaimOfToken(accessToken, "subject");
+		String extractedMemberUUID = jwtProvider.getClaimOfToken(accessToken, "sub");
 		memberPersistence.remove(Member.deleteMember(
 				memberPersistence.findByUuid(extractedMemberUUID)
 			)
@@ -101,7 +102,16 @@ public class AuthenticationService implements AuthenticationUseCase {
 	}
 
 	@Override
-	public String refresh(String refreshToken) {
-		return jwtProvider.refreshByToken(refreshToken);
+	public RefreshDTO refresh(String refreshToken) {
+		String accessToken = jwtProvider.refreshByToken(refreshToken);
+		String memberUUID = jwtProvider.getClaimOfToken(accessToken, "sub");
+		Member member = memberPersistence.findByUuid(memberUUID);
+		String nickname = member.getNickname();
+		String role = rolePersistence.findRoleById(member.getRole()).getName();
+		return RefreshDTO.builder()
+			.accessToken(accessToken)
+			.nickname(nickname)
+			.role(role)
+			.build();
 	}
 }
