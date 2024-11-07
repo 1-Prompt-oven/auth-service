@@ -62,11 +62,11 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private String makeMember(String email, String password, String nickname, int role) {
 		String uuid = UUID.randomUUID().toString();
 		String encodedPassword = passwordEncoder.encode(password);
-		Member member = Member.createMember
-			(uuid, email, encodedPassword, nickname, role);
 		while (memberPersistence.findByUuid(uuid) != null) {
 			uuid = UUID.randomUUID().toString();
 		}
+		Member member = Member.createMember
+			(uuid, email, encodedPassword, nickname, role);
 		memberPersistence.create(member);
 		return uuid;
 	}
