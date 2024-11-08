@@ -61,9 +61,9 @@ public class AuthenticationService implements AuthenticationUseCase {
 		if (null != member && passwordEncoder.matches(password, member.getPassword())) {
 
 			String role = rolePersistence.findRoleById(member.getRole()).getName();
-
-			String accessToken = jwtProvider.issueJwt(member.getUuid());
-			String refreshToken = jwtProvider.issueRefresh(accessToken);
+			String memberUUID = member.getUuid();
+			String accessToken = jwtProvider.issueJwt(memberUUID, role);
+			String refreshToken = jwtProvider.issueRefresh(memberUUID);
 
 			return LoginDTO.builder()
 				.accessToken(accessToken)
@@ -103,11 +103,11 @@ public class AuthenticationService implements AuthenticationUseCase {
 
 	@Override
 	public RefreshDTO refresh(String refreshToken) {
-		String accessToken = jwtProvider.refreshByToken(refreshToken);
-		String memberUUID = jwtProvider.getClaimOfToken(accessToken, "sub");
+		String memberUUID = jwtProvider.getClaimOfToken(refreshToken, "sub");
 		Member member = memberPersistence.findByUuid(memberUUID);
 		String nickname = member.getNickname();
 		String role = rolePersistence.findRoleById(member.getRole()).getName();
+		String accessToken = jwtProvider.issueJwt(memberUUID, role);
 		return RefreshDTO.builder()
 			.accessToken(accessToken)
 			.nickname(nickname)
