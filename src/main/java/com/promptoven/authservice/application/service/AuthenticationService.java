@@ -77,9 +77,16 @@ public class AuthenticationService implements AuthenticationUseCase {
 	}
 
 	@Override
-	public void logout(String AccessToken, String RefreshToken) {
-		authTaskMemory.blockToken(AccessToken, jwtProvider.getTokenExpiration(AccessToken));
-		authTaskMemory.blockToken(RefreshToken, jwtProvider.getTokenExpiration(RefreshToken));
+	public void logout(String accessToken, String refreshToken) {
+		JwtProvider.TokenInfo accessTokenInfo = jwtProvider.decryptTokenOnly(accessToken);
+		JwtProvider.TokenInfo refreshTokenInfo = jwtProvider.decryptTokenOnly(refreshToken);
+		
+		if (accessTokenInfo != null) {
+			authTaskMemory.blockToken(accessToken, accessTokenInfo.getExpirationTime());
+		}
+		if (refreshTokenInfo != null) {
+			authTaskMemory.blockToken(refreshToken, refreshTokenInfo.getExpirationTime());
+		}
 	}
 
 	@Override
@@ -92,22 +99,31 @@ public class AuthenticationService implements AuthenticationUseCase {
 
 	@Override
 	public void withdraw(String accessToken) {
+		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(accessToken);
+		if (tokenInfo == null) {
+			throw new RuntimeException("Invalid or expired token");
+		}
 
-		String extractedMemberUUID = jwtProvider.getClaimOfToken(accessToken, "sub");
+		String memberUUID = tokenInfo.getUserId();
 		memberPersistence.remove(Member.deleteMember(
-				memberPersistence.findByUuid(extractedMemberUUID)
-			)
-		);
-		eventPublisher.publish(memberWithdrawEvent, extractedMemberUUID);
+			memberPersistence.findByUuid(memberUUID)
+		));
+		eventPublisher.publish(memberWithdrawEvent, memberUUID);
 	}
 
 	@Override
 	public RefreshDTO refresh(String refreshToken) {
-		String memberUUID = jwtProvider.getClaimOfToken(refreshToken, "sub");
+		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(refreshToken);
+		if (tokenInfo == null) {
+			throw new RuntimeException("Invalid or expired refresh token");
+		}
+
+		String memberUUID = tokenInfo.getUserId();
 		Member member = memberPersistence.findByUuid(memberUUID);
 		String nickname = member.getNickname();
 		String role = rolePersistence.findRoleById(member.getRole()).getName();
 		String accessToken = jwtProvider.issueJwt(memberUUID, role);
+		
 		return RefreshDTO.builder()
 			.accessToken(accessToken)
 			.nickname(nickname)
