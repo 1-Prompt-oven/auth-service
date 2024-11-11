@@ -3,7 +3,9 @@ on:
   push:
     branches: [ "main" ]
 permissions:
-  contents: read
+  contents: write
+  id-token: write
+  security-events: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,6 +25,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10'
+          dependency-graph: generate-and-submit          
       ## gradle caching - 빌드 시간 향상
       - name: Gradle Caching
         uses: actions/cache@v4
