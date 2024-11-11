@@ -32,7 +32,7 @@ spring:
       - "optional:configserver:http://config-server:8888"
   data:
     redis:
-      host: 172.31.34.161
+      host: garnet
       port: 6379
   datasource:
     url: jdbc:mysql://mysql:3306/auth
