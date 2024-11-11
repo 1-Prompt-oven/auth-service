@@ -59,8 +59,8 @@ public class SocialLoginService implements SocialLoginUseCase {
 	private SocialLoginDTO createLoginResponse(String memberUUID) {
 		Member member = memberPersistence.findByUuid(memberUUID);
 		String role = rolePersistence.findRoleById(member.getRole()).getName();
-		String accessToken = jwtProvider.issueJwt(memberUUID);
-		String refreshToken = jwtProvider.issueRefresh(accessToken);
+		String accessToken = jwtProvider.issueJwt(memberUUID, role);
+		String refreshToken = jwtProvider.issueRefresh(memberUUID);
 
 		return SocialLoginDTO.builder()
 			.accessToken(accessToken)
@@ -80,7 +80,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 	@Override
 	@Transactional
 	public void OauthUnregister(String provider, String providerID, String memberUUID) {
-		
+
 		try {
 			oauthInfoPersistence.deleteOauthInfo(memberUUID, provider, providerID);
 		} catch (Exception e) {
