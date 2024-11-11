@@ -20,10 +20,22 @@ public class RedisConfig {
 
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
-		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
-		LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfig);
-		factory.afterPropertiesSet();
-		return factory;
+		log.info("Creating Redis connection factory for {}:{}", redisHost, redisPort);
+
+		RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration();
+		serverConfig.setHostName(redisHost);
+		serverConfig.setPort(redisPort);
+		serverConfig.setDatabase(0);
+
+		LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+			.clientOptions(ClientOptions.builder()
+				.protocolVersion(ProtocolVersion.RESP2)
+				.pingBeforeActivateConnection(true)
+				.build())
+			.commandTimeout(Duration.ofSeconds(5))
+			.build();
+
+		return new LettuceConnectionFactory(serverConfig, clientConfig);
 	}
 
 	@Bean
