@@ -10,6 +10,9 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import io.lettuce.core.ClientOptions;
@@ -54,22 +57,22 @@ public class RedisConfig {
 		template.afterPropertiesSet();
 		return template;
 	}
-	//
-	// 	@Bean
-	// 	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-	// 		MessageListenerAdapter listenerAdapter,
-	// 		RedisTemplate<String, String> redisTemplate) {
-	// 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-	// 		container.setConnectionFactory(connectionFactory);
-	// 		if (!Boolean.TRUE.equals(redisTemplate.hasKey(firstSettlementRegisteredTopic))) {
-	// 			redisTemplate.opsForValue().set(firstSettlementRegisteredTopic, "");
-	// 		}
-	// 		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
-	// 		return container;
-	// 	}
-	//
-	// 	@Bean
-	// 	MessageListenerAdapter listenerAdapter(EventSubscriberByRedis subscriber) {
-	// 		return new MessageListenerAdapter(subscriber, "onMessage");
-	// 	}
+
+	@Bean
+	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
+		MessageListenerAdapter listenerAdapter,
+		RedisTemplate<String, String> redisTemplate) {
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		container.setConnectionFactory(connectionFactory);
+		if (!Boolean.TRUE.equals(redisTemplate.hasKey(firstSettlementRegisteredTopic))) {
+			redisTemplate.opsForValue().set(firstSettlementRegisteredTopic, "");
+		}
+		container.addMessageListener(listenerAdapter, new ChannelTopic(firstSettlementRegisteredTopic));
+		return container;
+	}
+
+	@Bean
+	MessageListenerAdapter listenerAdapter(EventSubscriberByRedis subscriber) {
+		return new MessageListenerAdapter(subscriber, "onMessage");
+	}
 }

@@ -14,15 +14,10 @@ import lombok.RequiredArgsConstructor;
 public class EventPublisherByKafka implements EventPublisher {
 
 	private final KafkaTemplate<String, Object> kafkaTemplate;
-	private final KafkaTemplate<String, String> simpleKafkaTemplate;
 
 	@Override
 	public void publish(String topic, Object message) {
 		kafkaTemplate.send(topic, message);
 	}
 
-	@Override
-	public void publish(String topic, String message) {
-		simpleKafkaTemplate.send(topic, message);
-	}
 }
