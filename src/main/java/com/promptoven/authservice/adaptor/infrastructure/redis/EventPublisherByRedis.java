@@ -18,8 +18,4 @@ public class EventPublisherByRedis implements EventPublisher {
 		redisTemplate.opsForValue().set(topic, message.toString());
 	}
 
-	@Override
-	public void publish(String topic, String message) {
-		redisTemplate.opsForValue().set(topic, message);
-	}
 }
