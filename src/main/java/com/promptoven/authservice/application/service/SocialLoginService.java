@@ -1,9 +1,11 @@
 package com.promptoven.authservice.application.service;
 
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.promptoven.authservice.application.port.in.dto.OauthLoginRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.OauthRegisterRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.OauthUnregisterRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
@@ -28,15 +30,16 @@ public class SocialLoginService implements SocialLoginUseCase {
 	private final JwtProvider jwtProvider;
 
 	@Override
-	public SocialLoginDTO oauthLogin(String provider, String providerID, @Nullable String email) {
-
+	public SocialLoginDTO oauthLogin(OauthLoginRequestDTO oauthLoginRequestDTO) {
+		String provider = oauthLoginRequestDTO.getProvider();
+		String providerID = oauthLoginRequestDTO.getProviderId();
 		// Check if user already exists with this OAuth provider
 		String existingMemberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
 		boolean isExistingMember = null != existingMemberUUID;
 
 		// Handle email linking if provided
-		if (null != email) {
-			handleEmailLinking(email, provider, providerID);
+		if (null != oauthLoginRequestDTO.getEmail()) {
+			handleEmailLinking(oauthLoginRequestDTO.getEmail(), provider, providerID);
 		}
 		// Return login response if member exists
 		if (isExistingMember) {
@@ -72,17 +75,25 @@ public class SocialLoginService implements SocialLoginUseCase {
 	}
 
 	@Override
-	public void OauthRegister(String provider, String providerID, String memberUUID) {
-		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, memberUUID);
+	public void OauthRegister(OauthRegisterRequestDTO oauthRegisterRequestDTO) {
+		OauthInfo oauthInfo = OauthInfo.createOauthInfo(
+			oauthRegisterRequestDTO.getProvider(),
+			oauthRegisterRequestDTO.getProviderId(),
+			oauthRegisterRequestDTO.getMemberUUID());
+
 		oauthInfoPersistence.recordOauthInfo(oauthInfo);
 	}
 
 	@Override
 	@Transactional
-	public void OauthUnregister(String provider, String providerID, String memberUUID) {
+	public void OauthUnregister(OauthUnregisterRequestDTO oauthUnregisterRequestDTO) {
 
 		try {
-			oauthInfoPersistence.deleteOauthInfo(memberUUID, provider, providerID);
+			oauthInfoPersistence.deleteOauthInfo(
+				oauthUnregisterRequestDTO.getProvider(),
+				oauthUnregisterRequestDTO.getProviderId(),
+				oauthUnregisterRequestDTO.getMemberUUID()
+			);
 		} catch (Exception e) {
 			throw e;
 		}

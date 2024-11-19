@@ -5,11 +5,15 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.RegisterRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.RegisterSocialRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.VerifyEmailRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.VerifyNicknameRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
 
@@ -28,34 +32,47 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final EventPublisher eventPublisher;
 
 	@Override
-	public LoginDTO register(String email, String password, String nickname) {
+	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
+		String email = registerRequestDTO.getEmail();
+		String password = registerRequestDTO.getPassword();
+		String nickname = registerRequestDTO.getNickname();
 		String uuid = makeMember(email, password, nickname, 1);
 		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(email, password);
+		return authenticationService.login(new LoginRequestDTO(email, password));
 	}
 
 	@Override
-	public boolean verifyEmail(String email) {
-		return !memberPersistence.existsByEmail(email);
+	public boolean verifyEmail(VerifyEmailRequestDTO verifyEmailRequestDTO) {
+		return !memberPersistence.existsByEmail(verifyEmailRequestDTO.getEmail());
+	}
+
+	//todo: 닉네임 중복 체크 통과하면 5분 정도 점유를 할 수 있도록 구현 (Redis Cache 사용)
+	@Override
+	public boolean verifyNickname(VerifyNicknameRequestDTO verifyNicknameRequestDTO) {
+		return !memberPersistence.existsByNickname(verifyNicknameRequestDTO.getNickname());
 	}
 
 	@Override
-	public boolean verifyNickname(String nickname) {
-		return !memberPersistence.existsByNickname(nickname);
-	}
+	public LoginResponseDTO registerFromSocialLogin(RegisterSocialRequestDTO registerSocialRequestDTO) {
 
-	@Override
-	public LoginDTO registerFromSocialLogin(String email, String nickname, String password, String provider,
-		String providerID) {
+		String email = registerSocialRequestDTO.getEmail();
+		String password = registerSocialRequestDTO.getPassword();
+		String nickname = registerSocialRequestDTO.getNickname();
+		String provider = registerSocialRequestDTO.getProvider();
+		String providerID = registerSocialRequestDTO.getProviderId();
+
 		String uuid = makeMember(email, password, nickname, 1);
 		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
 		oauthInfoPersistence.recordOauthInfo(oauthInfo);
 		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(email, password);
+		return authenticationService.login(new LoginRequestDTO(email, password));
 	}
 
 	@Override
-	public void AdminRegister(String email, String password, String nickname) {
+	public void AdminRegister(RegisterRequestDTO registerRequestDTO) {
+		String email = registerRequestDTO.getEmail();
+		String password = registerRequestDTO.getPassword();
+		String nickname = registerRequestDTO.getNickname();
 		makeMember(email, password, nickname, 3);
 	}
 

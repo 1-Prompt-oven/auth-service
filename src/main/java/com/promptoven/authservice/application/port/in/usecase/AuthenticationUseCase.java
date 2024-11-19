@@ -1,19 +1,23 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.in.dto.ChangePWRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.CheckPWRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.ResetPWRequestDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 import com.promptoven.authservice.application.port.out.dto.RefreshDTO;
+import com.promptoven.authservice.application.service.LoginRequestDTO;
 
 public interface AuthenticationUseCase {
 
-	boolean checkPW(String password, String memberUUID);
+	boolean checkPW(CheckPWRequestDTO checkPWRequestDTO);
 
-	void changePW(String newPassword, String memberUUID);
+	void changePW(ChangePWRequestDTO changePWRequestDTO);
 
-	LoginDTO login(String email, String password);
+	LoginResponseDTO login(LoginRequestDTO loginRequestDTO);
 
 	void logout(String AccessToken, String RefreshToken);
 
-	void resetPW(String email, String password);
+	void resetPW(ResetPWRequestDTO resetPWRequestDTO);
 
 	void withdraw(String AccessToken);
 

@@ -1,6 +1,6 @@
 package com.promptoven.authservice.adaptor.web.controller.vo.out;
 
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +17,9 @@ public class LoginResponseVO {
 	private String role;
 	private String memberUUID;
 
-	public static LoginResponseVO from(LoginDTO loginDTO) {
-		return new LoginResponseVO(loginDTO.getAccessToken(), loginDTO.getRefreshToken(), loginDTO.getNickname(),
-			loginDTO.getRole(), loginDTO.getUuid());
+	public static LoginResponseVO from(LoginResponseDTO loginResponseDTO) {
+		return new LoginResponseVO(loginResponseDTO.getAccessToken(), loginResponseDTO.getRefreshToken(),
+			loginResponseDTO.getNickname(),
+			loginResponseDTO.getRole(), loginResponseDTO.getUuid());
 	}
 }

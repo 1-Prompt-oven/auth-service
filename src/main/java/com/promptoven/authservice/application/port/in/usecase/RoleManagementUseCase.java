@@ -1,12 +1,14 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-import org.springframework.lang.Nullable;
+import com.promptoven.authservice.application.port.in.dto.CreateRoleRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.DeleteRoleRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.UpdateRoleRequestDTO;
 
 public interface RoleManagementUseCase {
 
-    void createRole(String name, @Nullable String description);
+	void createRole(CreateRoleRequestDTO createRoleRequestDTO);
 
-    void deleteRole(int ID);
+	void deleteRole(DeleteRoleRequestDTO deleteRoleRequestDTO);
 
-    void updateRole(int ID, String name, String description);
+	void updateRole(UpdateRoleRequestDTO updateRoleRequestDTO);
 }

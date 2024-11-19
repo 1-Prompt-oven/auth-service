@@ -25,22 +25,18 @@ public class SocialLoginRestController {
 
 	@PostMapping("/oauth/login")
 	public SocialLoginResponseVO oauthLogin(@RequestBody OauthLoginRequestVO oauthLoginRequestVO) {
-		SocialLoginDTO socialLoginDTO = socialLoginUseCase.oauthLogin(
-			oauthLoginRequestVO.getProvider(), oauthLoginRequestVO.getProviderID(), oauthLoginRequestVO.getEmail());
+		SocialLoginDTO socialLoginDTO = socialLoginUseCase.oauthLogin(oauthLoginRequestVO.toDTO());
 		return SocialLoginResponseVO.from(socialLoginDTO);
-		// todo: 만약에 false 들어가있고 나머지가 들어가 null 이면 register-social 가야합니다. @Frontend Dev : 302 redirect
 	}
 
 	@PostMapping("/oauth/register")
 	public void oauthRegister(@RequestBody OauthRegisterRequestVO oauthRegisterRequestVO) {
-		socialLoginUseCase.OauthRegister(oauthRegisterRequestVO.getProvider(), oauthRegisterRequestVO.getProviderId(),
-			oauthRegisterRequestVO.getMemberUUID());
+		socialLoginUseCase.OauthRegister(oauthRegisterRequestVO.toDTO());
 	}
 
 	@PostMapping("/oauth/unregister")
 	public void oauthUnregister(@RequestBody OauthUnregisterRequestVO oauthUnregisterRequestVO) {
-		socialLoginUseCase.OauthUnregister(oauthUnregisterRequestVO.getProvider(),
-			oauthUnregisterRequestVO.getProviderId(), oauthUnregisterRequestVO.getMemberUUID());
+		socialLoginUseCase.OauthUnregister(oauthUnregisterRequestVO.toDTO());
 	}
 
 }
