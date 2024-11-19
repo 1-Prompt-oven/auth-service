@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class BanRequestDTO {
+public class BanRequestDTO implements MemberUUIDOnlyDTO {
     private final String memberUUID;
 
     @Builder
