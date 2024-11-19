@@ -2,6 +2,7 @@ package com.promptoven.authservice.adaptor.web.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,22 +39,19 @@ public class AuthenticationRestController {
 	@PostMapping("/logout")
 	public void logout(@RequestHeader(AuthHeader) String accessToken,
 		@RequestHeader(RefreshHeader) String refreshToken) {
-		authenticationUseCase.logout(accessToken.replace("Bearer ", ""), refreshToken.replace("Bearer ", ""));
+		authenticationUseCase.logout(accessToken, refreshToken);
 	}
 
-	@PostMapping("/withdraw")
-	public void withdraw(@RequestHeader(AuthHeader) String authorizationHeader) {
-		String accessToken = authorizationHeader.replace("Bearer ", "");
+	@PutMapping("/withdraw")
+	public void withdraw(@RequestHeader(AuthHeader) String accessToken) {
 		authenticationUseCase.withdraw(accessToken);
 	}
 
-	//todo: dto 사용으로 수정
 	@PostMapping("/resetPW")
 	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
 		authenticationUseCase.resetPW(resetPWRequestVO.toDTO());
 	}
 
-	//todo: dto 사용으로 수정
 	@PostMapping("/checkPW")
 	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
 		return authenticationUseCase.checkPW(checkPWRequestVO.toDTO());
@@ -61,7 +59,7 @@ public class AuthenticationRestController {
 
 	@GetMapping("/refresh")
 	public RefreshResponseVO tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
-		return RefreshResponseVO.from(authenticationUseCase.refresh(refreshToken.replace("Bearer ", "")));
+		return RefreshResponseVO.from(authenticationUseCase.refresh(refreshToken));
 	}
 
 }

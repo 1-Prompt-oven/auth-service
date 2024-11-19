@@ -82,8 +82,8 @@ public class AuthenticationService implements AuthenticationUseCase {
 
 	@Override
 	public void logout(String accessToken, String refreshToken) {
-		JwtProvider.TokenInfo accessTokenInfo = jwtProvider.decryptTokenOnly(accessToken);
-		JwtProvider.TokenInfo refreshTokenInfo = jwtProvider.decryptTokenOnly(refreshToken);
+		JwtProvider.TokenInfo accessTokenInfo = jwtProvider.decryptTokenOnly(accessToken.replace("Bearer ", ""));
+		JwtProvider.TokenInfo refreshTokenInfo = jwtProvider.decryptTokenOnly(refreshToken.replace("Bearer ", ""));
 
 		if (accessTokenInfo != null) {
 			authTaskMemory.blockToken(accessToken, accessTokenInfo.getExpirationTime());
@@ -104,7 +104,7 @@ public class AuthenticationService implements AuthenticationUseCase {
 
 	@Override
 	public void withdraw(String accessToken) {
-		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(accessToken);
+		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(accessToken.replace("Bearer ", ""));
 		if (tokenInfo == null) {
 			throw new RuntimeException("Invalid or expired token");
 		}
@@ -118,7 +118,7 @@ public class AuthenticationService implements AuthenticationUseCase {
 
 	@Override
 	public RefreshDTO refresh(String refreshToken) {
-		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(refreshToken);
+		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(refreshToken.replace("Bearer ", ""));
 		if (tokenInfo == null) {
 			throw new RuntimeException("Invalid or expired refresh token");
 		}

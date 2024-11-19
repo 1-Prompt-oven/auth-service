@@ -5,19 +5,27 @@ import lombok.Getter;
 
 @Getter
 public class RegisterSocialRequestDTO {
-    private final String email;
-    private final String password;
-    private final String nickname;
-    private final String provider;
-    private final String providerId;
+	private final String email;
+	private final String password;
+	private final String nickname;
+	private final String provider;
+	private final String providerId;
 
-    @Builder
-    public RegisterSocialRequestDTO(String email, String password, String nickname, 
-                                  String provider, String providerId) {
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.provider = provider;
-        this.providerId = providerId;
-    }
+	@Builder
+	public RegisterSocialRequestDTO(String email, String password, String nickname,
+		String provider, String providerId) {
+		this.email = email;
+		this.password = password;
+		this.nickname = nickname;
+		this.provider = provider;
+		this.providerId = providerId;
+	}
+
+	public RegisterRequestDTO toRegisterRequestDTO() {
+		return RegisterRequestDTO.builder()
+			.email(email)
+			.password(password)
+			.nickname(nickname)
+			.build();
+	}
 } 
