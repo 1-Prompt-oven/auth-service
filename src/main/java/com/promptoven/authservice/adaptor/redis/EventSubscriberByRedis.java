@@ -4,6 +4,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.PromoteToSellerRequestDTO;
 import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,6 @@ public class EventSubscriberByRedis implements MessageListener {
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		String memberUuid = new String(message.getBody());
-		memberManagementProxy.promoteToSeller(memberUuid);
+		memberManagementProxy.promoteToSeller(PromoteToSellerRequestDTO.builder().memberUUID(memberUuid).build());
 	}
 }

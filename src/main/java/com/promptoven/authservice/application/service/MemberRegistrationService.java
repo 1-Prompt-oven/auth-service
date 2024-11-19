@@ -33,12 +33,12 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 	@Override
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
-		String email = registerRequestDTO.getEmail();
-		String password = registerRequestDTO.getPassword();
-		String nickname = registerRequestDTO.getNickname();
-		String uuid = makeMember(email, password, nickname, 1);
+		String uuid = makeMember(registerRequestDTO, 1);
 		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(new LoginRequestDTO(email, password));
+		return authenticationService.login(LoginRequestDTO.builder()
+			.email(registerRequestDTO.getEmail())
+			.password(registerRequestDTO.getPassword())
+			.build());
 	}
 
 	@Override
@@ -57,11 +57,11 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 		String email = registerSocialRequestDTO.getEmail();
 		String password = registerSocialRequestDTO.getPassword();
-		String nickname = registerSocialRequestDTO.getNickname();
+		
 		String provider = registerSocialRequestDTO.getProvider();
 		String providerID = registerSocialRequestDTO.getProviderId();
 
-		String uuid = makeMember(email, password, nickname, 1);
+		String uuid = makeMember(registerSocialRequestDTO.toRegisterRequestDTO(), 1);
 		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
 		oauthInfoPersistence.recordOauthInfo(oauthInfo);
 		eventPublisher.publish("member-registered", uuid);
@@ -70,13 +70,15 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 	@Override
 	public void AdminRegister(RegisterRequestDTO registerRequestDTO) {
+		makeMember(registerRequestDTO, 3);
+	}
+
+	private String makeMember(RegisterRequestDTO registerRequestDTO, int role) {
+
 		String email = registerRequestDTO.getEmail();
 		String password = registerRequestDTO.getPassword();
 		String nickname = registerRequestDTO.getNickname();
-		makeMember(email, password, nickname, 3);
-	}
 
-	private String makeMember(String email, String password, String nickname, int role) {
 		String uuid = UUID.randomUUID().toString();
 		String encodedPassword = passwordEncoder.encode(password);
 		while (memberPersistence.findByUuid(uuid) != null) {

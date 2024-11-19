@@ -15,6 +15,6 @@ public class LoginRequestVO {
 	private String password;
 
 	public LoginRequestDTO toDTO() {
-		return new LoginRequestDTO.builder().email(email).password(password).build();
+		return LoginRequestDTO.builder().email(email).password(password).build();
 	}
 }
