@@ -22,14 +22,12 @@ public class MediaAuthRestController {
 
 	@PostMapping("/email/request")
 	public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
-		log.info("email request: {}", emailRequestRequestVO);
-		mediaAuthUseCase.requestEmail(emailRequestRequestVO.getEmail());
+		mediaAuthUseCase.requestEmail(emailRequestRequestVO.toDTO());
 	}
 
 	@PostMapping("/email/check")
 	public boolean emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
-		log.info("email check: {}", emailCheckRequestVO);
-		return mediaAuthUseCase.checkMedia(emailCheckRequestVO.getEmail(), emailCheckRequestVO.getCode());
+		return mediaAuthUseCase.checkMedia(emailCheckRequestVO.toDTO());
 	}
 
 }

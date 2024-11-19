@@ -1,5 +1,7 @@
 package com.promptoven.authservice.adaptor.web.controller.vo.in;
 
+import com.promptoven.authservice.application.service.LoginRequestDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,4 +13,8 @@ public class LoginRequestVO {
 
 	private String email;
 	private String password;
+
+	public LoginRequestDTO toDTO() {
+		return new LoginRequestDTO.builder().email(email).password(password).build();
+	}
 }

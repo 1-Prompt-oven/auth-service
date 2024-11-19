@@ -3,6 +3,8 @@ package com.promptoven.authservice.application.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.SetMemberRoleRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.UpdateNicknameRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
@@ -36,8 +38,8 @@ public class MemberManagementService implements MemberManagementUseCase {
 	}
 
 	@Override
-	public void setMemberRole(Member member, String roleName) {
-		Role role = rolePersistence.findByName(roleName);
+	public void setMemberRole(Member member, SetMemberRoleRequestDTO setMemberRoleRequestDTO) {
+		Role role = rolePersistence.findByName(setMemberRoleRequestDTO.getRoleName());
 		memberPersistence.updateMember(Member.updateMemberRole(member, role.getId()));
 	}
 
@@ -54,7 +56,8 @@ public class MemberManagementService implements MemberManagementUseCase {
 	}
 
 	@Override
-	public void updateNickname(Member member, String nickname) {
+	public void updateNickname(Member member, UpdateNicknameRequestDTO updateNicknameRequestDTO) {
+		String nickname = updateNicknameRequestDTO.getNickname();
 		memberPersistence.updateMember(Member.updateMemberNickname(member, nickname));
 		eventPublisher.publish(
 			memberNicknameUpdatedTopic,

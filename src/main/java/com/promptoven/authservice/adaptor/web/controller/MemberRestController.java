@@ -25,12 +25,11 @@ public class MemberRestController {
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		memberManagementProxy.updateNickname(updateNicknameRequestVO.getMemberUUID(),
-			updateNicknameRequestVO.getNickname());
+		memberManagementProxy.updateNickname(updateNicknameRequestVO.toDTO());
 	}
 
 	@PostMapping("/changePW")
 	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		authenticationUseCase.changePW(changePWRequestVO.getNewPassword(), changePWRequestVO.getMemberUUID());
+		authenticationUseCase.changePW(changePWRequestVO.toDTO());
 	}
 }

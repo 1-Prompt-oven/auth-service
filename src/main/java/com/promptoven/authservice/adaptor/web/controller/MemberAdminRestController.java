@@ -35,55 +35,47 @@ public class MemberAdminRestController {
 
 	@PostMapping("/admin-register")
 	public void adminRegister(@RequestBody RegisterRequestVO registerRequestVO) {
-		memberRegistrationUseCase.AdminRegister(registerRequestVO.getEmail(), registerRequestVO.getPassword(),
-			registerRequestVO.getNickname());
+		memberRegistrationUseCase.AdminRegister(registerRequestVO.toDTO());
 	}
 
 	@PutMapping("/ban")
 	public void banMember(@RequestBody BanRequestVO banRequestVO) {
-		memberManagementProxy.banMember(banRequestVO.getMemberUUID());
+		memberManagementProxy.banMember(banRequestVO.toDTO());
 	}
 
 	@PutMapping("/unban")
 	public void unbanMember(@RequestBody UnbanRequestVO unbanRequestVO) {
-		memberManagementProxy.unbanMember(unbanRequestVO.getMemberUUID());
+		memberManagementProxy.unbanMember(unbanRequestVO.toDTO());
 	}
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		memberManagementProxy.updateNickname(
-			updateNicknameRequestVO.getMemberUUID(),
-			updateNicknameRequestVO.getNickname()
-		);
+		 memberManagementProxy.updateNickname(updateNicknameRequestVO.toDTO());
 	}
 
 	@PutMapping("/member-role")
 	public void updateMemberRole(@RequestBody SetMemberRoleRequestVO setMemberRoleRequestVO) {
-		memberManagementProxy.setMemberRole(
-			setMemberRoleRequestVO.getMemberNickname(),
-			setMemberRoleRequestVO.getRoleName()
-		);
+		memberManagementProxy.setMemberRole(setMemberRoleRequestVO.toDTO());
 	}
 
 	@PutMapping("/clearPW")
 	public void clearPassword(@RequestBody ClearPasswordRequestVO clearPasswordRequestVO) {
-		memberManagementProxy.clearPassword(clearPasswordRequestVO.getMemberUUID());
+		 memberManagementProxy.clearPassword(clearPasswordRequestVO.toDTO());
 	}
 
 	@PostMapping("/role")
 	public void createRole(@RequestBody CreateRoleRequestVO createRoleRequestVO) {
-		roleManagementUseCase.createRole(createRoleRequestVO.getName(), createRoleRequestVO.getDescription());
+		roleManagementUseCase.createRole(createRoleRequestVO.toDTO());
 	}
 
 	@PutMapping("/role")
 	public void updateRole(@RequestBody UpdateRoleRequestVO updateRoleRequestVO) {
-		roleManagementUseCase.updateRole(updateRoleRequestVO.getId(), updateRoleRequestVO.getName(),
-			updateRoleRequestVO.getDescription());
+		roleManagementUseCase.updateRole(updateRoleRequestVO.toDTO());
 	}
 
 	@DeleteMapping("/role")
 	public void deleteRole(@RequestBody DeleteRoleRequestVO deleteRoleRequestVO) {
-		roleManagementUseCase.deleteRole(deleteRoleRequestVO.getRoleID());
+		roleManagementUseCase.deleteRole(deleteRoleRequestVO.toDTO());
 	}
 
 }

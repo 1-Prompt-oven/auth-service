@@ -11,7 +11,7 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyEmailReques
 import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyNicknameRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,33 +26,23 @@ public class MemberRegisterRestController {
 
 	@PostMapping("/register")
 	public LoginResponseVO register(@RequestBody RegisterRequestVO registerRequestVO) {
-		LoginDTO loginDTO = memberRegistrationUseCase.register(registerRequestVO.getEmail(),
-			registerRequestVO.getPassword(),
-			registerRequestVO.getNickname());
-		return LoginResponseVO.from(loginDTO);
+		LoginResponseDTO loginResponseDTO = memberRegistrationUseCase.register(registerRequestVO.toDTO());
+		return LoginResponseVO.from(loginResponseDTO);
 	}
 
 	@PostMapping("/verify/email")
 	public boolean verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
-		return memberRegistrationUseCase.verifyEmail(verifyEmailRequestVO.getEmail());
+		return memberRegistrationUseCase.verifyEmail(verifyEmailRequestVO.toDTO());
 	}
 
 	@PostMapping("/verify/nickname")
 	public boolean verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
-		return memberRegistrationUseCase.verifyNickname(verifyNicknameRequestVO.getNickname());
+		return memberRegistrationUseCase.verifyNickname(verifyNicknameRequestVO.toDTO());
 	}
 
 	@PostMapping("/register-social")
 	public LoginResponseVO registerSocial(@RequestBody RegisterSocialRequestVO registerSocialRequestVO) {
-		return LoginResponseVO.from(memberRegistrationUseCase.registerFromSocialLogin(
-				registerSocialRequestVO.getEmail(),
-				registerSocialRequestVO.getNickname(),
-				registerSocialRequestVO.getPassword(),
-				registerSocialRequestVO.getProvider(),
-				registerSocialRequestVO.getProviderId()
-			)
-		);
-
+		return LoginResponseVO.from(memberRegistrationUseCase.registerFromSocialLogin(registerSocialRequestVO.toDTO()));
 	}
 
 }

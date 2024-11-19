@@ -6,6 +6,8 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.EmailCheckRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.EmailRequestRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MediaAuthUseCase;
 import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
 import com.promptoven.authservice.application.port.out.call.MailSending;
@@ -24,7 +26,9 @@ public class MediaAuthService implements MediaAuthUseCase {
 	private long AUTH_CHALLENGE_EXPIRE_TIME;
 
 	@Override
-	public boolean checkMedia(String email, String code) {
+	public boolean checkMedia(EmailCheckRequestDTO emailCheckRequestDTO) {
+		String email = emailCheckRequestDTO.getEmail();
+		String code = emailCheckRequestDTO.getCode();
 		if (authTaskMemory.getAuthChallenge(email).equals(code)) {
 			saveSuccessAuthChallenge(email);
 			return true;
@@ -46,9 +50,10 @@ public class MediaAuthService implements MediaAuthUseCase {
 	}
 
 	@Override
-	public void requestEmail(String email) {
+	public void requestEmail(EmailRequestRequestDTO emailRequestRequestDTO) {
 		Date expires = makeExpire();
 		String code = makeRandomCode();
+		String email = emailRequestRequestDTO.getEmail();
 		mailSending.sendMail(email, "Email Verification Code", "Your verification code is " + code);
 		authTaskMemory.recordAuthChallenge(email, code, expires);
 	}

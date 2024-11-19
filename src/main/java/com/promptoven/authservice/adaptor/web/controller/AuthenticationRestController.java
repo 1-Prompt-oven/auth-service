@@ -13,7 +13,7 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.ResetPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.RefreshResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,20 +25,20 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationRestController {
 
 	final String AuthHeader = "Authorization";
-	final String RefreshHeader = "RefreshToken";
+	final String RefreshHeader = "Refreshtoken";
 
 	private final AuthenticationUseCase authenticationUseCase;
 
 	@PostMapping("/login")
 	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
-		LoginDTO loginDTO = authenticationUseCase.login(loginRequestVO.getEmail(), loginRequestVO.getPassword());
-		return LoginResponseVO.from(loginDTO);
+		LoginResponseDTO loginResponseDTO = authenticationUseCase.login(loginRequestVO.toDTO());
+		return LoginResponseVO.from(loginResponseDTO);
 	}
 
 	@PostMapping("/logout")
 	public void logout(@RequestHeader(AuthHeader) String accessToken,
-		@RequestHeader("RefreshToken") String refreshToken) {
-		authenticationUseCase.logout(accessToken, refreshToken);
+		@RequestHeader(RefreshHeader) String refreshToken) {
+		authenticationUseCase.logout(accessToken.replace("Bearer ", ""), refreshToken.replace("Bearer ", ""));
 	}
 
 	@PostMapping("/withdraw")
@@ -47,19 +47,21 @@ public class AuthenticationRestController {
 		authenticationUseCase.withdraw(accessToken);
 	}
 
+	//todo: dto 사용으로 수정
 	@PostMapping("/resetPW")
 	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
-		authenticationUseCase.resetPW(resetPWRequestVO.getEmail(), resetPWRequestVO.getPassword());
+		authenticationUseCase.resetPW(resetPWRequestVO.toDTO());
 	}
 
+	//todo: dto 사용으로 수정
 	@PostMapping("/checkPW")
 	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
-		return authenticationUseCase.checkPW(checkPWRequestVO.getPassword(), checkPWRequestVO.getMemberUUID());
+		return authenticationUseCase.checkPW(checkPWRequestVO.toDTO());
 	}
 
 	@GetMapping("/refresh")
 	public RefreshResponseVO tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
-		return RefreshResponseVO.from(authenticationUseCase.refresh(refreshToken));
+		return RefreshResponseVO.from(authenticationUseCase.refresh(refreshToken.replace("Bearer ", "")));
 	}
 
 }
