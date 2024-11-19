@@ -1,11 +1,14 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
+import com.promptoven.authservice.application.port.in.dto.EmailCheckRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.EmailRequestRequestDTO;
+
 public interface MediaAuthUseCase {
 
-    boolean checkMedia(String email, String code);
+	boolean checkMedia(EmailCheckRequestDTO emailCheckRequestDTO);
 
-    void requestEmail(String email);
+	void requestEmail(EmailRequestRequestDTO emailRequestRequestDTO);
 
-    void requestPhone(String phone);
+	void requestPhone(String phone);
 
 }

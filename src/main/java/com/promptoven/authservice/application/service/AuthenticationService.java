@@ -4,12 +4,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.ChangePWRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.CheckPWRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.ResetPWRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
 import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 import com.promptoven.authservice.application.port.out.dto.RefreshDTO;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
@@ -36,36 +39,37 @@ public class AuthenticationService implements AuthenticationUseCase {
 	private String memberWithdrawEvent;
 
 	@Override
-	public boolean checkPW(String password, String memberUUID) {
+	public boolean checkPW(CheckPWRequestDTO checkPWRequestDTO) {
 
-		Member member = memberPersistence.findByUuid(memberUUID);
+		Member member = memberPersistence.findByUuid(checkPWRequestDTO.getMemberUUID());
 
-		return passwordEncoder.matches(password, member.getPassword());
+		return passwordEncoder.matches(checkPWRequestDTO.getPassword(), member.getPassword());
 	}
 
 	@Override
-	public void changePW(String newPassword, String memberUUID) {
+	public void changePW(ChangePWRequestDTO changePWRequestDTO) {
 
-		Member member = memberPersistence.findByUuid(memberUUID);
-
+		Member member = memberPersistence.findByUuid(changePWRequestDTO.getMemberUUID());
+		String newPassword = changePWRequestDTO.getNewPassword();
 		Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
 
 		memberPersistence.updatePassword(updatedMember);
 	}
 
+	// 정책적인 이유로 login method는 DTO가 아니라 email과 PW 등을 string으로 바로 받아야 회원가입 method에서 여기 부르기 편함
 	@Override
-	public LoginDTO login(String email, String password) {
+	public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 
-		Member member = memberPersistence.findByEmail(email);
+		Member member = memberPersistence.findByEmail(loginRequestDTO.getEmail());
 
-		if (null != member && passwordEncoder.matches(password, member.getPassword())) {
+		if (null != member && passwordEncoder.matches(loginRequestDTO.getPassword(), member.getPassword())) {
 
 			String role = rolePersistence.findRoleById(member.getRole()).getName();
 			String memberUUID = member.getUuid();
 			String accessToken = jwtProvider.issueJwt(memberUUID, role);
 			String refreshToken = jwtProvider.issueRefresh(memberUUID);
 
-			return LoginDTO.builder()
+			return LoginResponseDTO.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.role(role)
@@ -80,7 +84,7 @@ public class AuthenticationService implements AuthenticationUseCase {
 	public void logout(String accessToken, String refreshToken) {
 		JwtProvider.TokenInfo accessTokenInfo = jwtProvider.decryptTokenOnly(accessToken);
 		JwtProvider.TokenInfo refreshTokenInfo = jwtProvider.decryptTokenOnly(refreshToken);
-		
+
 		if (accessTokenInfo != null) {
 			authTaskMemory.blockToken(accessToken, accessTokenInfo.getExpirationTime());
 		}
@@ -90,11 +94,12 @@ public class AuthenticationService implements AuthenticationUseCase {
 	}
 
 	@Override
-	public void resetPW(String email, String password) {
+	public void resetPW(ResetPWRequestDTO resetPWRequestDTO) {
 
-		Member member = memberPersistence.findByEmail(email);
+		Member member = memberPersistence.findByEmail(resetPWRequestDTO.getEmail());
 
-		memberPersistence.updatePassword(Member.updateMemberPassword(member, passwordEncoder.encode(password)));
+		memberPersistence.updatePassword(
+			Member.updateMemberPassword(member, passwordEncoder.encode(resetPWRequestDTO.getPassword())));
 	}
 
 	@Override
@@ -123,7 +128,7 @@ public class AuthenticationService implements AuthenticationUseCase {
 		String nickname = member.getNickname();
 		String role = rolePersistence.findRoleById(member.getRole()).getName();
 		String accessToken = jwtProvider.issueJwt(memberUUID, role);
-		
+
 		return RefreshDTO.builder()
 			.accessToken(accessToken)
 			.nickname(nickname)

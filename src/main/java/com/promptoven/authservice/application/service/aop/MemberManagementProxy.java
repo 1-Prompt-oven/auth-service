@@ -2,6 +2,12 @@ package com.promptoven.authservice.application.service.aop;
 
 import org.springframework.stereotype.Component;
 
+import com.promptoven.authservice.application.port.in.dto.BanRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.ClearPasswordRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.PromoteToSellerRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SetMemberRoleRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.UnbanRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.UpdateNicknameRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 
 import lombok.RequiredArgsConstructor;
@@ -17,27 +23,27 @@ public class MemberManagementProxy {
 	}
 
 	@FindMemberOperation
-	public void banMember(String memberUUID) {
+	public void banMember(BanRequestDTO dto) {
 		// Method body not needed as aspect will handle the service call
 	}
 
 	@FindMemberOperation
-	public void unbanMember(String memberUUID) {
+	public void unbanMember(UnbanRequestDTO dto) {
 	}
 
 	@FindMemberOperation
-	public void updateNickname(String memberUUID, String nickname) {
+	public void updateNickname(UpdateNicknameRequestDTO dto) {
 	}
 
 	@FindMemberOperation
-	public void setMemberRole(String memberUUID, String roleName) {
+	public void setMemberRole(SetMemberRoleRequestDTO dto) {
 	}
 
 	@FindMemberOperation
-	public void clearPassword(String memberUUID) {
+	public void clearPassword(ClearPasswordRequestDTO dto) {
 	}
 
 	@FindMemberOperation
-	public void promoteToSeller(String memberUuid) {
+	public void promoteToSeller(PromoteToSellerRequestDTO dto) {
 	}
 } 
