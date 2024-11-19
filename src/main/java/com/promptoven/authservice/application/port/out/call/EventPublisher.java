@@ -4,5 +4,4 @@ public interface EventPublisher {
 
 	void publish(String topic, Object message);
 
-	void publish(String topic, String message);
 }
