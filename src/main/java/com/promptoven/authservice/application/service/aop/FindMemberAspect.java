@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
+import com.promptoven.authservice.application.port.in.dto.MemberUUIDOnlyDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.domain.Member;
@@ -30,7 +31,7 @@ public class FindMemberAspect {
 		// Get the DTO from arguments
 		Object[] args = joinPoint.getArgs();
 		Object dto = args[0];
-		
+
 		// Extract memberUUID from DTO using reflection
 		Method getUuidMethod = dto.getClass().getMethod("getMemberUUID");
 		String memberUUID = (String)getUuidMethod.invoke(dto);
@@ -45,7 +46,13 @@ public class FindMemberAspect {
 		MemberManagementProxy proxy = (MemberManagementProxy)joinPoint.getTarget();
 		MemberManagementUseCase service = proxy.getMemberManagementUseCase();
 
-		// Invoke the service method with member and DTO
+		// If DTO only contains memberUUID, invoke service method with just Member
+		if (dto instanceof MemberUUIDOnlyDTO) {
+			Method serviceMethod = service.getClass().getMethod(methodName, Member.class);
+			return serviceMethod.invoke(service, member);
+		}
+
+		// Otherwise invoke with both Member and DTO
 		Method serviceMethod = service.getClass().getMethod(methodName, Member.class, dto.getClass());
 		return serviceMethod.invoke(service, member, dto);
 	}

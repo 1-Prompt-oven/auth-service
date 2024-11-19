@@ -4,11 +4,11 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class UnbanRequestDTO {
-    private final String memberUUID;
+public class UnbanRequestDTO implements MemberUUIDOnlyDTO {
+	private final String memberUUID;
 
-    @Builder
-    public UnbanRequestDTO(String memberUUID) {
-        this.memberUUID = memberUUID;
-    }
-} 
+	@Builder
+	public UnbanRequestDTO(String memberUUID) {
+		this.memberUUID = memberUUID;
+	}
+}

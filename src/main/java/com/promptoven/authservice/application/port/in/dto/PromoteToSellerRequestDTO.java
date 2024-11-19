@@ -4,11 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class PromoteToSellerRequestDTO {
-    private final String memberUUID;
+public class PromoteToSellerRequestDTO implements MemberUUIDOnlyDTO {
 
-    @Builder
-    public PromoteToSellerRequestDTO(String memberUUID) {
-        this.memberUUID = memberUUID;
-    }
+	private final String memberUUID;
+
+	@Builder
+	public PromoteToSellerRequestDTO(String memberUUID) {
+		this.memberUUID = memberUUID;
+	}
 }
