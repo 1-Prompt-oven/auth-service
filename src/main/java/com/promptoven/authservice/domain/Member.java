@@ -2,6 +2,8 @@ package com.promptoven.authservice.domain;
 
 import java.time.LocalDateTime;
 
+import com.promptoven.authservice.domain.dto.MemberModelDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,17 +25,16 @@ public class Member {
 
 	private int role;
 
-	public static Member createMember(
-		String uuid, String email, String password, String nickname, int role) {
+	public static Member createMember(MemberModelDTO memberModelDTO) {
 		return Member.builder()
-			.uuid(uuid)
-			.email(email)
-			.password(password)
-			.nickname(nickname)
+			.uuid(memberModelDTO.getUuid())
+			.email(memberModelDTO.getEmail())
+			.password(memberModelDTO.getPassword())
+			.nickname(memberModelDTO.getNickname())
 			.createdAt(LocalDateTime.now())
 			.isDeleted(false)
 			.isBanned(false)
-			.role(role)
+			.role(memberModelDTO.getRole())
 			.build();
 	}
 
@@ -114,5 +115,5 @@ public class Member {
 			.role(member.getRole())
 			.build();
 	}
-	
+
 }
