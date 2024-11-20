@@ -1,5 +1,7 @@
 package com.promptoven.authservice.domain;
 
+import com.promptoven.authservice.domain.dto.OauthInfoModelDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,12 +15,11 @@ public class OauthInfo {
 	private String providerID;
 	private String memberUUID;
 
-	public static OauthInfo createOauthInfo(
-		String provider, String providerID, String memberUUID) {
+	public static OauthInfo createOauthInfo(OauthInfoModelDTO oauthInfoModelDTO) {
 		return OauthInfo.builder()
-			.provider(provider)
-			.providerID(providerID)
-			.memberUUID(memberUUID)
+			.provider(oauthInfoModelDTO.getProvider())
+			.providerID(oauthInfoModelDTO.getProviderID())
+			.memberUUID(oauthInfoModelDTO.getMemberUUID())
 			.build();
 	}
 }

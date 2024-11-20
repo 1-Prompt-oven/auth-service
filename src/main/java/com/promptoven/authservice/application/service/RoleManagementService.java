@@ -9,6 +9,7 @@ import com.promptoven.authservice.application.port.in.usecase.RoleManagementUseC
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
 import com.promptoven.authservice.domain.Role;
+import com.promptoven.authservice.domain.dto.RoleModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,12 @@ public class RoleManagementService implements RoleManagementUseCase {
 	@Override
 	public void createRole(CreateRoleRequestDTO createRoleRequestDTO) {
 		int newRoleID = 1 + rolePersistence.findMaxRoleID();
-		Role role = Role.createRole(createRoleRequestDTO.getName(), newRoleID, createRoleRequestDTO.getDescription());
+		RoleModelDTO roleModelDTO = RoleModelDTO.builder()
+			.id(newRoleID)
+			.name(createRoleRequestDTO.getName())
+			.description(createRoleRequestDTO.getDescription())
+			.build();
+		Role role = Role.createRole(roleModelDTO);
 		rolePersistence.create(roleDomainDTOMapper.toDTO(role));
 	}
 
@@ -36,7 +42,12 @@ public class RoleManagementService implements RoleManagementUseCase {
 	@Override
 	public void updateRole(UpdateRoleRequestDTO updateRoleRequestDTO) {
 		Role role = roleDomainDTOMapper.toDomain(rolePersistence.findRoleById(updateRoleRequestDTO.getId()));
+		RoleModelDTO roleModelDTO = RoleModelDTO.builder()
+			.id(updateRoleRequestDTO.getId())
+			.name(updateRoleRequestDTO.getName())
+			.description(updateRoleRequestDTO.getDescription())
+			.build();
 		rolePersistence.updateRole(roleDomainDTOMapper.toDTO(
-			Role.updateRole(role, updateRoleRequestDTO.getName(), updateRoleRequestDTO.getDescription())));
+			Role.updateRole(role, roleModelDTO)));
 	}
 }
