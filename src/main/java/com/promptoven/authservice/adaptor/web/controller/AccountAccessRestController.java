@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/auth")
-public class AuthenticationRestController {
+public class AccountAccessRestController {
 
 	final String AuthHeader = "Authorization";
 	final String RefreshHeader = "Refreshtoken";
