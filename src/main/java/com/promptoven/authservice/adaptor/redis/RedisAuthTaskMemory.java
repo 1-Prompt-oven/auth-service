@@ -1,7 +1,6 @@
 package com.promptoven.authservice.adaptor.redis;
 
 import java.util.Date;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -49,7 +48,8 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 
 	@Override
 	public boolean isAuthChallengeSuccess(String media) {
-		return Boolean.TRUE.equals(Objects.requireNonNull(redisTemplate.opsForValue().get(media)).equals("Success"));
+		String value = redisTemplate.opsForValue().get(media);
+		return "Success".equals(value);
 	}
 
 	@Override
