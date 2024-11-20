@@ -20,6 +20,8 @@ import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTO
 import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.domain.dto.MemberModelDTO;
+import com.promptoven.authservice.domain.dto.OauthInfoModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,8 +70,13 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 		String providerID = registerSocialRequestDTO.getProviderId();
 
 		String uuid = makeMember(registerSocialRequestDTO.toRegisterRequestDTO(), 1);
+		OauthInfoModelDTO oauthInfoModelDTO = OauthInfoModelDTO.builder()
+			.memberUUID(uuid)
+			.provider(provider)
+			.providerID(providerID)
+			.build();
 		OauthInfoDTO oauthInfoDTO = oauthInfoDomainDTOMapper.toDTO(
-			OauthInfo.createOauthInfo(provider, providerID, uuid));
+			OauthInfo.createOauthInfo(oauthInfoModelDTO));
 		oauthInfoPersistence.recordOauthInfo(oauthInfoDTO);
 		eventPublisher.publish("member-registered", uuid);
 		return authenticationService.login(new LoginRequestDTO(email, password));
@@ -81,18 +88,20 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	}
 
 	private String makeMember(RegisterRequestDTO registerRequestDTO, int role) {
-
-		String email = registerRequestDTO.getEmail();
-		String password = registerRequestDTO.getPassword();
-		String nickname = registerRequestDTO.getNickname();
-
+		
 		String uuid = UUID.randomUUID().toString();
-		String encodedPassword = passwordEncoder.encode(password);
+		String encodedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 		while (memberPersistence.findByUuid(uuid) != null) {
 			uuid = UUID.randomUUID().toString();
 		}
-		Member member = Member.createMember
-			(uuid, email, encodedPassword, nickname, role);
+		MemberModelDTO memberModelDTO = MemberModelDTO.builder()
+			.uuid(uuid)
+			.email(registerRequestDTO.getEmail())
+			.password(encodedPassword)
+			.nickname(registerRequestDTO.getNickname())
+			.role(role)
+			.build();
+		Member member = Member.createMember(memberModelDTO);
 		memberPersistence.create(memberDomainDTOMapper.toDTO(member));
 		return uuid;
 	}

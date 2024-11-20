@@ -20,6 +20,7 @@ import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomain
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.domain.dto.OauthInfoModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,12 @@ public class SocialLoginService implements SocialLoginUseCase {
 		MemberDTO memberDTO = memberPersistence.findByEmail(email);
 		if (null != memberDTO) {
 			Member member = memberDomainDTOMapper.toDomain(memberDTO);
-			OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
+			OauthInfoModelDTO oauthInfoModelDTO = OauthInfoModelDTO.builder()
+				.memberUUID(member.getUuid())
+				.provider(provider)
+				.providerID(providerID)
+				.build();
+			OauthInfo oauthInfo = OauthInfo.createOauthInfo(oauthInfoModelDTO);
 			oauthInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(oauthInfo));
 		} else {
 			mediaAuthService.saveSuccessAuthChallenge(email);
@@ -85,11 +91,12 @@ public class SocialLoginService implements SocialLoginUseCase {
 
 	@Override
 	public void OauthRegister(OauthRegisterRequestDTO oauthRegisterRequestDTO) {
-		OauthInfo oauthInfo = OauthInfo.createOauthInfo(
-			oauthRegisterRequestDTO.getProvider(),
-			oauthRegisterRequestDTO.getProviderId(),
-			oauthRegisterRequestDTO.getMemberUUID());
-
+		OauthInfoModelDTO oauthInfoModelDTO = OauthInfoModelDTO.builder()
+			.memberUUID(oauthRegisterRequestDTO.getMemberUUID())
+			.provider(oauthRegisterRequestDTO.getProvider())
+			.providerID(oauthRegisterRequestDTO.getProviderId())
+			.build();
+		OauthInfo oauthInfo = OauthInfo.createOauthInfo(oauthInfoModelDTO);
 		oauthInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(oauthInfo));
 	}
 
