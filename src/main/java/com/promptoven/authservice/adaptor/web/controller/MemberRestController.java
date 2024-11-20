@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ChangePWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateNicknameRequestVO;
-import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
 import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberRestController {
 
 	private final MemberManagementProxy memberManagementProxy;
-	private final AuthenticationUseCase authenticationUseCase;
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
@@ -30,6 +28,6 @@ public class MemberRestController {
 
 	@PostMapping("/changePW")
 	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		authenticationUseCase.changePW(changePWRequestVO.toDTO());
+		memberManagementProxy.changePW(changePWRequestVO.toDTO());
 	}
 }

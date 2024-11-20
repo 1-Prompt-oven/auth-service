@@ -4,10 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.promptoven.authservice.application.port.in.dto.ChangePWRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.CheckPWRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.ResetPWRequestDTO;
-import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
+import com.promptoven.authservice.application.port.in.usecase.AccountAccessUsecase;
 import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
@@ -28,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService implements AuthenticationUseCase {
+public class AccountAccessService implements AccountAccessUsecase {
 
 	private final MemberDomainDTOMapper memberDomainDTOMapper;
 	private final RoleDomainDTOMapper roleDomainDTOMapper;
@@ -49,17 +47,6 @@ public class AuthenticationService implements AuthenticationUseCase {
 		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 
 		return passwordEncoder.matches(checkPWRequestDTO.getPassword(), member.getPassword());
-	}
-
-	@Override
-	public void changePW(ChangePWRequestDTO changePWRequestDTO) {
-
-		MemberDTO memberDTO = memberPersistence.findByUuid(changePWRequestDTO.getMemberUUID());
-		Member member = memberDomainDTOMapper.toDomain(memberDTO);
-		String newPassword = changePWRequestDTO.getNewPassword();
-		Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
-		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(updatedMember);
-		memberPersistence.updatePassword(updatedMemberDTO);
 	}
 
 	// 정책적인 이유로 login method는 DTO가 아니라 email과 PW 등을 string으로 바로 받아야 회원가입 method에서 여기 부르기 편함
@@ -101,22 +88,12 @@ public class AuthenticationService implements AuthenticationUseCase {
 	}
 
 	@Override
-	public void resetPW(ResetPWRequestDTO resetPWRequestDTO) {
-
-		MemberDTO memberDTO = memberPersistence.findByEmail(resetPWRequestDTO.getEmail());
-		Member member = memberDomainDTOMapper.toDomain(memberDTO);
-		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(
-			Member.updateMemberPassword(member, passwordEncoder.encode(resetPWRequestDTO.getPassword())));
-		memberPersistence.updatePassword(updatedMemberDTO);
-	}
-
-	@Override
 	public void withdraw(String accessToken) {
 		JwtProvider.TokenInfo tokenInfo = jwtProvider.validateAndDecryptToken(accessToken.replace("Bearer ", ""));
 		if (tokenInfo == null) {
 			throw new RuntimeException("Invalid or expired token");
 		}
-
+		authTaskMemory.blockToken(accessToken.replace("Bearer ", ""), tokenInfo.getExpirationTime());
 		String memberUUID = tokenInfo.getUserId();
 		memberPersistence.remove(memberDomainDTOMapper.toDTO(
 			Member.deleteMember(memberDomainDTOMapper.toDomain(memberPersistence.findByUuid(memberUUID)))));

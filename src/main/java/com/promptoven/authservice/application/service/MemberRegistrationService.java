@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.dto.RegisterRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.RegisterSocialRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.VerifyEmailRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.VerifyNicknameRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
@@ -34,7 +32,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final MemberPersistence memberPersistence;
 	private final PasswordEncoder passwordEncoder;
 	private final OauthInfoPersistence oauthInfoPersistence;
-	private final AuthenticationService authenticationService;
+	private final AccountAccessService accountAccessService;
 	private final EventPublisher eventPublisher;
 	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
 	private final MemberDomainDTOMapper memberDomainDTOMapper;
@@ -43,21 +41,10 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
 		String uuid = makeMember(registerRequestDTO, 1);
 		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(LoginRequestDTO.builder()
+		return accountAccessService.login(LoginRequestDTO.builder()
 			.email(registerRequestDTO.getEmail())
 			.password(registerRequestDTO.getPassword())
 			.build());
-	}
-
-	@Override
-	public boolean verifyEmail(VerifyEmailRequestDTO verifyEmailRequestDTO) {
-		return !memberPersistence.existsByEmail(verifyEmailRequestDTO.getEmail());
-	}
-
-	//todo: 닉네임 중복 체크 통과하면 5분 정도 점유를 할 수 있도록 구현 (Redis Cache 사용)
-	@Override
-	public boolean verifyNickname(VerifyNicknameRequestDTO verifyNicknameRequestDTO) {
-		return !memberPersistence.existsByNickname(verifyNicknameRequestDTO.getNickname());
 	}
 
 	@Override
@@ -79,7 +66,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 			OauthInfo.createOauthInfo(oauthInfoModelDTO));
 		oauthInfoPersistence.recordOauthInfo(oauthInfoDTO);
 		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(new LoginRequestDTO(email, password));
+		return accountAccessService.login(new LoginRequestDTO(email, password));
 	}
 
 	@Override
@@ -88,7 +75,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	}
 
 	private String makeMember(RegisterRequestDTO registerRequestDTO, int role) {
-		
+
 		String uuid = UUID.randomUUID().toString();
 		String encodedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 		while (memberPersistence.findByUuid(uuid) != null) {
