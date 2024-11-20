@@ -1,5 +1,7 @@
 package com.promptoven.authservice.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,5 +111,11 @@ public class SocialLoginService implements SocialLoginUseCase {
 			throw e;
 		}
 
+	}
+
+	@Override
+	public List<OauthInfoDTO> getOauthInfo(String accessToken) {
+		String memberUUID = jwtProvider.validateAndDecryptToken(accessToken).getUserId();
+		return oauthInfoPersistence.getOauthInfo(memberUUID);
 	}
 }
