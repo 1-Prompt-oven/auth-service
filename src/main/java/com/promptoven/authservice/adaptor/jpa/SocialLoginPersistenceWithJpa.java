@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.promptoven.authservice.adaptor.jpa.entity.OauthInfoEntity;
 import com.promptoven.authservice.adaptor.jpa.repository.OauthInfoRepository;
-import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
-import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
+import com.promptoven.authservice.application.port.out.call.SocialLoginInfoPersistence;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,20 +17,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class OauthPersistenceWithJpa implements OauthInfoPersistence {
+public class SocialLoginPersistenceWithJpa implements SocialLoginInfoPersistence {
 	private final OauthInfoRepository oauthInfoRepository;
 
 	@Override
-	public boolean existByOauthInfoDTO(OauthInfoDTO oauthInfoDTO) {
+	public boolean existByOauthInfoDTO(SocialLoginInfoDTO socialLoginInfoDTO) {
 		return oauthInfoRepository.existsByMemberUUIDAndProviderAndProviderID(
-			oauthInfoDTO.getMemberUUID(),
-			oauthInfoDTO.getProvider(),
-			oauthInfoDTO.getProviderID());
+			socialLoginInfoDTO.getMemberUUID(),
+			socialLoginInfoDTO.getProvider(),
+			socialLoginInfoDTO.getProviderID());
 	}
 
 	@Override
-	public void recordOauthInfo(OauthInfoDTO oauthInfoDTO) {
-		oauthInfoRepository.save(JpaOauthInfoDTOEntityMapper.toEntity(oauthInfoDTO));
+	public void recordOauthInfo(SocialLoginInfoDTO socialLoginInfoDTO) {
+		oauthInfoRepository.save(JpaOauthInfoDTOEntityMapper.toEntity(socialLoginInfoDTO));
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class OauthPersistenceWithJpa implements OauthInfoPersistence {
 	}
 
 	@Override
-	public List<OauthInfoDTO> getOauthInfo(String memberUUID) {
+	public List<SocialLoginInfoDTO> getOauthInfo(String memberUUID) {
 		List<OauthInfoEntity> oauthInfoEntities = oauthInfoRepository.findAllByMemberUUID(memberUUID);
 		return oauthInfoEntities.stream()
 			.map(JpaOauthInfoDTOEntityMapper::toDTO)
@@ -48,10 +48,10 @@ public class OauthPersistenceWithJpa implements OauthInfoPersistence {
 
 	@Override
 	@Transactional
-	public void deleteOauthInfo(OauthInfoDTO oauthInfoDTO) {
-		String memberUUID = oauthInfoDTO.getMemberUUID();
-		String provider = oauthInfoDTO.getProvider();
-		String providerID = oauthInfoDTO.getProviderID();
+	public void deleteOauthInfo(SocialLoginInfoDTO socialLoginInfoDTO) {
+		String memberUUID = socialLoginInfoDTO.getMemberUUID();
+		String provider = socialLoginInfoDTO.getProvider();
+		String providerID = socialLoginInfoDTO.getProviderID();
 		oauthInfoRepository.deleteByMemberUUIDAndProviderAndProviderID(memberUUID, provider, providerID);
 	}
 }

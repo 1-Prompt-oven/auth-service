@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.CheckPWRequestMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.LoginRequestMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.ResetPWRequestMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.response.LoginResponseMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.response.RefreshResponseMapper;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.CheckPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.LoginRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ResetPWRequestVO;
@@ -34,8 +39,8 @@ public class AccountAccessRestController {
 
 	@PostMapping("/login")
 	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
-		LoginResponseDTO loginResponseDTO = accountAccessUsecase.login(loginRequestVO.toDTO());
-		return LoginResponseVO.from(loginResponseDTO);
+		LoginResponseDTO loginResponseDTO = accountAccessUsecase.login(LoginRequestMapper.toDTO(loginRequestVO));
+		return LoginResponseMapper.fromDTO(loginResponseDTO);
 	}
 
 	@PostMapping("/logout")
@@ -51,17 +56,17 @@ public class AccountAccessRestController {
 
 	@PostMapping("/resetPW")
 	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
-		memberManagementUseCase.resetPW(resetPWRequestVO.toDTO());
+		memberManagementUseCase.resetPW(ResetPWRequestMapper.toDTO(resetPWRequestVO));
 	}
 
 	@PostMapping("/checkPW")
 	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
-		return accountAccessUsecase.checkPW(checkPWRequestVO.toDTO());
+		return accountAccessUsecase.checkPW(CheckPWRequestMapper.toDTO(checkPWRequestVO));
 	}
 
 	@GetMapping("/refresh")
 	public RefreshResponseVO tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
-		return RefreshResponseVO.from(accountAccessUsecase.refresh(refreshToken));
+		return RefreshResponseMapper.fromDTO(accountAccessUsecase.refresh(refreshToken));
 	}
 
 }

@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.EmailCheckRequestMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.EmailRequestRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailCheckRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailRequestRequestVO;
 import com.promptoven.authservice.application.port.in.usecase.VerificationUseCase;
@@ -22,12 +24,12 @@ public class MediaAuthRestController {
 
 	@PostMapping("/email/request")
 	public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
-		verificationUseCase.requestEmail(emailRequestRequestVO.toDTO());
+		verificationUseCase.requestEmail(EmailRequestRequestMapper.toDTO(emailRequestRequestVO));
 	}
 
 	@PostMapping("/email/check")
 	public boolean emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
-		return verificationUseCase.checkMedia(emailCheckRequestVO.toDTO());
+		return verificationUseCase.checkMedia(EmailCheckRequestMapper.toDTO(emailCheckRequestVO));
 	}
 
 }

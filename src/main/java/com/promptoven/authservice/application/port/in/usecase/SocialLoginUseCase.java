@@ -6,7 +6,7 @@ import com.promptoven.authservice.application.port.in.dto.SocialLoginAssociateRe
 import com.promptoven.authservice.application.port.in.dto.SocialLoginDisassociateRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.SocialLoginRequestDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
-import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
 
 public interface SocialLoginUseCase {
 
@@ -16,5 +16,5 @@ public interface SocialLoginUseCase {
 
 	void SocialLoginDisassociate(SocialLoginDisassociateRequestDTO SocialLoginDisassociateRequestDTO);
 
-	List<OauthInfoDTO> getSocialLoginAssociations(String memberUUID);
+	List<SocialLoginInfoDTO> getSocialLoginAssociations(String memberUUID);
 }
