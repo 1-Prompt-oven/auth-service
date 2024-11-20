@@ -15,6 +15,7 @@ import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
 import com.promptoven.authservice.application.service.dto.MemberDTO;
 import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
+import com.promptoven.authservice.application.service.dto.SocialLoginEmailHandlingDTO;
 import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
 import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
@@ -46,7 +47,12 @@ public class SocialLoginService implements SocialLoginUseCase {
 		String existingMemberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
 		// Handle email linking if provided
 		if (null != socialLoginRequestDTO.getEmail()) {
-			existingMemberUUID = handleEmailLinking(socialLoginRequestDTO.getEmail(), provider, providerID);
+			SocialLoginEmailHandlingDTO socialLoginEmailHandlingDTO = SocialLoginEmailHandlingDTO.builder()
+				.email(socialLoginRequestDTO.getEmail())
+				.provider(provider)
+				.providerId(providerID)
+				.build();
+			existingMemberUUID = handleEmailLinking(socialLoginEmailHandlingDTO);
 		}
 		boolean isExistingMember = null != existingMemberUUID;
 		// Return login response if member exists
@@ -57,7 +63,10 @@ public class SocialLoginService implements SocialLoginUseCase {
 		return new SocialLoginDTO();
 	}
 
-	private String handleEmailLinking(String email, String provider, String providerID) {
+	private String handleEmailLinking(SocialLoginEmailHandlingDTO socialLoginEmailHandlingDTO) {
+		String email = socialLoginEmailHandlingDTO.getEmail();
+		String provider = socialLoginEmailHandlingDTO.getProvider();
+		String providerID = socialLoginEmailHandlingDTO.getProviderId();
 		MemberDTO memberDTO = memberPersistence.findByEmail(email);
 		if (null != memberDTO) {
 			Member member = memberDomainDTOMapper.toDomain(memberDTO);
@@ -71,6 +80,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 			return member.getUuid();
 		} else {
 			verificationService.saveSuccessAuthChallenge(email);
+			return null;
 		}
 	}
 
