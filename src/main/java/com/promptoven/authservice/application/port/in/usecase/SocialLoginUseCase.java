@@ -2,19 +2,19 @@ package com.promptoven.authservice.application.port.in.usecase;
 
 import java.util.List;
 
-import com.promptoven.authservice.application.port.in.dto.OauthLoginRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.OauthRegisterRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.OauthUnregisterRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginAssociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginDisassociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginRequestDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
 import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
 
 public interface SocialLoginUseCase {
 
-	SocialLoginDTO oauthLogin(OauthLoginRequestDTO OauthLoginRequestDTO);
+	SocialLoginDTO SocialLogin(SocialLoginRequestDTO SocialLoginRequestDTO);
 
-	void OauthRegister(OauthRegisterRequestDTO OauthRegisterRequestDTO);
+	void SocialLoginAssociate(SocialLoginAssociateRequestDTO SocialLoginAssociateRequestDTO);
 
-	void OauthUnregister(OauthUnregisterRequestDTO OauthUnregisterRequestDTO);
+	void SocialLoginDisassociate(SocialLoginDisassociateRequestDTO SocialLoginDisassociateRequestDTO);
 
-	List<OauthInfoDTO> getOauthInfo(String memberUUID);
+	List<OauthInfoDTO> getSocialLoginAssociations(String memberUUID);
 }

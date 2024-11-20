@@ -1,6 +1,7 @@
 package com.promptoven.authservice.adaptor.redis;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -8,6 +9,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
+import com.promptoven.authservice.application.port.out.dto.AuthChallengeDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +32,11 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 	}
 
 	@Override
-	public void recordAuthChallenge(String media, String code, Date expires) {
+	public void recordAuthChallenge(AuthChallengeDTO authChallenge) {
+		String media = authChallenge.getMedia();
+		String code = authChallenge.getCode();
+		Date expires = authChallenge.getExpires();
+
 		long expirationTime = expires.getTime() - System.currentTimeMillis();
 		redisTemplate.opsForValue().set(media, code, expirationTime, TimeUnit.MILLISECONDS);
 	}
@@ -43,7 +49,7 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 
 	@Override
 	public boolean isAuthChallengeSuccess(String media) {
-		return Boolean.TRUE.equals(redisTemplate.opsForValue().get(media).equals("Success"));
+		return Boolean.TRUE.equals(Objects.requireNonNull(redisTemplate.opsForValue().get(media)).equals("Success"));
 	}
 
 	@Override

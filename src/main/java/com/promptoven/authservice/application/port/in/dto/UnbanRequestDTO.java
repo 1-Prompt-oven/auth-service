@@ -1,14 +1,17 @@
 package com.promptoven.authservice.application.port.in.dto;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Builder;
 
+@Builder
+@AllArgsConstructor
 @Getter
 public class UnbanRequestDTO implements MemberUUIDOnlyDTO {
-	private final String memberUUID;
+    private final String memberUUID;
 
-	@Builder
-	public UnbanRequestDTO(String memberUUID) {
-		this.memberUUID = memberUUID;
-	}
+    @Override
+    public String memberUUID() {
+        return memberUUID;
+    }
 }

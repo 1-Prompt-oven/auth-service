@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.promptoven.authservice.application.port.in.dto.OauthLoginRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.OauthRegisterRequestDTO;
-import com.promptoven.authservice.application.port.in.dto.OauthUnregisterRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginAssociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginDisassociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
@@ -39,16 +39,16 @@ public class SocialLoginService implements SocialLoginUseCase {
 	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
 
 	@Override
-	public SocialLoginDTO oauthLogin(OauthLoginRequestDTO oauthLoginRequestDTO) {
-		String provider = oauthLoginRequestDTO.getProvider();
-		String providerID = oauthLoginRequestDTO.getProviderId();
+	public SocialLoginDTO SocialLogin(SocialLoginRequestDTO socialLoginRequestDTO) {
+		String provider = socialLoginRequestDTO.getProvider();
+		String providerID = socialLoginRequestDTO.getProviderId();
 		// Check if user already exists with this OAuth provider
 		String existingMemberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
 		boolean isExistingMember = null != existingMemberUUID;
 
 		// Handle email linking if provided
-		if (null != oauthLoginRequestDTO.getEmail()) {
-			handleEmailLinking(oauthLoginRequestDTO.getEmail(), provider, providerID);
+		if (null != socialLoginRequestDTO.getEmail()) {
+			handleEmailLinking(socialLoginRequestDTO.getEmail(), provider, providerID);
 		}
 		// Return login response if member exists
 		if (isExistingMember) {
@@ -90,11 +90,11 @@ public class SocialLoginService implements SocialLoginUseCase {
 	}
 
 	@Override
-	public void OauthRegister(OauthRegisterRequestDTO oauthRegisterRequestDTO) {
+	public void SocialLoginAssociate(SocialLoginAssociateRequestDTO socialLoginAssociateRequestDTO) {
 		OauthInfoModelDTO oauthInfoModelDTO = OauthInfoModelDTO.builder()
-			.memberUUID(oauthRegisterRequestDTO.getMemberUUID())
-			.provider(oauthRegisterRequestDTO.getProvider())
-			.providerID(oauthRegisterRequestDTO.getProviderId())
+			.memberUUID(socialLoginAssociateRequestDTO.getMemberUUID())
+			.provider(socialLoginAssociateRequestDTO.getProvider())
+			.providerID(socialLoginAssociateRequestDTO.getProviderId())
 			.build();
 		OauthInfo oauthInfo = OauthInfo.createOauthInfo(oauthInfoModelDTO);
 		oauthInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(oauthInfo));
@@ -102,12 +102,12 @@ public class SocialLoginService implements SocialLoginUseCase {
 
 	@Override
 	@Transactional
-	public void OauthUnregister(OauthUnregisterRequestDTO oauthUnregisterRequestDTO) {
+	public void SocialLoginDisassociate(SocialLoginDisassociateRequestDTO socialLoginDisassociateRequestDTO) {
 
 		OauthInfoDTO requestedOauthInfoDTO = OauthInfoDTO.builder()
-			.memberUUID(oauthUnregisterRequestDTO.getMemberUUID())
-			.provider(oauthUnregisterRequestDTO.getProvider())
-			.providerID(oauthUnregisterRequestDTO.getProviderId())
+			.memberUUID(socialLoginDisassociateRequestDTO.getMemberUUID())
+			.provider(socialLoginDisassociateRequestDTO.getProvider())
+			.providerID(socialLoginDisassociateRequestDTO.getProviderId())
 			.build();
 
 		OauthInfo requestedOauthInfo = oauthInfoDomainDTOMapper.toDomain(requestedOauthInfoDTO);
@@ -121,7 +121,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 	}
 
 	@Override
-	public List<OauthInfoDTO> getOauthInfo(String accessToken) {
+	public List<OauthInfoDTO> getSocialLoginAssociations(String accessToken) {
 		String memberUUID = jwtProvider.validateAndDecryptToken(accessToken).getUserId();
 		return oauthInfoPersistence.getOauthInfo(memberUUID);
 	}
