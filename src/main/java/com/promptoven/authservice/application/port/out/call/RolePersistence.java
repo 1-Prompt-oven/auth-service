@@ -1,5 +1,7 @@
 package com.promptoven.authservice.application.port.out.call;
 
+import java.util.List;
+
 import com.promptoven.authservice.application.service.dto.RoleDTO;
 
 public interface RolePersistence {
@@ -17,4 +19,6 @@ public interface RolePersistence {
 	void updateRole(RoleDTO roleDTO);
 
 	long count();
+
+	List<RoleDTO> findAll();
 }

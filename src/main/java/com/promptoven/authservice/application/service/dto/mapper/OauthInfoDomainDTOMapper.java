@@ -2,15 +2,15 @@ package com.promptoven.authservice.application.service.dto.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
-import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
+import com.promptoven.authservice.domain.SocialLoginInfo;
 
 @Component
-public class OauthInfoDomainDTOMapper implements DomainDTOMapper<OauthInfo, OauthInfoDTO> {
+public class OauthInfoDomainDTOMapper implements DomainDTOMapper<SocialLoginInfo, SocialLoginInfoDTO> {
 
 	@Override
-	public OauthInfoDTO toDTO(OauthInfo domain) {
-		return OauthInfoDTO.builder()
+	public SocialLoginInfoDTO toDTO(SocialLoginInfo domain) {
+		return SocialLoginInfoDTO.builder()
 			.memberUUID(domain.getMemberUUID())
 			.provider(domain.getProvider())
 			.providerID(domain.getProviderID())
@@ -18,8 +18,8 @@ public class OauthInfoDomainDTOMapper implements DomainDTOMapper<OauthInfo, Oaut
 	}
 
 	@Override
-	public OauthInfo toDomain(OauthInfoDTO dto) {
-		return OauthInfo.builder()
+	public SocialLoginInfo toDomain(SocialLoginInfoDTO dto) {
+		return SocialLoginInfo.builder()
 			.memberUUID(dto.getMemberUUID())
 			.provider(dto.getProvider())
 			.providerID(dto.getProviderID())

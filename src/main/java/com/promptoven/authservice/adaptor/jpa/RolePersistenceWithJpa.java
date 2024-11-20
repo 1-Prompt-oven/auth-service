@@ -1,5 +1,7 @@
 package com.promptoven.authservice.adaptor.jpa;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.adaptor.jpa.entity.RoleEntity;
@@ -53,5 +55,12 @@ public class RolePersistenceWithJpa implements RolePersistence {
 	@Override
 	public long count() {
 		return roleRepository.count();
+	}
+
+	@Override
+	public List<RoleDTO> findAll() {
+		return roleRepository.findAll().stream()
+			.map(JpaRoleDTOEntityMapper::toDTO)
+			.toList();
 	}
 }
