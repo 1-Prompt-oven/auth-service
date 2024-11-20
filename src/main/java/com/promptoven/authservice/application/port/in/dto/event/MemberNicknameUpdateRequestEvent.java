@@ -1,4 +1,4 @@
-package com.promptoven.authservice.application.port.in.dto;
+package com.promptoven.authservice.application.port.in.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
