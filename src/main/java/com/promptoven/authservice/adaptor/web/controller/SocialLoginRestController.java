@@ -1,13 +1,19 @@
 package com.promptoven.authservice.adaptor.web.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthLoginRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthRegisterRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthUnregisterRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.out.OauthInfoResponseVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.SocialLoginResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
@@ -37,6 +43,13 @@ public class SocialLoginRestController {
 	@PostMapping("/oauth/unregister")
 	public void oauthUnregister(@RequestBody OauthUnregisterRequestVO oauthUnregisterRequestVO) {
 		socialLoginUseCase.OauthUnregister(oauthUnregisterRequestVO.toDTO());
+	}
+
+	@GetMapping("/oauth/info")
+	public List<OauthInfoResponseVO> getOauthInfoes(@RequestHeader("Authorization") String accessToken) {
+		return socialLoginUseCase.getOauthInfo(accessToken).stream()
+			.map(OauthInfoResponseVO::fromDTO)
+			.collect(Collectors.toList());
 	}
 
 }
