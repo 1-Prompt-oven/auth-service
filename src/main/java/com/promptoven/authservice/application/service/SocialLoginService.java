@@ -33,7 +33,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 	private final OauthInfoPersistence oauthInfoPersistence;
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
-	private final MediaAuthService mediaAuthService;
+	private final VerificationService verificationService;
 	private final JwtProvider jwtProvider;
 	private final MemberDomainDTOMapper memberDomainDTOMapper;
 	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
@@ -44,12 +44,11 @@ public class SocialLoginService implements SocialLoginUseCase {
 		String providerID = socialLoginRequestDTO.getProviderId();
 		// Check if user already exists with this OAuth provider
 		String existingMemberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
-		boolean isExistingMember = null != existingMemberUUID;
-
 		// Handle email linking if provided
 		if (null != socialLoginRequestDTO.getEmail()) {
-			handleEmailLinking(socialLoginRequestDTO.getEmail(), provider, providerID);
+			existingMemberUUID = handleEmailLinking(socialLoginRequestDTO.getEmail(), provider, providerID);
 		}
+		boolean isExistingMember = null != existingMemberUUID;
 		// Return login response if member exists
 		if (isExistingMember) {
 			return createLoginResponse(existingMemberUUID);
@@ -58,7 +57,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 		return new SocialLoginDTO();
 	}
 
-	private void handleEmailLinking(String email, String provider, String providerID) {
+	private String handleEmailLinking(String email, String provider, String providerID) {
 		MemberDTO memberDTO = memberPersistence.findByEmail(email);
 		if (null != memberDTO) {
 			Member member = memberDomainDTOMapper.toDomain(memberDTO);
@@ -69,8 +68,9 @@ public class SocialLoginService implements SocialLoginUseCase {
 				.build();
 			OauthInfo oauthInfo = OauthInfo.createOauthInfo(oauthInfoModelDTO);
 			oauthInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(oauthInfo));
+			return member.getUuid();
 		} else {
-			mediaAuthService.saveSuccessAuthChallenge(email);
+			verificationService.saveSuccessAuthChallenge(email);
 		}
 	}
 

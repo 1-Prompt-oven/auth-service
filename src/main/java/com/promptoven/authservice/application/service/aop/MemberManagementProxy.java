@@ -3,8 +3,10 @@ package com.promptoven.authservice.application.service.aop;
 import org.springframework.stereotype.Component;
 
 import com.promptoven.authservice.application.port.in.dto.BanRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.ChangePWRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.ClearPasswordRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.PromoteToSellerRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.ResetPWRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.SetMemberRoleRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.UnbanRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.UpdateNicknameRequestDTO;
@@ -45,5 +47,13 @@ public class MemberManagementProxy {
 
 	@FindMemberOperation
 	public void promoteToSeller(PromoteToSellerRequestDTO dto) {
+	}
+
+	@FindMemberOperation
+	public void changePW(ChangePWRequestDTO dto) {
+	}
+
+	@FindMemberOperation
+	public void resetPW(ResetPWRequestDTO dto) {
 	}
 } 

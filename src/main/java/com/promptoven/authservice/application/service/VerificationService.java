@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.dto.EmailCheckRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.EmailRequestRequestDTO;
-import com.promptoven.authservice.application.port.in.usecase.MediaAuthUseCase;
+import com.promptoven.authservice.application.port.in.dto.VerifyEmailRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.VerifyNicknameRequestDTO;
+import com.promptoven.authservice.application.port.in.usecase.VerificationUseCase;
 import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
 import com.promptoven.authservice.application.port.out.call.MailSending;
+import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.dto.AuthChallengeDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -19,8 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class MediaAuthService implements MediaAuthUseCase {
+public class VerificationService implements VerificationUseCase {
 
+	private final MemberPersistence memberPersistence;
 	private final AuthTaskMemory authTaskMemory;
 	private final MailSending mailSending;
 	@Value("${auth.challenge.expiration}")
@@ -70,5 +74,16 @@ public class MediaAuthService implements MediaAuthUseCase {
 			.code(code)
 			.expires(makeExpire())
 			.build());
+	}
+
+	@Override
+	public boolean verifyEmail(VerifyEmailRequestDTO verifyEmailRequestDTO) {
+		return !memberPersistence.existsByEmail(verifyEmailRequestDTO.getEmail());
+	}
+
+	//todo: 닉네임 중복 체크 통과하면 5분 정도 점유를 할 수 있도록 구현 (Redis Cache 사용)
+	@Override
+	public boolean verifyNickname(VerifyNicknameRequestDTO verifyNicknameRequestDTO) {
+		return !memberPersistence.existsByNickname(verifyNicknameRequestDTO.getNickname());
 	}
 }
