@@ -1,5 +1,7 @@
 package com.promptoven.authservice.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.promptoven.authservice.application.port.in.dto.CreateRoleRequestDTO;
@@ -7,6 +9,7 @@ import com.promptoven.authservice.application.port.in.dto.DeleteRoleRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.UpdateRoleRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.RoleManagementUseCase;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
+import com.promptoven.authservice.application.service.dto.RoleDTO;
 import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
 import com.promptoven.authservice.domain.Role;
 import com.promptoven.authservice.domain.dto.RoleModelDTO;
@@ -49,5 +52,10 @@ public class RoleManagementService implements RoleManagementUseCase {
 			.build();
 		rolePersistence.updateRole(roleDomainDTOMapper.toDTO(
 			Role.updateRole(role, roleModelDTO)));
+	}
+
+	@Override
+	public List<RoleDTO> getRole() {
+		return rolePersistence.findAll();
 	}
 }

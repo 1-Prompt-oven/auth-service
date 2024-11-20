@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.ChangePWRequestMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.UpdateNicknameRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ChangePWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateNicknameRequestVO;
 import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
@@ -23,11 +25,11 @@ public class MemberRestController {
 
 	@PutMapping("/nickname")
 	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		memberManagementProxy.updateNickname(updateNicknameRequestVO.toDTO());
+		memberManagementProxy.updateNickname(UpdateNicknameRequestMapper.toDTO(updateNicknameRequestVO));
 	}
 
 	@PostMapping("/changePW")
 	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		memberManagementProxy.changePW(changePWRequestVO.toDTO());
+		memberManagementProxy.changePW(ChangePWRequestMapper.toDTO(changePWRequestVO));
 	}
 }

@@ -10,16 +10,16 @@ import com.promptoven.authservice.application.port.in.dto.RegisterSocialRequestD
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
-import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
+import com.promptoven.authservice.application.port.out.call.SocialLoginInfoPersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
-import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
 import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
 import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.domain.Member;
-import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.domain.SocialLoginInfo;
 import com.promptoven.authservice.domain.dto.MemberModelDTO;
-import com.promptoven.authservice.domain.dto.OauthInfoModelDTO;
+import com.promptoven.authservice.domain.dto.SocialLoginInfoModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 	private final MemberPersistence memberPersistence;
 	private final PasswordEncoder passwordEncoder;
-	private final OauthInfoPersistence oauthInfoPersistence;
+	private final SocialLoginInfoPersistence socialLoginInfoPersistence;
 	private final AccountAccessService accountAccessService;
 	private final EventPublisher eventPublisher;
 	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
@@ -57,14 +57,14 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 		String providerID = registerSocialRequestDTO.getProviderId();
 
 		String uuid = makeMember(registerSocialRequestDTO.toRegisterRequestDTO(), 1);
-		OauthInfoModelDTO oauthInfoModelDTO = OauthInfoModelDTO.builder()
+		SocialLoginInfoModelDTO socialLoginInfoModelDTO = SocialLoginInfoModelDTO.builder()
 			.memberUUID(uuid)
 			.provider(provider)
 			.providerID(providerID)
 			.build();
-		OauthInfoDTO oauthInfoDTO = oauthInfoDomainDTOMapper.toDTO(
-			OauthInfo.createOauthInfo(oauthInfoModelDTO));
-		oauthInfoPersistence.recordOauthInfo(oauthInfoDTO);
+		SocialLoginInfoDTO socialLoginInfoDTO = oauthInfoDomainDTOMapper.toDTO(
+			SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO));
+		socialLoginInfoPersistence.recordOauthInfo(socialLoginInfoDTO);
 		eventPublisher.publish("member-registered", uuid);
 		return accountAccessService.login(new LoginRequestDTO(email, password));
 	}

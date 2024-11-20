@@ -4,14 +4,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class OauthInfoDTO {
+public class SocialLoginInfoDTO {
 
 	private final String provider;
 	private final String providerID;
 	private final String memberUUID;
 
 	@Builder
-	public OauthInfoDTO(String provider, String providerID, String memberUUID) {
+	public SocialLoginInfoDTO(String provider, String providerID, String memberUUID) {
 		this.provider = provider;
 		this.providerID = providerID;
 		this.memberUUID = memberUUID;
