@@ -2,8 +2,6 @@ package com.promptoven.authservice.adaptor.jpa.entity;
 
 import java.time.LocalDateTime;
 
-import com.promptoven.authservice.domain.Member;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,33 +32,8 @@ public class MemberEntity {
 	private Boolean isBanned;
 	private int role;
 
-	public static MemberEntity fromDomain(Member member) {
-		return MemberEntity.builder()
-			.uuid(member.getUuid())
-			.email(member.getEmail())
-			.password(member.getPassword())
-			.nickname(member.getNickname())
-			.createdAt(member.getCreatedAt())
-			.isDeleted(member.getIsDeleted())
-			.isBanned(member.getIsBanned())
-			.role(member.getRole())
-			.build();
-	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public Member toDomain() {
-		return Member.builder()
-			.uuid(this.uuid)
-			.email(this.email)
-			.password(this.password)
-			.nickname(this.nickname)
-			.createdAt(this.createdAt)
-			.isDeleted(this.isDeleted)
-			.isBanned(this.isBanned)
-			.role(this.role)
-			.build();
-	}
 }

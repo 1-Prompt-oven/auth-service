@@ -11,6 +11,10 @@ import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
+import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
+import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
+import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
@@ -28,6 +32,8 @@ public class SocialLoginService implements SocialLoginUseCase {
 	private final RolePersistence rolePersistence;
 	private final MediaAuthService mediaAuthService;
 	private final JwtProvider jwtProvider;
+	private final MemberDomainDTOMapper memberDomainDTOMapper;
+	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
 
 	@Override
 	public SocialLoginDTO oauthLogin(OauthLoginRequestDTO oauthLoginRequestDTO) {
@@ -50,17 +56,18 @@ public class SocialLoginService implements SocialLoginUseCase {
 	}
 
 	private void handleEmailLinking(String email, String provider, String providerID) {
-		Member member = memberPersistence.findByEmail(email);
-		if (null != member) {
+		MemberDTO memberDTO = memberPersistence.findByEmail(email);
+		if (null != memberDTO) {
+			Member member = memberDomainDTOMapper.toDomain(memberDTO);
 			OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
-			oauthInfoPersistence.recordOauthInfo(oauthInfo);
+			oauthInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(oauthInfo));
 		} else {
 			mediaAuthService.saveSuccessAuthChallenge(email);
 		}
 	}
 
 	private SocialLoginDTO createLoginResponse(String memberUUID) {
-		Member member = memberPersistence.findByUuid(memberUUID);
+		Member member = memberDomainDTOMapper.toDomain(memberPersistence.findByUuid(memberUUID));
 		String role = rolePersistence.findRoleById(member.getRole()).getName();
 		String accessToken = jwtProvider.issueJwt(memberUUID, role);
 		String refreshToken = jwtProvider.issueRefresh(memberUUID);
@@ -81,21 +88,26 @@ public class SocialLoginService implements SocialLoginUseCase {
 			oauthRegisterRequestDTO.getProviderId(),
 			oauthRegisterRequestDTO.getMemberUUID());
 
-		oauthInfoPersistence.recordOauthInfo(oauthInfo);
+		oauthInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(oauthInfo));
 	}
 
 	@Override
 	@Transactional
 	public void OauthUnregister(OauthUnregisterRequestDTO oauthUnregisterRequestDTO) {
 
+		OauthInfoDTO requestedOauthInfoDTO = OauthInfoDTO.builder()
+			.memberUUID(oauthUnregisterRequestDTO.getMemberUUID())
+			.provider(oauthUnregisterRequestDTO.getProvider())
+			.providerID(oauthUnregisterRequestDTO.getProviderId())
+			.build();
+
+		OauthInfo requestedOauthInfo = oauthInfoDomainDTOMapper.toDomain(requestedOauthInfoDTO);
+
 		try {
-			oauthInfoPersistence.deleteOauthInfo(
-				oauthUnregisterRequestDTO.getProvider(),
-				oauthUnregisterRequestDTO.getProviderId(),
-				oauthUnregisterRequestDTO.getMemberUUID()
-			);
+			oauthInfoPersistence.deleteOauthInfo(oauthInfoDomainDTOMapper.toDTO(requestedOauthInfo));
 		} catch (Exception e) {
 			throw e;
 		}
+
 	}
 }

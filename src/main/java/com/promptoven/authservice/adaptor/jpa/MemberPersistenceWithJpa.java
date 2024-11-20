@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.promptoven.authservice.adaptor.jpa.entity.MemberEntity;
 import com.promptoven.authservice.adaptor.jpa.repository.MemberRepository;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
-import com.promptoven.authservice.domain.Member;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,27 +18,27 @@ public class MemberPersistenceWithJpa implements MemberPersistence {
 	private final MemberRepository memberRepository;
 
 	@Override
-	public void create(Member member) {
-		MemberEntity memberEntity = MemberEntity.fromDomain(member);
+	public void create(MemberDTO memberDTO) {
+		MemberEntity memberEntity = JpaMemberDTOEntityMapper.toEntity(memberDTO);
 		memberRepository.save(memberEntity);
 	}
 
 	@Override
-	public Member findByEmail(String email) {
+	public MemberDTO findByEmail(String email) {
 		MemberEntity memberEntity = memberRepository.findByEmail(email);
-		return null != memberEntity ? memberEntity.toDomain() : null;
+		return null != memberEntity ? JpaMemberDTOEntityMapper.toDTO(memberEntity) : null;
 	}
 
 	@Override
-	public Member findByUuid(String uuid) {
+	public MemberDTO findByUuid(String uuid) {
 		MemberEntity memberEntity = memberRepository.findByUuid(uuid);
-		return null != memberEntity ? memberEntity.toDomain() : null;
+		return null != memberEntity ? JpaMemberDTOEntityMapper.toDTO(memberEntity) : null;
 	}
 
 	@Override
-	public Member findByNickname(String nickname) {
+	public MemberDTO findByNickname(String nickname) {
 		MemberEntity memberEntity = memberRepository.findByNickname(nickname);
-		return null != memberEntity ? memberEntity.toDomain() : null;
+		return null != memberEntity ? JpaMemberDTOEntityMapper.toDTO(memberEntity) : null;
 	}
 
 	@Override
@@ -52,22 +52,22 @@ public class MemberPersistenceWithJpa implements MemberPersistence {
 	}
 
 	@Override
-	public void updatePassword(Member updatedMember) {
-		MemberEntity memberEntity = MemberEntity.fromDomain(updatedMember);
+	public void updatePassword(MemberDTO updatedMember) {
+		MemberEntity memberEntity = JpaMemberDTOEntityMapper.toEntity(updatedMember);
 		memberEntity.setId(memberRepository.findByUuid(updatedMember.getUuid()).getId());
 		memberRepository.save(memberEntity);
 	}
 
 	@Override
-	public void updateMember(Member updatedMember) {
-		MemberEntity memberEntity = MemberEntity.fromDomain(updatedMember);
+	public void updateMember(MemberDTO updatedMember) {
+		MemberEntity memberEntity = JpaMemberDTOEntityMapper.toEntity(updatedMember);
 		memberEntity.setId(memberRepository.findByUuid(updatedMember.getUuid()).getId());
 		memberRepository.save(memberEntity);
 	}
 
 	@Override
-	public void remove(Member member) {
-		MemberEntity memberEntity = MemberEntity.fromDomain(member);
+	public void remove(MemberDTO member) {
+		MemberEntity memberEntity = JpaMemberDTOEntityMapper.toEntity(member);
 		memberEntity.setId(memberRepository.findByUuid(member.getUuid()).getId());
 		memberRepository.save(memberEntity);
 	}

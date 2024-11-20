@@ -1,4 +1,4 @@
-package com.promptoven.authservice.application.service;
+package com.promptoven.authservice.application.service.dto;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -20,4 +20,7 @@ public interface OauthInfoRepository extends JpaRepository<OauthInfoEntity, Long
 	@Query("DELETE FROM OauthInfoEntity o WHERE o.memberUUID = :memberUUID AND o.provider = :provider AND o.providerID = :providerID")
 	void deleteByMemberUUIDAndProviderAndProviderID(@Param("memberUUID") String memberUUID,
 		@Param("provider") String provider, @Param("providerID") String providerID);
+
+	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM OauthInfoEntity o WHERE o.memberUUID = :memberUUID AND o.provider = :provider AND o.providerID = :providerID")
+	boolean existsByMemberUUIDAndProviderAndProviderID(String memberUUID, String provider, String providerID);
 }

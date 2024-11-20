@@ -14,8 +14,13 @@ import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 import com.promptoven.authservice.application.port.out.dto.RefreshDTO;
+import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
+import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
+import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
+import com.promptoven.authservice.domain.Role;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +30,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthenticationService implements AuthenticationUseCase {
 
+	private final MemberDomainDTOMapper memberDomainDTOMapper;
+	private final RoleDomainDTOMapper roleDomainDTOMapper;
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
-
 	private final AuthTaskMemory authTaskMemory;
-
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
-
 	private final EventPublisher eventPublisher;
 
 	@Value("${member-withdraw-event}")
@@ -41,7 +45,8 @@ public class AuthenticationService implements AuthenticationUseCase {
 	@Override
 	public boolean checkPW(CheckPWRequestDTO checkPWRequestDTO) {
 
-		Member member = memberPersistence.findByUuid(checkPWRequestDTO.getMemberUUID());
+		MemberDTO memberDTO = memberPersistence.findByUuid(checkPWRequestDTO.getMemberUUID());
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 
 		return passwordEncoder.matches(checkPWRequestDTO.getPassword(), member.getPassword());
 	}
@@ -49,18 +54,20 @@ public class AuthenticationService implements AuthenticationUseCase {
 	@Override
 	public void changePW(ChangePWRequestDTO changePWRequestDTO) {
 
-		Member member = memberPersistence.findByUuid(changePWRequestDTO.getMemberUUID());
+		MemberDTO memberDTO = memberPersistence.findByUuid(changePWRequestDTO.getMemberUUID());
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 		String newPassword = changePWRequestDTO.getNewPassword();
 		Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
-
-		memberPersistence.updatePassword(updatedMember);
+		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(updatedMember);
+		memberPersistence.updatePassword(updatedMemberDTO);
 	}
 
 	// 정책적인 이유로 login method는 DTO가 아니라 email과 PW 등을 string으로 바로 받아야 회원가입 method에서 여기 부르기 편함
 	@Override
 	public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 
-		Member member = memberPersistence.findByEmail(loginRequestDTO.getEmail());
+		MemberDTO memberDTO = memberPersistence.findByEmail(loginRequestDTO.getEmail());
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 
 		if (null != member && passwordEncoder.matches(loginRequestDTO.getPassword(), member.getPassword())) {
 
@@ -96,10 +103,11 @@ public class AuthenticationService implements AuthenticationUseCase {
 	@Override
 	public void resetPW(ResetPWRequestDTO resetPWRequestDTO) {
 
-		Member member = memberPersistence.findByEmail(resetPWRequestDTO.getEmail());
-
-		memberPersistence.updatePassword(
+		MemberDTO memberDTO = memberPersistence.findByEmail(resetPWRequestDTO.getEmail());
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
+		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(
 			Member.updateMemberPassword(member, passwordEncoder.encode(resetPWRequestDTO.getPassword())));
+		memberPersistence.updatePassword(updatedMemberDTO);
 	}
 
 	@Override
@@ -110,9 +118,8 @@ public class AuthenticationService implements AuthenticationUseCase {
 		}
 
 		String memberUUID = tokenInfo.getUserId();
-		memberPersistence.remove(Member.deleteMember(
-			memberPersistence.findByUuid(memberUUID)
-		));
+		memberPersistence.remove(memberDomainDTOMapper.toDTO(
+			Member.deleteMember(memberDomainDTOMapper.toDomain(memberPersistence.findByUuid(memberUUID)))));
 		eventPublisher.publish(memberWithdrawEvent, memberUUID);
 	}
 
@@ -124,9 +131,11 @@ public class AuthenticationService implements AuthenticationUseCase {
 		}
 
 		String memberUUID = tokenInfo.getUserId();
-		Member member = memberPersistence.findByUuid(memberUUID);
+		MemberDTO memberDTO = memberPersistence.findByUuid(memberUUID);
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 		String nickname = member.getNickname();
-		String role = rolePersistence.findRoleById(member.getRole()).getName();
+		Role roleDomain = roleDomainDTOMapper.toDomain(rolePersistence.findRoleById(member.getRole()));
+		String role = roleDomain.getName();
 		String accessToken = jwtProvider.issueJwt(memberUUID, role);
 
 		return RefreshDTO.builder()
