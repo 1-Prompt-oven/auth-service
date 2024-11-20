@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.promptoven.authservice.adaptor.jpa.entity.OauthInfoEntity;
 import com.promptoven.authservice.adaptor.jpa.repository.OauthInfoRepository;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
-import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +18,19 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Service
 public class OauthPersistenceWithJpa implements OauthInfoPersistence {
-
 	private final OauthInfoRepository oauthInfoRepository;
 
 	@Override
-	public void recordOauthInfo(OauthInfo oauthInfo) {
-		oauthInfoRepository.save(OauthInfoEntity.fromDomain(oauthInfo));
+	public boolean existByOauthInfoDTO(OauthInfoDTO oauthInfoDTO) {
+		return oauthInfoRepository.existsByMemberUUIDAndProviderAndProviderID(
+			oauthInfoDTO.getMemberUUID(),
+			oauthInfoDTO.getProvider(),
+			oauthInfoDTO.getProviderID());
+	}
+
+	@Override
+	public void recordOauthInfo(OauthInfoDTO oauthInfoDTO) {
+		oauthInfoRepository.save(JpaOauthInfoDTOEntityMapper.toEntity(oauthInfoDTO));
 	}
 
 	@Override
@@ -32,16 +39,19 @@ public class OauthPersistenceWithJpa implements OauthInfoPersistence {
 	}
 
 	@Override
-	public List<OauthInfo> getOauthInfo(String memberUUID) {
+	public List<OauthInfoDTO> getOauthInfo(String memberUUID) {
 		List<OauthInfoEntity> oauthInfoEntities = oauthInfoRepository.findAllByMemberUUID(memberUUID);
 		return oauthInfoEntities.stream()
-			.map(OauthInfoEntity::toDomain)
+			.map(JpaOauthInfoDTOEntityMapper::toDTO)
 			.collect(Collectors.toList());
 	}
 
 	@Override
 	@Transactional
-	public void deleteOauthInfo(String memberUUID, String provider, String providerID) {
+	public void deleteOauthInfo(OauthInfoDTO oauthInfoDTO) {
+		String memberUUID = oauthInfoDTO.getMemberUUID();
+		String provider = oauthInfoDTO.getProvider();
+		String providerID = oauthInfoDTO.getProviderID();
 		oauthInfoRepository.deleteByMemberUUIDAndProviderAndProviderID(memberUUID, provider, providerID);
 	}
 }

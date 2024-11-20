@@ -2,15 +2,17 @@ package com.promptoven.authservice.application.port.out.call;
 
 import java.util.List;
 
-import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
 
 public interface OauthInfoPersistence {
 
-	void recordOauthInfo(OauthInfo oauthInfo);
+	void recordOauthInfo(OauthInfoDTO oauthInfoDTO);
 
 	String getMemberUUID(String Provider, String ProviderID);
 
-	List<OauthInfo> getOauthInfo(String memberUUID);
+	List<OauthInfoDTO> getOauthInfo(String memberUUID);
 
-	void deleteOauthInfo(String memberUUID, String provider, String providerID);
+	boolean existByOauthInfoDTO(OauthInfoDTO oauthInfoDTO);
+
+	void deleteOauthInfo(OauthInfoDTO oauthInfoDTO);
 }

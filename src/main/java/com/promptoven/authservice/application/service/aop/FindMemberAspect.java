@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.promptoven.authservice.application.port.in.dto.MemberUUIDOnlyDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
+import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
 import com.promptoven.authservice.domain.Member;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class FindMemberAspect {
+
 	private final MemberPersistence memberPersistence;
+	private final MemberDomainDTOMapper memberDomainDTOMapper;
 
 	@Around("@annotation(findMemberOperation)")
 	public Object findMemberAndInject(ProceedingJoinPoint joinPoint, FindMemberOperation findMemberOperation) throws
@@ -37,8 +41,8 @@ public class FindMemberAspect {
 		String memberUUID = (String)getUuidMethod.invoke(dto);
 
 		// Find member
-		Member member = memberPersistence.findByUuid(memberUUID);
-		if (member == null) {
+		MemberDTO memberDTO = memberPersistence.findByUuid(memberUUID);
+		if (memberDTO == null) {
 			throw new RuntimeException("Member not found with UUID: " + memberUUID);
 		}
 
@@ -49,11 +53,11 @@ public class FindMemberAspect {
 		// If DTO only contains memberUUID, invoke service method with just Member
 		if (dto instanceof MemberUUIDOnlyDTO) {
 			Method serviceMethod = service.getClass().getMethod(methodName, Member.class);
-			return serviceMethod.invoke(service, member);
+			return serviceMethod.invoke(service, memberDomainDTOMapper.toDomain(memberDTO));
 		}
 
 		// Otherwise invoke with both Member and DTO
 		Method serviceMethod = service.getClass().getMethod(methodName, Member.class, dto.getClass());
-		return serviceMethod.invoke(service, member, dto);
+		return serviceMethod.invoke(service, memberDomainDTOMapper.toDomain(memberDTO), dto);
 	}
 }
