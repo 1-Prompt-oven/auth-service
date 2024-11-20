@@ -1,15 +1,17 @@
 package com.promptoven.authservice.application.port.in.dto;
 
 import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class ClearPasswordRequestDTO implements MemberUUIDOnlyDTO {
+    private final String memberUUID;
 
-	private final String memberUUID;
-
-	@Builder
-	public ClearPasswordRequestDTO(String memberUUID) {
-		this.memberUUID = memberUUID;
-	}
-} 
+    @Override
+    public String memberUUID() {
+        return memberUUID;
+    }
+}

@@ -3,6 +3,7 @@ package com.promptoven.authservice.adaptor.web.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthLoginRequestVO;
-import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthRegisterRequestVO;
-import com.promptoven.authservice.adaptor.web.controller.vo.in.OauthUnregisterRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.SocialLoginAssociateRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.SocialLoginDisassociateRequestVO;
+import com.promptoven.authservice.adaptor.web.controller.vo.in.SocialLoginRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.OauthInfoResponseVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.SocialLoginResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
@@ -24,30 +25,34 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/auth")
+@RequestMapping("/v1/auth/social")
 public class SocialLoginRestController {
 
 	private final SocialLoginUseCase socialLoginUseCase;
 
-	@PostMapping("/oauth/login")
-	public SocialLoginResponseVO oauthLogin(@RequestBody OauthLoginRequestVO oauthLoginRequestVO) {
-		SocialLoginDTO socialLoginDTO = socialLoginUseCase.oauthLogin(oauthLoginRequestVO.toDTO());
+	@PostMapping("/login")
+	public SocialLoginResponseVO socialLogin(
+		@RequestBody SocialLoginRequestVO socialLoginRequestVO) {
+		SocialLoginDTO socialLoginDTO = socialLoginUseCase.SocialLogin(socialLoginRequestVO.toDTO());
 		return SocialLoginResponseVO.from(socialLoginDTO);
 	}
 
-	@PostMapping("/oauth/register")
-	public void oauthRegister(@RequestBody OauthRegisterRequestVO oauthRegisterRequestVO) {
-		socialLoginUseCase.OauthRegister(oauthRegisterRequestVO.toDTO());
+	@PostMapping("/info")
+	public void socialLoginAssociate(
+		@RequestBody SocialLoginAssociateRequestVO socialLoginAssociateRequestVO) {
+		socialLoginUseCase.SocialLoginAssociate(socialLoginAssociateRequestVO.toDTO());
 	}
 
-	@PostMapping("/oauth/unregister")
-	public void oauthUnregister(@RequestBody OauthUnregisterRequestVO oauthUnregisterRequestVO) {
-		socialLoginUseCase.OauthUnregister(oauthUnregisterRequestVO.toDTO());
+	@DeleteMapping("/info")
+	public void socialLoginDisassociate(
+		@RequestBody SocialLoginDisassociateRequestVO socialLoginDisassociateRequestVO) {
+		socialLoginUseCase.SocialLoginDisassociate(socialLoginDisassociateRequestVO.toDTO());
 	}
 
-	@GetMapping("/oauth/info")
-	public List<OauthInfoResponseVO> getOauthInfoes(@RequestHeader("Authorization") String accessToken) {
-		return socialLoginUseCase.getOauthInfo(accessToken).stream()
+	@GetMapping("/info")
+	public List<OauthInfoResponseVO> getSocialLoginAssociations(
+		@RequestHeader("Authorization") String accessToken) {
+		return socialLoginUseCase.getSocialLoginAssociations(accessToken).stream()
 			.map(OauthInfoResponseVO::fromDTO)
 			.collect(Collectors.toList());
 	}

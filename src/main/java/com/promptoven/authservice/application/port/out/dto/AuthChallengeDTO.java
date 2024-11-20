@@ -3,7 +3,9 @@ package com.promptoven.authservice.application.port.out.dto;
 import java.util.Date;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class AuthChallengeDTO {
 
 	private final String code;

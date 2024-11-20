@@ -7,8 +7,8 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class UpdateRoleRequestDTO {
-    private final int id;
-    private final String name;
-    private final String description;
+public class SocialLoginDisassociateRequestDTO {
+    private final String provider;
+    private final String providerId;
+    private final String memberUUID;
 }
