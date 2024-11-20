@@ -37,7 +37,7 @@ public class FindMemberAspect {
 		Object dto = args[0];
 
 		// Extract memberUUID from DTO using reflection
-		Method getUuidMethod = dto.getClass().getMethod("getMemberUUID");
+		Method getUuidMethod = dto.getClass().getMethod("memberUUID");
 		String memberUUID = (String)getUuidMethod.invoke(dto);
 
 		// Find member

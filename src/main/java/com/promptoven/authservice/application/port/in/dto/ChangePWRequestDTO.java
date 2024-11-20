@@ -1,18 +1,13 @@
 package com.promptoven.authservice.application.port.in.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
+@Getter 
+@Builder
+@AllArgsConstructor
 public class ChangePWRequestDTO {
-
-	private final String newPassword;
-	private final String memberUUID;
-
-	@Builder
-	public ChangePWRequestDTO(String newPassword, String memberUUID) {
-		this.newPassword = newPassword;
-		this.memberUUID = memberUUID;
-	}
-
+    private final String newPassword;
+    private final String memberUUID;
 }

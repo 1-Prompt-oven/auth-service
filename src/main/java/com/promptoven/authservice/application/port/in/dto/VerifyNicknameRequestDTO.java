@@ -1,14 +1,12 @@
 package com.promptoven.authservice.application.port.in.dto;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Builder;
 
+@AllArgsConstructor
 @Getter
+@Builder
 public class VerifyNicknameRequestDTO {
-    private final String nickname;
-
-    @Builder
-    public VerifyNicknameRequestDTO(String nickname) {
-        this.nickname = nickname;
-    }
-} 
+	private final String nickname;
+}

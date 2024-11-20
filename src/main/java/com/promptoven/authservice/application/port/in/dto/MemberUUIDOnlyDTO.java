@@ -5,5 +5,5 @@ package com.promptoven.authservice.application.port.in.dto;
  * in use for Aspect handle method with optimization
  */
 public interface MemberUUIDOnlyDTO {
-	String getMemberUUID();
+	String memberUUID();
 } 
