@@ -13,7 +13,8 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.LoginRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ResetPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.RefreshResponseVO;
-import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
+import com.promptoven.authservice.application.port.in.usecase.AccountAccessUsecase;
+import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -28,38 +29,39 @@ public class AuthenticationRestController {
 	final String AuthHeader = "Authorization";
 	final String RefreshHeader = "Refreshtoken";
 
-	private final AuthenticationUseCase authenticationUseCase;
+	private final AccountAccessUsecase accountAccessUsecase;
+	private final MemberManagementUseCase memberManagementUseCase;
 
 	@PostMapping("/login")
 	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
-		LoginResponseDTO loginResponseDTO = authenticationUseCase.login(loginRequestVO.toDTO());
+		LoginResponseDTO loginResponseDTO = accountAccessUsecase.login(loginRequestVO.toDTO());
 		return LoginResponseVO.from(loginResponseDTO);
 	}
 
 	@PostMapping("/logout")
 	public void logout(@RequestHeader(AuthHeader) String accessToken,
 		@RequestHeader(RefreshHeader) String refreshToken) {
-		authenticationUseCase.logout(accessToken, refreshToken);
+		accountAccessUsecase.logout(accessToken, refreshToken);
 	}
 
 	@PutMapping("/withdraw")
 	public void withdraw(@RequestHeader(AuthHeader) String accessToken) {
-		authenticationUseCase.withdraw(accessToken);
+		accountAccessUsecase.withdraw(accessToken);
 	}
 
 	@PostMapping("/resetPW")
 	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
-		authenticationUseCase.resetPW(resetPWRequestVO.toDTO());
+		memberManagementUseCase.resetPW(resetPWRequestVO.toDTO());
 	}
 
 	@PostMapping("/checkPW")
 	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
-		return authenticationUseCase.checkPW(checkPWRequestVO.toDTO());
+		return accountAccessUsecase.checkPW(checkPWRequestVO.toDTO());
 	}
 
 	@GetMapping("/refresh")
 	public RefreshResponseVO tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
-		return RefreshResponseVO.from(authenticationUseCase.refresh(refreshToken));
+		return RefreshResponseVO.from(accountAccessUsecase.refresh(refreshToken));
 	}
 
 }

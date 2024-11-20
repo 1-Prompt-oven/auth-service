@@ -1,8 +1,11 @@
 package com.promptoven.authservice.application.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.ChangePWRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.ResetPWRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.SetMemberRoleRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.UpdateNicknameRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
@@ -10,6 +13,7 @@ import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.MemberNicknameUpdateEvent;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
 import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
 import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
 import com.promptoven.authservice.domain.Member;
@@ -26,6 +30,7 @@ public class MemberManagementService implements MemberManagementUseCase {
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
 	private final EventPublisher eventPublisher;
+	private final PasswordEncoder passwordEncoder;
 	private final RoleDomainDTOMapper roleDomainDTOMapper;
 	private final MemberDomainDTOMapper memberDomainDTOMapper;
 
@@ -72,5 +77,26 @@ public class MemberManagementService implements MemberManagementUseCase {
 	@Override
 	public void clearPassword(Member member) {
 		memberPersistence.updateMember(memberDomainDTOMapper.toDTO(Member.updateMemberPassword(member, "clear")));
+	}
+
+	@Override
+	public void changePW(ChangePWRequestDTO changePWRequestDTO) {
+
+		MemberDTO memberDTO = memberPersistence.findByUuid(changePWRequestDTO.getMemberUUID());
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
+		String newPassword = changePWRequestDTO.getNewPassword();
+		Member updatedMember = Member.updateMemberPassword(member, passwordEncoder.encode(newPassword));
+		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(updatedMember);
+		memberPersistence.updatePassword(updatedMemberDTO);
+	}
+
+	@Override
+	public void resetPW(ResetPWRequestDTO resetPWRequestDTO) {
+
+		MemberDTO memberDTO = memberPersistence.findByEmail(resetPWRequestDTO.getEmail());
+		Member member = memberDomainDTOMapper.toDomain(memberDTO);
+		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(
+			Member.updateMemberPassword(member, passwordEncoder.encode(resetPWRequestDTO.getPassword())));
+		memberPersistence.updatePassword(updatedMemberDTO);
 	}
 }

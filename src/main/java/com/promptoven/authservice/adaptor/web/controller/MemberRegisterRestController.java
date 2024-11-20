@@ -11,6 +11,7 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyEmailReques
 import com.promptoven.authservice.adaptor.web.controller.vo.in.VerifyNicknameRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
+import com.promptoven.authservice.application.port.in.usecase.VerificationUseCase;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberRegisterRestController {
 
 	private final MemberRegistrationUseCase memberRegistrationUseCase;
+	private final VerificationUseCase verificationUseCase;
 
 	@PostMapping("/register")
 	public LoginResponseVO register(@RequestBody RegisterRequestVO registerRequestVO) {
@@ -32,12 +34,12 @@ public class MemberRegisterRestController {
 
 	@PostMapping("/verify/email")
 	public boolean verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
-		return memberRegistrationUseCase.verifyEmail(verifyEmailRequestVO.toDTO());
+		return verificationUseCase.verifyEmail(verifyEmailRequestVO.toDTO());
 	}
 
 	@PostMapping("/verify/nickname")
 	public boolean verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
-		return memberRegistrationUseCase.verifyNickname(verifyNicknameRequestVO.toDTO());
+		return verificationUseCase.verifyNickname(verifyNicknameRequestVO.toDTO());
 	}
 
 	@PostMapping("/register-social")
