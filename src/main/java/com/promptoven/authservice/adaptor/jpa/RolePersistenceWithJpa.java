@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.promptoven.authservice.adaptor.jpa.entity.RoleEntity;
 import com.promptoven.authservice.adaptor.jpa.repository.RoleRepository;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
-import com.promptoven.authservice.domain.Role;
+import com.promptoven.authservice.application.service.dto.RoleDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,19 +18,19 @@ public class RolePersistenceWithJpa implements RolePersistence {
 	private final RoleRepository roleRepository;
 
 	@Override
-	public void create(Role role) {
+	public void create(RoleDTO role) {
 		RoleEntity roleEntity = JpaRoleDTOEntityMapper.toEntity(role);
 		roleRepository.save(roleEntity);
 	}
 
 	@Override
-	public Role findRoleById(int roleID) {
+	public RoleDTO findRoleById(int roleID) {
 		RoleEntity roleEntity = roleRepository.findById(roleID).orElse(new RoleEntity());
 		return JpaRoleDTOEntityMapper.toDTO(roleEntity);
 	}
 
 	@Override
-	public Role findByName(String roleName) {
+	public RoleDTO findByName(String roleName) {
 		RoleEntity roleEntity = roleRepository.findByName(roleName);
 		return null != roleEntity ? JpaRoleDTOEntityMapper.toDTO(roleEntity) : null;
 	}
@@ -46,7 +46,7 @@ public class RolePersistenceWithJpa implements RolePersistence {
 	}
 
 	@Override
-	public void updateRole(Role updatedRole) {
+	public void updateRole(RoleDTO updatedRole) {
 		roleRepository.save(JpaRoleDTOEntityMapper.toEntity(updatedRole));
 	}
 
