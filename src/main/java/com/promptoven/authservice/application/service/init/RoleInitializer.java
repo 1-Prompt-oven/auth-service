@@ -10,6 +10,7 @@ import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.service.dto.RoleDTO;
 import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
 import com.promptoven.authservice.domain.Role;
+import com.promptoven.authservice.domain.dto.RoleModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,10 +40,26 @@ public class RoleInitializer implements ApplicationListener<ApplicationReadyEven
 	}
 
 	private List<RoleDTO> RoleBaseEntityList() {
+		RoleModelDTO memberModel = RoleModelDTO.builder()
+			.id(1)
+			.name("member")
+			.description("ROLE_MEMBER")
+			.build();
+		RoleModelDTO sellerModel = RoleModelDTO.builder()
+			.id(2)
+			.name("seller")
+			.description("ROLE_SELLER")
+			.build();
+		RoleModelDTO adminModel = RoleModelDTO.builder()
+			.id(3)
+			.name("admin")
+			.description("ROLE_ADMIN")
+			.build();
+
 		return List.of(
-			roleDomainDTOMapper.toDTO(Role.createRole("user", 1, "ROLE_USER")),
-			roleDomainDTOMapper.toDTO(Role.createRole("seller", 2, "ROLE_SELLER")),
-			roleDomainDTOMapper.toDTO(Role.createRole("admin", 3, "ROLE_ADMIN"))
+			roleDomainDTOMapper.toDTO(Role.createRole(memberModel)),
+			roleDomainDTOMapper.toDTO(Role.createRole(sellerModel)),
+			roleDomainDTOMapper.toDTO(Role.createRole(adminModel))
 		);
 	}
 }
