@@ -42,6 +42,11 @@ public class RedisAuthTaskMemory implements AuthTaskMemory {
 	}
 
 	@Override
+	public boolean isAuthChallengeSuccess(String media) {
+		return Boolean.TRUE.equals(redisTemplate.opsForValue().get(media).equals("Success"));
+	}
+
+	@Override
 	public void recordAuthChallengeSuccess(String media, Date expires) {
 		long expirationTime = expires.getTime() - System.currentTimeMillis();
 		redisTemplate.opsForValue().set(media, "Success", expirationTime, TimeUnit.MILLISECONDS);

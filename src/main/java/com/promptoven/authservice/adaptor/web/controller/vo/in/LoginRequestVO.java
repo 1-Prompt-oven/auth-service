@@ -1,6 +1,6 @@
 package com.promptoven.authservice.adaptor.web.controller.vo.in;
 
-import com.promptoven.authservice.application.service.LoginRequestDTO;
+import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -11,6 +11,7 @@ import com.promptoven.authservice.application.port.in.dto.EmailRequestRequestDTO
 import com.promptoven.authservice.application.port.in.usecase.MediaAuthUseCase;
 import com.promptoven.authservice.application.port.out.call.AuthTaskMemory;
 import com.promptoven.authservice.application.port.out.call.MailSending;
+import com.promptoven.authservice.application.port.out.dto.AuthChallengeDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +38,7 @@ public class MediaAuthService implements MediaAuthUseCase {
 	}
 
 	protected void saveSuccessAuthChallenge(String email) {
-		Date expires = new Date(AUTH_CHALLENGE_EXPIRE_TIME + System.currentTimeMillis());
-		authTaskMemory.recordAuthChallengeSuccess(email, expires);
+		authTaskMemory.recordAuthChallengeSuccess(email, makeExpire());
 	}
 
 	private String makeRandomCode() {
@@ -51,18 +51,24 @@ public class MediaAuthService implements MediaAuthUseCase {
 
 	@Override
 	public void requestEmail(EmailRequestRequestDTO emailRequestRequestDTO) {
-		Date expires = makeExpire();
-		String code = makeRandomCode();
 		String email = emailRequestRequestDTO.getEmail();
+		String code = makeRandomCode();
 		mailSending.sendMail(email, "Email Verification Code", "Your verification code is " + code);
-		authTaskMemory.recordAuthChallenge(email, code, expires);
+		authTaskMemory.recordAuthChallenge(AuthChallengeDTO.builder()
+			.media(email)
+			.code(code)
+			.expires(makeExpire())
+			.build());
 	}
 
 	@Override
 	public void requestPhone(String phone) {
-		Date expires = makeExpire();
 		String code = makeRandomCode();
 		// todo: Send SMS or Kakaotalk Alert talk
-		authTaskMemory.recordAuthChallenge(phone, code, expires);
+		authTaskMemory.recordAuthChallenge(AuthChallengeDTO.builder()
+			.media(phone)
+			.code(code)
+			.expires(makeExpire())
+			.build());
 	}
 }

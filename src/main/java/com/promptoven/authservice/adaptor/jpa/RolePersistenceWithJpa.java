@@ -19,20 +19,20 @@ public class RolePersistenceWithJpa implements RolePersistence {
 
 	@Override
 	public void create(Role role) {
-		RoleEntity roleEntity = RoleEntity.fromDomain(role);
+		RoleEntity roleEntity = JpaRoleDTOEntityMapper.toEntity(role);
 		roleRepository.save(roleEntity);
 	}
 
 	@Override
 	public Role findRoleById(int roleID) {
 		RoleEntity roleEntity = roleRepository.findById(roleID).orElse(new RoleEntity());
-		return roleEntity.toDomain();
+		return JpaRoleDTOEntityMapper.toDTO(roleEntity);
 	}
 
 	@Override
 	public Role findByName(String roleName) {
 		RoleEntity roleEntity = roleRepository.findByName(roleName);
-		return null != roleEntity ? roleEntity.toDomain() : null;
+		return null != roleEntity ? JpaRoleDTOEntityMapper.toDTO(roleEntity) : null;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class RolePersistenceWithJpa implements RolePersistence {
 
 	@Override
 	public void updateRole(Role updatedRole) {
-		roleRepository.save(RoleEntity.fromDomain(updatedRole));
+		roleRepository.save(JpaRoleDTOEntityMapper.toEntity(updatedRole));
 	}
 
 	@Override

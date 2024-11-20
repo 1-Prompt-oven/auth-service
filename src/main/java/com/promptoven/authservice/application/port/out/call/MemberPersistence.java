@@ -1,25 +1,25 @@
 package com.promptoven.authservice.application.port.out.call;
 
-import com.promptoven.authservice.domain.Member;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
 
 public interface MemberPersistence {
 
-	void create(Member member);
+	void create(MemberDTO memberDTO);
 
-	Member findByEmail(String email);
+	MemberDTO findByEmail(String email);
 
-	Member findByUuid(String uuid);
+	MemberDTO findByUuid(String uuid);
 
-	Member findByNickname(String nickname);
+	MemberDTO findByNickname(String nickname);
 
 	boolean existsByEmail(String email);
 
 	boolean existsByNickname(String nickname);
 
-	void updatePassword(Member updatedMember);
+	void updatePassword(MemberDTO updatedMember);
 
-	void remove(Member member);
+	void remove(MemberDTO memberDTO);
 
-	void updateMember(Member updatedMember);
+	void updateMember(MemberDTO updatedMember);
 
 }

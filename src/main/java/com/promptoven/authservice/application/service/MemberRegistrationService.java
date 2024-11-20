@@ -14,6 +14,10 @@ import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
+import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
+import com.promptoven.authservice.application.service.dto.OauthInfoDTO;
+import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
+import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.domain.Member;
 import com.promptoven.authservice.domain.OauthInfo;
 
@@ -30,6 +34,8 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final OauthInfoPersistence oauthInfoPersistence;
 	private final AuthenticationService authenticationService;
 	private final EventPublisher eventPublisher;
+	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
+	private final MemberDomainDTOMapper memberDomainDTOMapper;
 
 	@Override
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
@@ -57,13 +63,14 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 		String email = registerSocialRequestDTO.getEmail();
 		String password = registerSocialRequestDTO.getPassword();
-		
+
 		String provider = registerSocialRequestDTO.getProvider();
 		String providerID = registerSocialRequestDTO.getProviderId();
 
 		String uuid = makeMember(registerSocialRequestDTO.toRegisterRequestDTO(), 1);
-		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
-		oauthInfoPersistence.recordOauthInfo(oauthInfo);
+		OauthInfoDTO oauthInfoDTO = oauthInfoDomainDTOMapper.toDTO(
+			OauthInfo.createOauthInfo(provider, providerID, uuid));
+		oauthInfoPersistence.recordOauthInfo(oauthInfoDTO);
 		eventPublisher.publish("member-registered", uuid);
 		return authenticationService.login(new LoginRequestDTO(email, password));
 	}
@@ -86,7 +93,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 		}
 		Member member = Member.createMember
 			(uuid, email, encodedPassword, nickname, role);
-		memberPersistence.create(member);
+		memberPersistence.create(memberDomainDTOMapper.toDTO(member));
 		return uuid;
 	}
 }
