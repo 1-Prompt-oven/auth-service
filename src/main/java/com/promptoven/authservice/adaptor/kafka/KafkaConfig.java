@@ -22,6 +22,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import com.promptoven.authservice.application.port.in.dto.event.MemberNicknameUpdateRequestEvent;
+import com.promptoven.authservice.application.port.in.dto.event.SettlementFirstCreateEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -103,6 +104,9 @@ public class KafkaConfig {
 	}
 
 	@Bean(name = "settlementFirstCreateListenerFactory")
+	public ConcurrentKafkaListenerContainerFactory<String, SettlementFirstCreateEvent> settlementFirstCreateListenerFactory() {
+		return createTypedContainerFactory(SettlementFirstCreateEvent.class);
+	}
 
 	// Helper method to create new event type factories
 	protected <T> void registerEventFactory(String beanName, Class<T> eventType) {
