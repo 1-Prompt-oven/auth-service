@@ -25,7 +25,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10'
-          dependency-graph: generate-and-submit          
+          dependency-graph: generate-and-submit
       ## gradle caching - 빌드 시간 향상
       - name: Gradle Caching
         uses: actions/cache@v4
@@ -46,14 +46,14 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/auth-service .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/auth-service
 
-      - name: docker-compose yaml update
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
-          source: docker-compose.yaml
-          target: /home/ubuntu/config-server/
+      #      - name: docker-compose yaml update
+      #        uses: appleboy/scp-action@master
+      #        with:
+      #          host: ${{ secrets.EC2_HOST }}
+      #          username: ubuntu
+      #          key: ${{ secrets.EC2_KEY }}
+      #          source: docker-compose.yaml
+      #          target: /home/ubuntu/config-server/
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
