@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Builder
-@Table(name = "oauthinfo")
+@Table(name = "sociallogininfo")
 @NoArgsConstructor
 @AllArgsConstructor
-public class OauthInfoEntity {
+public class SocialLoginInfoEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

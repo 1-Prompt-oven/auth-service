@@ -7,20 +7,20 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.promptoven.authservice.adaptor.jpa.entity.OauthInfoEntity;
+import com.promptoven.authservice.adaptor.jpa.entity.SocialLoginInfoEntity;
 
-public interface OauthInfoRepository extends JpaRepository<OauthInfoEntity, Long> {
+public interface SocialLoginInfoRepository extends JpaRepository<SocialLoginInfoEntity, Long> {
 
-	@Query("SELECT memberUUID FROM OauthInfoEntity WHERE provider = ?1 AND providerID = ?2")
+	@Query("SELECT memberUUID FROM SocialLoginInfoEntity WHERE provider = ?1 AND providerID = ?2")
 	String findByProviderAndProviderID(String provider, String providerID);
 
-	List<OauthInfoEntity> findAllByMemberUUID(String memberUUID);
+	List<SocialLoginInfoEntity> findAllByMemberUUID(String memberUUID);
 
 	@Modifying
-	@Query("DELETE FROM OauthInfoEntity o WHERE o.memberUUID = :memberUUID AND o.provider = :provider AND o.providerID = :providerID")
+	@Query("DELETE FROM SocialLoginInfoEntity o WHERE o.memberUUID = :memberUUID AND o.provider = :provider AND o.providerID = :providerID")
 	void deleteByMemberUUIDAndProviderAndProviderID(@Param("memberUUID") String memberUUID,
 		@Param("provider") String provider, @Param("providerID") String providerID);
 
-	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM OauthInfoEntity o WHERE o.memberUUID = :memberUUID AND o.provider = :provider AND o.providerID = :providerID")
+	@Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM SocialLoginInfoEntity o WHERE o.memberUUID = :memberUUID AND o.provider = :provider AND o.providerID = :providerID")
 	boolean existsByMemberUUIDAndProviderAndProviderID(String memberUUID, String provider, String providerID);
 }
