@@ -1,8 +1,8 @@
 package com.promptoven.authservice.adaptor.web.controller;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,7 +49,7 @@ public class AccountAccessRestController {
 		accountAccessUsecase.logout(accessToken, refreshToken);
 	}
 
-	@PutMapping("/withdraw")
+	@DeleteMapping("/withdraw")
 	public void withdraw(@RequestHeader(AuthHeader) String accessToken) {
 		accountAccessUsecase.withdraw(accessToken);
 	}

@@ -6,13 +6,13 @@ import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
 
 public interface SocialLoginInfoPersistence {
 
-	void recordOauthInfo(SocialLoginInfoDTO socialLoginInfoDTO);
+	void recordSocialLoginInfo(SocialLoginInfoDTO socialLoginInfoDTO);
 
 	String getMemberUUID(String Provider, String ProviderID);
 
-	List<SocialLoginInfoDTO> getOauthInfo(String memberUUID);
+	List<SocialLoginInfoDTO> getSocialLoginInfo(String memberUUID);
 
-	boolean existByOauthInfoDTO(SocialLoginInfoDTO socialLoginInfoDTO);
+	boolean existBySocialLoginDTO(SocialLoginInfoDTO socialLoginInfoDTO);
 
-	void deleteOauthInfo(SocialLoginInfoDTO socialLoginInfoDTO);
+	void deleteSocialLoginInfo(SocialLoginInfoDTO socialLoginInfoDTO);
 }
