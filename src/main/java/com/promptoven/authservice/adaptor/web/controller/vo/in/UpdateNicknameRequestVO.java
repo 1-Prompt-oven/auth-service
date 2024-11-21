@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class UpdateNicknameRequestVO {
 	private String memberUUID;
 	private String nickname;
+
 }

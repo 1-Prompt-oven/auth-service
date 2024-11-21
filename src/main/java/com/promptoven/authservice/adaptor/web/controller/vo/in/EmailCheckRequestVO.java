@@ -11,5 +11,4 @@ public class EmailCheckRequestVO {
 
 	private String email;
 	private String code;
-	
 }

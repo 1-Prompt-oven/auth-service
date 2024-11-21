@@ -7,7 +7,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
+import com.promptoven.authservice.application.service.dto.RoleDTO;
+import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
 import com.promptoven.authservice.domain.Role;
+import com.promptoven.authservice.domain.dto.RoleModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RoleInitializer implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final RolePersistence rolePersistence;
+	private final RoleDomainDTOMapper roleDomainDTOMapper;
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -27,7 +31,7 @@ public class RoleInitializer implements ApplicationListener<ApplicationReadyEven
 	private void initializeRoleData() {
 
 		if (rolePersistence.count() == 0) {
-			RoleEntityList().forEach(rolePersistence::create);
+			RoleBaseEntityList().forEach(rolePersistence::create);
 			log.info("Role data is empty. Initializing...");
 
 		} else {
@@ -35,11 +39,27 @@ public class RoleInitializer implements ApplicationListener<ApplicationReadyEven
 		}
 	}
 
-	private List<Role> RoleEntityList() {
+	private List<RoleDTO> RoleBaseEntityList() {
+		RoleModelDTO memberModel = RoleModelDTO.builder()
+			.id(1)
+			.name("member")
+			.description("ROLE_MEMBER")
+			.build();
+		RoleModelDTO sellerModel = RoleModelDTO.builder()
+			.id(2)
+			.name("seller")
+			.description("ROLE_SELLER")
+			.build();
+		RoleModelDTO adminModel = RoleModelDTO.builder()
+			.id(3)
+			.name("admin")
+			.description("ROLE_ADMIN")
+			.build();
+
 		return List.of(
-			Role.createRole("user", 1, "ROLE_USER"),
-			Role.createRole("seller", 2, "ROLE_SELLER"),
-			Role.createRole("admin", 3, "ROLE_ADMIN")
+			roleDomainDTOMapper.toDTO(Role.createRole(memberModel)),
+			roleDomainDTOMapper.toDTO(Role.createRole(sellerModel)),
+			roleDomainDTOMapper.toDTO(Role.createRole(adminModel))
 		);
 	}
 }

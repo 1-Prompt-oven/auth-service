@@ -1,17 +1,27 @@
 package com.promptoven.authservice.application.service;
 
-import org.springframework.lang.Nullable;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.promptoven.authservice.application.port.in.dto.SocialLoginAssociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginDisassociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
-import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
+import com.promptoven.authservice.application.port.out.call.SocialLoginInfoPersistence;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
+import com.promptoven.authservice.application.service.dto.MemberDTO;
+import com.promptoven.authservice.application.service.dto.SocialLoginEmailHandlingDTO;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
+import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
+import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.application.service.utility.JwtProvider;
 import com.promptoven.authservice.domain.Member;
-import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.domain.SocialLoginInfo;
+import com.promptoven.authservice.domain.dto.SocialLoginInfoModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,23 +31,30 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SocialLoginService implements SocialLoginUseCase {
 
-	private final OauthInfoPersistence oauthInfoPersistence;
+	private final SocialLoginInfoPersistence socialLoginInfoPersistence;
 	private final MemberPersistence memberPersistence;
 	private final RolePersistence rolePersistence;
-	private final MediaAuthService mediaAuthService;
+	private final VerificationService verificationService;
 	private final JwtProvider jwtProvider;
+	private final MemberDomainDTOMapper memberDomainDTOMapper;
+	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
 
 	@Override
-	public SocialLoginDTO oauthLogin(String provider, String providerID, @Nullable String email) {
-
+	public SocialLoginDTO SocialLogin(SocialLoginRequestDTO socialLoginRequestDTO) {
+		String provider = socialLoginRequestDTO.getProvider();
+		String providerID = socialLoginRequestDTO.getProviderId();
 		// Check if user already exists with this OAuth provider
-		String existingMemberUUID = oauthInfoPersistence.getMemberUUID(provider, providerID);
-		boolean isExistingMember = null != existingMemberUUID;
-
+		String existingMemberUUID = socialLoginInfoPersistence.getMemberUUID(provider, providerID);
 		// Handle email linking if provided
-		if (null != email) {
-			handleEmailLinking(email, provider, providerID);
+		if (null != socialLoginRequestDTO.getEmail()) {
+			SocialLoginEmailHandlingDTO socialLoginEmailHandlingDTO = SocialLoginEmailHandlingDTO.builder()
+				.email(socialLoginRequestDTO.getEmail())
+				.provider(provider)
+				.providerId(providerID)
+				.build();
+			existingMemberUUID = handleEmailLinking(socialLoginEmailHandlingDTO);
 		}
+		boolean isExistingMember = null != existingMemberUUID;
 		// Return login response if member exists
 		if (isExistingMember) {
 			return createLoginResponse(existingMemberUUID);
@@ -46,18 +63,29 @@ public class SocialLoginService implements SocialLoginUseCase {
 		return new SocialLoginDTO();
 	}
 
-	private void handleEmailLinking(String email, String provider, String providerID) {
-		Member member = memberPersistence.findByEmail(email);
-		if (null != member) {
-			OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, member.getUuid());
-			oauthInfoPersistence.recordOauthInfo(oauthInfo);
+	private String handleEmailLinking(SocialLoginEmailHandlingDTO socialLoginEmailHandlingDTO) {
+		String email = socialLoginEmailHandlingDTO.getEmail();
+		String provider = socialLoginEmailHandlingDTO.getProvider();
+		String providerID = socialLoginEmailHandlingDTO.getProviderId();
+		MemberDTO memberDTO = memberPersistence.findByEmail(email);
+		if (null != memberDTO) {
+			Member member = memberDomainDTOMapper.toDomain(memberDTO);
+			SocialLoginInfoModelDTO socialLoginInfoModelDTO = SocialLoginInfoModelDTO.builder()
+				.memberUUID(member.getUuid())
+				.provider(provider)
+				.providerID(providerID)
+				.build();
+			SocialLoginInfo socialLoginInfo = SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO);
+			socialLoginInfoPersistence.recordSocialLoginInfo(oauthInfoDomainDTOMapper.toDTO(socialLoginInfo));
+			return member.getUuid();
 		} else {
-			mediaAuthService.saveSuccessAuthChallenge(email);
+			verificationService.saveSuccessAuthChallenge(email);
+			return null;
 		}
 	}
 
 	private SocialLoginDTO createLoginResponse(String memberUUID) {
-		Member member = memberPersistence.findByUuid(memberUUID);
+		Member member = memberDomainDTOMapper.toDomain(memberPersistence.findByUuid(memberUUID));
 		String role = rolePersistence.findRoleById(member.getRole()).getName();
 		String accessToken = jwtProvider.issueJwt(memberUUID, role);
 		String refreshToken = jwtProvider.issueRefresh(memberUUID);
@@ -72,19 +100,39 @@ public class SocialLoginService implements SocialLoginUseCase {
 	}
 
 	@Override
-	public void OauthRegister(String provider, String providerID, String memberUUID) {
-		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, memberUUID);
-		oauthInfoPersistence.recordOauthInfo(oauthInfo);
+	public void SocialLoginAssociate(SocialLoginAssociateRequestDTO socialLoginAssociateRequestDTO) {
+		SocialLoginInfoModelDTO socialLoginInfoModelDTO = SocialLoginInfoModelDTO.builder()
+			.memberUUID(socialLoginAssociateRequestDTO.getMemberUUID())
+			.provider(socialLoginAssociateRequestDTO.getProvider())
+			.providerID(socialLoginAssociateRequestDTO.getProviderId())
+			.build();
+		SocialLoginInfo socialLoginInfo = SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO);
+		socialLoginInfoPersistence.recordSocialLoginInfo(oauthInfoDomainDTOMapper.toDTO(socialLoginInfo));
 	}
 
 	@Override
 	@Transactional
-	public void OauthUnregister(String provider, String providerID, String memberUUID) {
+	public void SocialLoginDisassociate(SocialLoginDisassociateRequestDTO socialLoginDisassociateRequestDTO) {
+
+		SocialLoginInfoDTO requestedSocialLoginInfoDTO = SocialLoginInfoDTO.builder()
+			.memberUUID(socialLoginDisassociateRequestDTO.getMemberUUID())
+			.provider(socialLoginDisassociateRequestDTO.getProvider())
+			.providerID(socialLoginDisassociateRequestDTO.getProviderId())
+			.build();
+
+		SocialLoginInfo requestedSocialLoginInfo = oauthInfoDomainDTOMapper.toDomain(requestedSocialLoginInfoDTO);
 
 		try {
-			oauthInfoPersistence.deleteOauthInfo(memberUUID, provider, providerID);
+			socialLoginInfoPersistence.deleteSocialLoginInfo(oauthInfoDomainDTOMapper.toDTO(requestedSocialLoginInfo));
 		} catch (Exception e) {
 			throw e;
 		}
+
+	}
+
+	@Override
+	public List<SocialLoginInfoDTO> getSocialLoginAssociations(String accessToken) {
+		String memberUUID = jwtProvider.validateAndDecryptToken(accessToken).getUserId();
+		return socialLoginInfoPersistence.getSocialLoginInfo(memberUUID);
 	}
 }

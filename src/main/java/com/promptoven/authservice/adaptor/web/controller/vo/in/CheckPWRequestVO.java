@@ -12,12 +12,4 @@ public class CheckPWRequestVO {
 	private String memberUUID;
 	private String password;
 
-	public String getMemberUUID() {
-		return memberUUID;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
 }
