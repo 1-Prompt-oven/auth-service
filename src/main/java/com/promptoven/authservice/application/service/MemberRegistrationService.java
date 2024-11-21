@@ -64,9 +64,12 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 			.build();
 		SocialLoginInfoDTO socialLoginInfoDTO = oauthInfoDomainDTOMapper.toDTO(
 			SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO));
-		socialLoginInfoPersistence.recordOauthInfo(socialLoginInfoDTO);
+		socialLoginInfoPersistence.recordSocialLoginInfo(socialLoginInfoDTO);
 		eventPublisher.publish("member-registered", uuid);
-		return accountAccessService.login(new LoginRequestDTO(email, password));
+		return accountAccessService.login(LoginRequestDTO.builder()
+			.email(email)
+			.password(password)
+			.build());
 	}
 
 	@Override

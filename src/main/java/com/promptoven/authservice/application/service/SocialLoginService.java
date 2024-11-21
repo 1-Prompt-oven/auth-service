@@ -76,7 +76,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 				.providerID(providerID)
 				.build();
 			SocialLoginInfo socialLoginInfo = SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO);
-			socialLoginInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(socialLoginInfo));
+			socialLoginInfoPersistence.recordSocialLoginInfo(oauthInfoDomainDTOMapper.toDTO(socialLoginInfo));
 			return member.getUuid();
 		} else {
 			verificationService.saveSuccessAuthChallenge(email);
@@ -107,7 +107,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 			.providerID(socialLoginAssociateRequestDTO.getProviderId())
 			.build();
 		SocialLoginInfo socialLoginInfo = SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO);
-		socialLoginInfoPersistence.recordOauthInfo(oauthInfoDomainDTOMapper.toDTO(socialLoginInfo));
+		socialLoginInfoPersistence.recordSocialLoginInfo(oauthInfoDomainDTOMapper.toDTO(socialLoginInfo));
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public class SocialLoginService implements SocialLoginUseCase {
 		SocialLoginInfo requestedSocialLoginInfo = oauthInfoDomainDTOMapper.toDomain(requestedSocialLoginInfoDTO);
 
 		try {
-			socialLoginInfoPersistence.deleteOauthInfo(oauthInfoDomainDTOMapper.toDTO(requestedSocialLoginInfo));
+			socialLoginInfoPersistence.deleteSocialLoginInfo(oauthInfoDomainDTOMapper.toDTO(requestedSocialLoginInfo));
 		} catch (Exception e) {
 			throw e;
 		}
@@ -133,6 +133,6 @@ public class SocialLoginService implements SocialLoginUseCase {
 	@Override
 	public List<SocialLoginInfoDTO> getSocialLoginAssociations(String accessToken) {
 		String memberUUID = jwtProvider.validateAndDecryptToken(accessToken).getUserId();
-		return socialLoginInfoPersistence.getOauthInfo(memberUUID);
+		return socialLoginInfoPersistence.getSocialLoginInfo(memberUUID);
 	}
 }
