@@ -16,7 +16,6 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import io.lettuce.core.ClientOptions;
-import io.lettuce.core.protocol.ProtocolVersion;
 
 @Configuration
 public class RedisConfig {
