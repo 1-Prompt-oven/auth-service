@@ -111,6 +111,7 @@ logging:
     org.springframework.jdbc: DEBUG
     org.springframework.transaction: DEBUG
     org.springframework.orm.jpa: DEBUG
+    io.lettuce.core: DEBUG
 eureka:
   client:
     serviceUrl:
