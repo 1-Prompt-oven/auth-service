@@ -3,6 +3,7 @@ member-ban-event: member-banned
 member-unban-event: member-unbanned
 member-nickname-update-event: member-nickname-updated
 member-withdraw-event: member-withdraw
+member-register-event: member-registered # {memberUUID : String}
 # Settlement Service Produced
 settlement-first-create-event: settlement-first-created
 # Profile Service Produced
