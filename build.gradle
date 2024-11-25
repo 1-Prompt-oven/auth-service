@@ -56,6 +56,8 @@ dependencies {
 //    implementation 'org.springdoc:springdoc-openapi-webflux-ui:2.6.0'
 
     implementation 'ognl:ognl:3.4.3'
+
+    implementation 'io.lettuce:lettuce-core:6.5.0.RELEASE'
 }
 
 dependencyManagement {
