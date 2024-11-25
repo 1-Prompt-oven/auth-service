@@ -22,4 +22,6 @@ public interface MemberPersistence {
 
 	void updateMember(MemberDTO updatedMember);
 
+	long count();
+
 }
