@@ -2,6 +2,7 @@ package com.promptoven.authservice.application.service;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +37,13 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final EventPublisher eventPublisher;
 	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
 	private final MemberDomainDTOMapper memberDomainDTOMapper;
+	@Value("${member-registered-event}")
+	private String MemberRegisteredTopic;
 
 	@Override
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
 		String uuid = makeMember(registerRequestDTO, 1);
-		eventPublisher.publish("member-registered", uuid);
+		eventPublisher.publish(MemberRegisteredTopic, uuid);
 		return accountAccessService.login(LoginRequestDTO.builder()
 			.email(registerRequestDTO.getEmail())
 			.password(registerRequestDTO.getPassword())
