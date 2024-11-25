@@ -71,4 +71,9 @@ public class MemberPersistenceWithJpa implements MemberPersistence {
 		memberEntity.setId(memberRepository.findByUuid(member.getUuid()).getId());
 		memberRepository.save(memberEntity);
 	}
+	
+	@Override
+	public long count() {
+		return memberRepository.count();
+	}
 }
