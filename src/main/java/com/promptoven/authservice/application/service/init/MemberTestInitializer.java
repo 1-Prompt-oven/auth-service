@@ -29,9 +29,9 @@ public class MemberTestInitializer implements ApplicationListener<ApplicationRea
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		if (memberPersistence.count() > 100) {
 			log.info("Test member Data already exists. Skipping initialization...");
-			return;
+		} else {
+			initializeTestMemberData();
 		}
-		initializeTestMemberData();
 	}
 
 	private void initializeTestMemberData() {
