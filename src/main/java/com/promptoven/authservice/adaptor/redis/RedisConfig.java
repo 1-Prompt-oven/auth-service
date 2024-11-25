@@ -37,8 +37,7 @@ public class RedisConfig {
 
 		LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
 			.clientOptions(ClientOptions.builder()
-				.protocolVersion(ProtocolVersion.RESP2)
-				.pingBeforeActivateConnection(true)
+				.autoReconnect(true)
 				.build())
 			.commandTimeout(Duration.ofSeconds(5))
 			.build();
