@@ -7,9 +7,8 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class MemberNicknameUpdateEvent {
+public class MemberRegisterEvent {
 
 	private final String memberUUID;
-	private final String nickname;
-
+	private final String email;
 }
