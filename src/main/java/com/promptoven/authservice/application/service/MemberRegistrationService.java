@@ -37,7 +37,7 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	private final EventPublisher eventPublisher;
 	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
 	private final MemberDomainDTOMapper memberDomainDTOMapper;
-	@Value("${member-registered-event}")
+	@Value("${member-register-event}")
 	private String MemberRegisteredTopic;
 
 	@Override
