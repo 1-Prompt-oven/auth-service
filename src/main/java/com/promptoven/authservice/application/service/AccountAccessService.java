@@ -11,6 +11,7 @@ import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
+import com.promptoven.authservice.application.port.out.dto.MemberWithdrawEvent;
 import com.promptoven.authservice.application.port.out.dto.RefreshDTO;
 import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
 import com.promptoven.authservice.application.service.dto.MemberDTO;
@@ -97,7 +98,7 @@ public class AccountAccessService implements AccountAccessUsecase {
 		String memberUUID = tokenInfo.getUserId();
 		memberPersistence.remove(memberDomainDTOMapper.toDTO(
 			Member.deleteMember(memberDomainDTOMapper.toDomain(memberPersistence.findByUuid(memberUUID)))));
-		eventPublisher.publish(memberWithdrawEvent, memberUUID);
+		eventPublisher.publish(memberWithdrawEvent, new MemberWithdrawEvent(memberUUID));
 	}
 
 	@Override

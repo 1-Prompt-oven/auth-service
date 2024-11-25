@@ -12,7 +12,9 @@ import com.promptoven.authservice.application.port.in.usecase.MemberManagementUs
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.RolePersistence;
+import com.promptoven.authservice.application.port.out.dto.MemberBanEvent;
 import com.promptoven.authservice.application.port.out.dto.MemberNicknameUpdateEvent;
+import com.promptoven.authservice.application.port.out.dto.MemberUnbanEvent;
 import com.promptoven.authservice.application.service.dto.MemberDTO;
 import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
 import com.promptoven.authservice.application.service.dto.mapper.RoleDomainDTOMapper;
@@ -54,13 +56,13 @@ public class MemberManagementService implements MemberManagementUseCase {
 
 	@Override
 	public void banMember(Member member) {
-		eventPublisher.publish(memberBannedTopic, member.getUuid());
+		eventPublisher.publish(memberBannedTopic, new MemberBanEvent(member.getUuid()));
 		memberPersistence.updateMember(memberDomainDTOMapper.toDTO(Member.banMember(member)));
 	}
 
 	@Override
 	public void unbanMember(Member member) {
-		eventPublisher.publish(memberUnbanTopic, member.getUuid());
+		eventPublisher.publish(memberUnbanTopic, new MemberUnbanEvent(member.getUuid()));
 		memberPersistence.updateMember(memberDomainDTOMapper.toDTO(Member.unbanMember(member)));
 	}
 
@@ -70,7 +72,10 @@ public class MemberManagementService implements MemberManagementUseCase {
 		memberPersistence.updateMember(memberDomainDTOMapper.toDTO(Member.updateMemberNickname(member, nickname)));
 		eventPublisher.publish(
 			memberNicknameUpdatedTopic,
-			new MemberNicknameUpdateEvent(member.getUuid(), nickname)
+			MemberNicknameUpdateEvent.builder()
+				.memberUUID(member.getUuid())
+				.nickname(nickname)
+				.build()
 		);
 	}
 

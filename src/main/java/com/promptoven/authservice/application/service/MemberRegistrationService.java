@@ -13,6 +13,7 @@ import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
 import com.promptoven.authservice.application.port.out.call.SocialLoginInfoPersistence;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
+import com.promptoven.authservice.application.port.out.dto.MemberRegisterEvent;
 import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
 import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
 import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
@@ -43,9 +44,11 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	@Override
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
 		String uuid = makeMember(registerRequestDTO, 1);
-		eventPublisher.publish(MemberRegisteredTopic, uuid);
+		String email = registerRequestDTO.getEmail();
+		eventPublisher.publish(MemberRegisteredTopic,
+			MemberRegisterEvent.builder().memberUUID(uuid).email(email).build());
 		return accountAccessService.login(LoginRequestDTO.builder()
-			.email(registerRequestDTO.getEmail())
+			.email(email)
 			.password(registerRequestDTO.getPassword())
 			.build());
 	}
