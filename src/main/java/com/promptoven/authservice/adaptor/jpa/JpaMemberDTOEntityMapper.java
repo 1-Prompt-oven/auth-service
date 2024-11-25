@@ -12,6 +12,9 @@ class JpaMemberDTOEntityMapper {
 			.password(entity.getPassword())
 			.nickname(entity.getNickname())
 			.role(entity.getRole())
+			.isDeleted(entity.getIsDeleted())
+			.isBanned(entity.getIsBanned())
+			.createdAt(entity.getCreatedAt())
 			.build();
 	}
 
@@ -22,6 +25,9 @@ class JpaMemberDTOEntityMapper {
 			.password(dto.getPassword())
 			.nickname(dto.getNickname())
 			.role(dto.getRole())
+			.isDeleted(dto.getIsDeleted())
+			.isBanned(dto.getIsBanned())
+			.createdAt(dto.getCreatedAt())
 			.build();
 	}
 }
