@@ -44,11 +44,10 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 	@Override
 	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
 		String uuid = makeMember(registerRequestDTO, 1);
-		String email = registerRequestDTO.getEmail();
 		eventPublisher.publish(MemberRegisteredTopic,
-			MemberRegisterEvent.builder().memberUUID(uuid).email(email).build());
+			MemberRegisterEvent.builder().memberUUID(uuid).nickname(registerRequestDTO.getNickname()).build());
 		return accountAccessService.login(LoginRequestDTO.builder()
-			.email(email)
+			.email(registerRequestDTO.getEmail())
 			.password(registerRequestDTO.getPassword())
 			.build());
 	}
@@ -71,7 +70,8 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 		SocialLoginInfoDTO socialLoginInfoDTO = oauthInfoDomainDTOMapper.toDTO(
 			SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO));
 		socialLoginInfoPersistence.recordSocialLoginInfo(socialLoginInfoDTO);
-		eventPublisher.publish("member-registered", uuid);
+		eventPublisher.publish(MemberRegisteredTopic,
+			MemberRegisterEvent.builder().memberUUID(uuid).nickname(registerSocialRequestDTO.getNickname()).build());
 		return accountAccessService.login(LoginRequestDTO.builder()
 			.email(email)
 			.password(password)

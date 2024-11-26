@@ -10,5 +10,5 @@ import lombok.Getter;
 public class MemberRegisterEvent {
 
 	private final String memberUUID;
-	private final String email;
+	private final String nickname;
 }
