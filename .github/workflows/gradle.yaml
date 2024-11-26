@@ -62,6 +62,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
+            sudo docker stop auth-service || true
             sudo docker rm -f auth-service || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/auth-service
             cd /home/ubuntu/auth-service
