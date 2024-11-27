@@ -14,7 +14,7 @@ public class BaseExceptionHandler {
 	public ResponseEntity<BaseResponse<Void>> BaseError(BaseException e) {
 		// BaseException의 BaseResponseStatus를 가져와서 BaseResponse를 만들어서 return
 		BaseResponse<Void> response = new BaseResponse<>(e.getStatus());
-		log.error("BaseException -> {} {})", e.getStatus(), e.getStatus().getMessage(), e);
+		log.error("BaseException -> {} {}", e.getStatus(), e.getStatus().getMessage(), e);
 		return new ResponseEntity<>(response, response.httpStatus());
 	}
 
@@ -25,7 +25,7 @@ public class BaseExceptionHandler {
 		BaseResponse<Void> response = new BaseResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR);
 		log.error("RuntimeException: ", e);
 		for (StackTraceElement s : e.getStackTrace()) {
-			System.out.println(s);
+			log.error(s.toString());
 		}
 		return new ResponseEntity<>(response, response.httpStatus());
 	}
