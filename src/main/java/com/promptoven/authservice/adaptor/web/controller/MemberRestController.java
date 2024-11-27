@@ -11,6 +11,7 @@ import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.UpdateNi
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ChangePWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateNicknameRequestVO;
 import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +25,14 @@ public class MemberRestController {
 	private final MemberManagementProxy memberManagementProxy;
 
 	@PutMapping("/nickname")
-	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
+	public BaseResponse<Void> updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
 		memberManagementProxy.updateNickname(UpdateNicknameRequestMapper.toDTO(updateNicknameRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PostMapping("/changePW")
-	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
+	public BaseResponse<Void> changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
 		memberManagementProxy.changePW(ChangePWRequestMapper.toDTO(changePWRequestVO));
+		return new BaseResponse<>();
 	}
 }

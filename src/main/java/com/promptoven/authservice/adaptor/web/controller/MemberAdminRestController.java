@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.BanRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.ClearPasswordRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.CreateRoleRequestMapper;
@@ -48,53 +49,62 @@ public class MemberAdminRestController {
 	private final RoleManagementUseCase roleManagementUseCase;
 
 	@PostMapping("/admin-register")
-	public void adminRegister(@RequestBody RegisterRequestVO registerRequestVO) {
+	public BaseResponse<Void> adminRegister(@RequestBody RegisterRequestVO registerRequestVO) {
 		memberRegistrationUseCase.AdminRegister(RegisterRequestMapper.toDTO(registerRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PutMapping("/ban")
-	public void banMember(@RequestBody BanRequestVO banRequestVO) {
+	public BaseResponse<Void> banMember(@RequestBody BanRequestVO banRequestVO) {
 		memberManagementProxy.banMember(BanRequestMapper.toDTO(banRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PutMapping("/unban")
-	public void unbanMember(@RequestBody UnbanRequestVO unbanRequestVO) {
+	public BaseResponse<Void> unbanMember(@RequestBody UnbanRequestVO unbanRequestVO) {
 		memberManagementProxy.unbanMember(UnbanRequestMapper.toDTO(unbanRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PutMapping("/nickname")
-	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
+	public BaseResponse<Void> updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
 		memberManagementProxy.updateNickname(UpdateNicknameRequestMapper.toDTO(updateNicknameRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PutMapping("/member-role")
-	public void updateMemberRole(@RequestBody SetMemberRoleRequestVO setMemberRoleRequestVO) {
+	public BaseResponse<Void> updateMemberRole(@RequestBody SetMemberRoleRequestVO setMemberRoleRequestVO) {
 		memberManagementProxy.setMemberRole(SetMemberRoleRequestMapper.toDTO(setMemberRoleRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PutMapping("/clearPW")
-	public void clearPassword(@RequestBody ClearPasswordRequestVO clearPasswordRequestVO) {
+	public BaseResponse<Void> clearPassword(@RequestBody ClearPasswordRequestVO clearPasswordRequestVO) {
 		memberManagementProxy.clearPassword(ClearPasswordRequestMapper.toDTO(clearPasswordRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PostMapping("/role")
-	public void createRole(@RequestBody CreateRoleRequestVO createRoleRequestVO) {
+	public BaseResponse<Void> createRole(@RequestBody CreateRoleRequestVO createRoleRequestVO) {
 		roleManagementUseCase.createRole(CreateRoleRequestMapper.toDTO(createRoleRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PutMapping("/role")
-	public void updateRole(@RequestBody UpdateRoleRequestVO updateRoleRequestVO) {
+	public BaseResponse<Void> updateRole(@RequestBody UpdateRoleRequestVO updateRoleRequestVO) {
 		roleManagementUseCase.updateRole(UpdateRoleRequestMapper.toDTO(updateRoleRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@DeleteMapping("/role")
-	public void deleteRole(@RequestBody DeleteRoleRequestVO deleteRoleRequestVO) {
+	public BaseResponse<Void> deleteRole(@RequestBody DeleteRoleRequestVO deleteRoleRequestVO) {
 		roleManagementUseCase.deleteRole(DeleteRoleRequestMapper.toDTO(deleteRoleRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@GetMapping("/role")
-	public List<RoleResponseVO> getRole() {
-		return roleManagementUseCase.getRole().stream().map(RoleResponseMapper::fromDTO).toList();
+	public BaseResponse<List<RoleResponseVO>> getRole() {
+		return new BaseResponse<>(roleManagementUseCase.getRole().stream().map(RoleResponseMapper::fromDTO).toList());
 	}
 
 }
