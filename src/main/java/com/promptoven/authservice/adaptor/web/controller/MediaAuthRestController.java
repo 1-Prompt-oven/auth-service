@@ -10,6 +10,7 @@ import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.EmailReq
 import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailCheckRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.EmailRequestRequestVO;
 import com.promptoven.authservice.application.port.in.usecase.VerificationUseCase;
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +24,14 @@ public class MediaAuthRestController {
 	private final VerificationUseCase verificationUseCase;
 
 	@PostMapping("/email/request")
-	public void emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
+	public BaseResponse<Void> emailRequest(@RequestBody EmailRequestRequestVO emailRequestRequestVO) {
 		verificationUseCase.requestEmail(EmailRequestRequestMapper.toDTO(emailRequestRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PostMapping("/email/check")
-	public boolean emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
-		return verificationUseCase.checkMedia(EmailCheckRequestMapper.toDTO(emailCheckRequestVO));
+	public BaseResponse<Boolean> emailCheck(@RequestBody EmailCheckRequestVO emailCheckRequestVO) {
+		return new BaseResponse<>(verificationUseCase.checkMedia(EmailCheckRequestMapper.toDTO(emailCheckRequestVO)));
 	}
 
 }

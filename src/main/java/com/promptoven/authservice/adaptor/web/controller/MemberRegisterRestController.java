@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.RegisterRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.RegisterSocialRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.VerifyEmailRequestMapper;
@@ -32,26 +33,26 @@ public class MemberRegisterRestController {
 	private final VerificationUseCase verificationUseCase;
 
 	@PostMapping("/register")
-	public LoginResponseVO register(@RequestBody RegisterRequestVO registerRequestVO) {
+	public BaseResponse<LoginResponseVO> register(@RequestBody RegisterRequestVO registerRequestVO) {
 		LoginResponseDTO loginResponseDTO = memberRegistrationUseCase.register(
 			RegisterRequestMapper.toDTO(registerRequestVO));
-		return LoginResponseMapper.fromDTO(loginResponseDTO);
+		return new BaseResponse<>(LoginResponseMapper.fromDTO(loginResponseDTO));
 	}
 
 	@PostMapping("/verify/email")
-	public boolean verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
-		return verificationUseCase.verifyEmail(VerifyEmailRequestMapper.toDTO(verifyEmailRequestVO));
+	public BaseResponse<Boolean> verifyEmail(@RequestBody VerifyEmailRequestVO verifyEmailRequestVO) {
+		return new BaseResponse<>(verificationUseCase.verifyEmail(VerifyEmailRequestMapper.toDTO(verifyEmailRequestVO)));
 	}
 
 	@PostMapping("/verify/nickname")
-	public boolean verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
-		return verificationUseCase.verifyNickname(VerifyNicknameRequestMapper.toDTO(verifyNicknameRequestVO));
+	public BaseResponse<Boolean> verifyNickname(@RequestBody VerifyNicknameRequestVO verifyNicknameRequestVO) {
+		return new BaseResponse<>(verificationUseCase.verifyNickname(VerifyNicknameRequestMapper.toDTO(verifyNicknameRequestVO)));
 	}
 
 	@PostMapping("/register-social")
-	public LoginResponseVO registerSocial(@RequestBody RegisterSocialRequestVO registerSocialRequestVO) {
-		return LoginResponseMapper.fromDTO(memberRegistrationUseCase.registerFromSocialLogin(
-			RegisterSocialRequestMapper.toDTO(registerSocialRequestVO)));
+	public BaseResponse<LoginResponseVO> registerSocial(@RequestBody RegisterSocialRequestVO registerSocialRequestVO) {
+		return new BaseResponse<>(LoginResponseMapper.fromDTO(memberRegistrationUseCase.registerFromSocialLogin(
+			RegisterSocialRequestMapper.toDTO(registerSocialRequestVO))));
 	}
 
 }
