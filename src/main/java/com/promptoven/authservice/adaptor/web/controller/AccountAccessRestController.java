@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.CheckPWRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.LoginRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.ResetPWRequestMapper;
@@ -38,35 +39,38 @@ public class AccountAccessRestController {
 	private final MemberManagementUseCase memberManagementUseCase;
 
 	@PostMapping("/login")
-	public LoginResponseVO login(@RequestBody LoginRequestVO loginRequestVO) {
+	public BaseResponse<LoginResponseVO> login(@RequestBody LoginRequestVO loginRequestVO) {
 		LoginResponseDTO loginResponseDTO = accountAccessUsecase.login(LoginRequestMapper.toDTO(loginRequestVO));
-		return LoginResponseMapper.fromDTO(loginResponseDTO);
+		return new BaseResponse<>(LoginResponseMapper.fromDTO(loginResponseDTO));
 	}
 
 	@PostMapping("/logout")
-	public void logout(@RequestHeader(AuthHeader) String accessToken,
+	public BaseResponse<Void> logout(@RequestHeader(AuthHeader) String accessToken,
 		@RequestHeader(RefreshHeader) String refreshToken) {
-		accountAccessUsecase.logout(accessToken, refreshToken);
+			accountAccessUsecase.logout(accessToken, refreshToken);
+			return new BaseResponse<>();
 	}
 
 	@DeleteMapping("/withdraw")
-	public void withdraw(@RequestHeader(AuthHeader) String accessToken) {
+	public BaseResponse<Void> withdraw(@RequestHeader(AuthHeader) String accessToken) {
 		accountAccessUsecase.withdraw(accessToken);
+		return new BaseResponse<>();
 	}
 
 	@PostMapping("/resetPW")
-	public void resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
+	public BaseResponse<Void> resetPW(@RequestBody ResetPWRequestVO resetPWRequestVO) {
 		memberManagementUseCase.resetPW(ResetPWRequestMapper.toDTO(resetPWRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PostMapping("/checkPW")
-	public boolean checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
-		return accountAccessUsecase.checkPW(CheckPWRequestMapper.toDTO(checkPWRequestVO));
+	public BaseResponse<Boolean> checkPW(@RequestBody CheckPWRequestVO checkPWRequestVO) {
+		return new BaseResponse<>(accountAccessUsecase.checkPW(CheckPWRequestMapper.toDTO(checkPWRequestVO)));
 	}
 
 	@GetMapping("/refresh")
-	public RefreshResponseVO tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
-		return RefreshResponseMapper.fromDTO(accountAccessUsecase.refresh(refreshToken));
+	public BaseResponse<RefreshResponseVO> tokenUpdate(@RequestHeader(RefreshHeader) String refreshToken) {
+		return new BaseResponse<>(RefreshResponseMapper.fromDTO(accountAccessUsecase.refresh(refreshToken)));
 	}
 
 }

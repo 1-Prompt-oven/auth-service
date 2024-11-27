@@ -23,6 +23,7 @@ import com.promptoven.authservice.adaptor.web.controller.vo.out.SocialLoginInfoR
 import com.promptoven.authservice.adaptor.web.controller.vo.out.SocialLoginResponseVO;
 import com.promptoven.authservice.application.port.in.usecase.SocialLoginUseCase;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,32 +37,35 @@ public class SocialLoginRestController {
 	private final SocialLoginUseCase socialLoginUseCase;
 
 	@PostMapping("/login")
-	public SocialLoginResponseVO socialLogin(
+	public BaseResponse<SocialLoginResponseVO> socialLogin(
 		@RequestBody SocialLoginRequestVO socialLoginRequestVO) {
 		SocialLoginDTO socialLoginDTO = socialLoginUseCase.SocialLogin(
 			SocialLoginRequestMapper.toDTO(socialLoginRequestVO));
-		return SocialLoginResponseMapper.fromDTO(socialLoginDTO);
+		return new BaseResponse<>(SocialLoginResponseMapper.fromDTO(socialLoginDTO));
 	}
 
 	@PostMapping("/info")
-	public void socialLoginAssociate(
+	public BaseResponse<Void> socialLoginAssociate(
 		@RequestBody SocialLoginAssociateRequestVO socialLoginAssociateRequestVO) {
 		socialLoginUseCase.SocialLoginAssociate(SocialLoginAssociateRequestMapper.toDTO(socialLoginAssociateRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@DeleteMapping("/info")
-	public void socialLoginDisassociate(
+	public BaseResponse<Void> socialLoginDisassociate(
 		@RequestBody SocialLoginDisassociateRequestVO socialLoginDisassociateRequestVO) {
 		socialLoginUseCase.SocialLoginDisassociate(
 			SocialLoginDisassociateRequestMapper.toDTO(socialLoginDisassociateRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@GetMapping("/info")
-	public List<SocialLoginInfoResponseVO> getSocialLoginAssociations(
+	public BaseResponse<List<SocialLoginInfoResponseVO>> getSocialLoginAssociations(
 		@RequestHeader("Authorization") String accessToken) {
-		return socialLoginUseCase.getSocialLoginAssociations(accessToken).stream()
+		List<SocialLoginInfoResponseVO> result = socialLoginUseCase.getSocialLoginAssociations(accessToken).stream()
 			.map(SocialLoginInfoResponseMapper::fromDTO)
 			.collect(Collectors.toList());
+		return new BaseResponse<>(result);
 	}
 
 }
