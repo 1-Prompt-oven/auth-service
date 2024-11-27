@@ -39,7 +39,7 @@ public enum BaseResponseStatus {
 	 * 500 INTERNAL_SERVER_ERROR: 내부 서버 오류
 	 */
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, "내부 서버 오류입니다."),
-	FILE_PROCESSING_ERROR(HttpStatus.PROCESSING, false, "파일 처리 중 오류가 발생했습니다."),
+	FILE_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, "파일 처리 중 오류가 발생했습니다."),
 	;
 
 	private final HttpStatusCode httpStatusCode;
