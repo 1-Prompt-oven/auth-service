@@ -37,7 +37,7 @@ public class EventSubscriberByKafka {
 	public void listenProfileNicknameUpdateRequest(MemberNicknameUpdateRequestEvent event) {
 		log.info("Received nickname update event: {}", event);
 		UpdateNicknameRequestDTO updateNicknameRequestDTO = UpdateNicknameRequestDTO.builder()
-			.memberUUID(event.getMemberUuid())
+			.memberUUID(event.getMemberUUID())
 			.nickname(event.getNickname())
 			.build();
 		memberManagementProxy.updateNickname(updateNicknameRequestDTO);
