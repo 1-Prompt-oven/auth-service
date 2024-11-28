@@ -10,6 +10,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class MemberNicknameUpdateRequestEvent {
-	private String memberUuid;
+	private String memberUUID;
 	private String nickname;
 }
