@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.CheckPWRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.LoginRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.ResetPWRequestMapper;
@@ -19,6 +18,8 @@ import com.promptoven.authservice.adaptor.web.controller.vo.in.LoginRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ResetPWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.LoginResponseVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.out.RefreshResponseVO;
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
+import com.promptoven.authservice.adaptor.web.util.BaseResponseStatus;
 import com.promptoven.authservice.application.port.in.usecase.AccountAccessUsecase;
 import com.promptoven.authservice.application.port.in.usecase.MemberManagementUseCase;
 import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
@@ -41,14 +42,17 @@ public class AccountAccessRestController {
 	@PostMapping("/login")
 	public BaseResponse<LoginResponseVO> login(@RequestBody LoginRequestVO loginRequestVO) {
 		LoginResponseDTO loginResponseDTO = accountAccessUsecase.login(LoginRequestMapper.toDTO(loginRequestVO));
+		if (loginResponseDTO == null) {
+			return new BaseResponse<>(BaseResponseStatus.FAILED_LOGIN);
+		}
 		return new BaseResponse<>(LoginResponseMapper.fromDTO(loginResponseDTO));
 	}
 
 	@PostMapping("/logout")
 	public BaseResponse<Void> logout(@RequestHeader(AuthHeader) String accessToken,
 		@RequestHeader(RefreshHeader) String refreshToken) {
-			accountAccessUsecase.logout(accessToken, refreshToken);
-			return new BaseResponse<>();
+		accountAccessUsecase.logout(accessToken, refreshToken);
+		return new BaseResponse<>();
 	}
 
 	@DeleteMapping("/withdraw")

@@ -55,6 +55,9 @@ public class AccountAccessService implements AccountAccessUsecase {
 	public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 
 		MemberDTO memberDTO = memberPersistence.findByEmail(loginRequestDTO.getEmail());
+		if (memberDTO == null) {
+			return null;
+		}
 		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 
 		if (null != member && passwordEncoder.matches(loginRequestDTO.getPassword(), member.getPassword())) {
