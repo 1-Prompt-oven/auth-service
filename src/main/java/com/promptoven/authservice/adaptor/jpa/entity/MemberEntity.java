@@ -15,8 +15,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Table(name = "member", indexes = {
-	@Index(name = "idx_uuid", columnList = "uuid"
-	)}
+	@Index(name = "idx_uuid", columnList = "uuid"),
+	@Index(name = "idx_email", columnList = "email")
+}
 )
 @Entity
 @NoArgsConstructor
