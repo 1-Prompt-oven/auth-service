@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.adaptor.web.util.BaseException;
+import com.promptoven.authservice.adaptor.web.util.BaseResponseStatus;
 import com.promptoven.authservice.application.port.in.dto.ChangePWRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.ResetPWRequestDTO;
 import com.promptoven.authservice.application.port.in.dto.SetMemberRoleRequestDTO;
@@ -99,6 +101,9 @@ public class MemberManagementService implements MemberManagementUseCase {
 	public void resetPW(ResetPWRequestDTO resetPWRequestDTO) {
 
 		MemberDTO memberDTO = memberPersistence.findByEmail(resetPWRequestDTO.getEmail());
+		if (memberDTO == null) {
+			throw new BaseException(BaseResponseStatus.NOT_FOUND_DATA);
+		}
 		Member member = memberDomainDTOMapper.toDomain(memberDTO);
 		MemberDTO updatedMemberDTO = memberDomainDTOMapper.toDTO(
 			Member.updateMemberPassword(member, passwordEncoder.encode(resetPWRequestDTO.getPassword())));
