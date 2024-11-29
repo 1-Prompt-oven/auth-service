@@ -4,10 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter 
+@Getter
 @Builder
 @AllArgsConstructor
 public class ChangePWRequestDTO {
-    private final String newPassword;
-    private final String memberUUID;
+	private final String newPassword;
+	private final String memberUUID;
+
+	public String memberUUID() {
+		return memberUUID;
+	}
 }
