@@ -17,6 +17,15 @@ public enum BaseResponseStatus {
 	BAD_REQUEST(HttpStatus.BAD_REQUEST, false, "잘못된 요청입니다."),
 	INVALID_FILE_FORMAT(HttpStatus.BAD_REQUEST, false, "잘못된 파일 형식입니다."),
 	FILE_IS_EMPTY(HttpStatus.BAD_REQUEST, false, "파일이 비어있습니다."),
+	/*
+	 * 401 UNAUTHORIZED: 인증되지 않은 사용자
+	 */
+	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, false, "인증되지 않은 사용자입니다."),
+	/*
+	 * 403 FORBIDDEN: 권한이 없는 사용자
+	 */
+	FORBIDDEN(HttpStatus.FORBIDDEN, false, "권한이 없는 사용자입니다."),
+	FAILED_LOGIN(HttpStatus.FORBIDDEN, false, "로그인에 실패했습니다. 아이디나 비밀번호를 다시 확인해 주세요."),
 
 	/*
 	 * 404 NOT_FOUND: 리소스를 찾을 수 없음
@@ -25,6 +34,7 @@ public enum BaseResponseStatus {
 	EXHIBITION_NOT_FOUND(HttpStatus.NOT_FOUND, false, "기획전을 찾을 수 없습니다."),
 	INVALID_CSV_FORMAT(HttpStatus.BAD_REQUEST, false, "잘못된 CSV 파일 형식입니다."),
 	NOT_FOUND_DATA(HttpStatus.NOT_FOUND, false, "데이터를 찾을 수 없습니다."),
+
 	/*
 	 * 405 METHOD_NOT_ALLOWED: 허용되지 않은 Request Method 호출
 	 */
