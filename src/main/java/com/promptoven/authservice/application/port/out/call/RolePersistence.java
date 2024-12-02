@@ -1,20 +1,24 @@
 package com.promptoven.authservice.application.port.out.call;
 
-import com.promptoven.authservice.domain.Role;
+import java.util.List;
+
+import com.promptoven.authservice.application.service.dto.RoleDTO;
 
 public interface RolePersistence {
 
-	void create(Role role);
+	void create(RoleDTO roleDTO);
 
-	Role findRoleById(int roleID);
+	RoleDTO findRoleById(int roleID);
 
-	Role findByName(String roleName);
+	RoleDTO findByName(String roleName);
 
 	int findMaxRoleID();
 
 	void deleteRoleById(int roleID);
 
-	void updateRole(Role role);
+	void updateRole(RoleDTO roleDTO);
 
 	long count();
+
+	List<RoleDTO> findAll();
 }

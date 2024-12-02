@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class VerifyEmailRequestVO {
 
 	private String email;
+
 }

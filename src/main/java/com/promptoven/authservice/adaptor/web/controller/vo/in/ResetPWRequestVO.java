@@ -11,5 +11,5 @@ public class ResetPWRequestVO {
 
 	private String email;
 	private String password;
-	
+
 }

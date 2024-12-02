@@ -2,8 +2,8 @@ spring:
   application:
     name: auth-service
   mail:
-    password: "test value"
-    username: "test value"
+    password: ${MAIL_PASSWORD}
+    username: kr.promptoven@gmail.com
 auth:
   challenge:
     expiration: 300000 # 5 minutes
@@ -20,6 +20,7 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    display-request-duration: true
 
 ---
 # application-prod.yml
@@ -110,6 +111,7 @@ logging:
     org.springframework.jdbc: DEBUG
     org.springframework.transaction: DEBUG
     org.springframework.orm.jpa: DEBUG
+    io.lettuce.core: DEBUG
 eureka:
   client:
     serviceUrl:
