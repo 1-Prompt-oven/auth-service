@@ -1,17 +1,14 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.in.dto.RegisterRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.RegisterSocialRequestDTO;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
 
 public interface MemberRegistrationUseCase {
 
-    LoginDTO register(String email, String password, String nickname);
+	LoginResponseDTO register(RegisterRequestDTO registerRequestDTO);
 
-    boolean verifyEmail(String email);
+	LoginResponseDTO registerFromSocialLogin(RegisterSocialRequestDTO registerSocialRequestDTO);
 
-    boolean verifyNickname(String nickname);
-
-    LoginDTO registerFromSocialLogin(String email, String nickname, String password, String provider,
-                                     String providerID);
-
-    void AdminRegister(String email, String password, String nickname);
+	void AdminRegister(RegisterRequestDTO registerRequestDTO);
 }

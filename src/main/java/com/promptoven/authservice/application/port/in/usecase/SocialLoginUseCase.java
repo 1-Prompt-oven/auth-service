@@ -1,14 +1,20 @@
 package com.promptoven.authservice.application.port.in.usecase;
 
+import java.util.List;
+
+import com.promptoven.authservice.application.port.in.dto.SocialLoginAssociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginDisassociateRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.SocialLoginRequestDTO;
 import com.promptoven.authservice.application.port.out.dto.SocialLoginDTO;
-import org.springframework.lang.Nullable;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
 
 public interface SocialLoginUseCase {
 
-    SocialLoginDTO oauthLogin(String provider, String providerID, @Nullable String email);
+	SocialLoginDTO SocialLogin(SocialLoginRequestDTO SocialLoginRequestDTO);
 
-    void OauthRegister(String provider, String providerID, String memberUUID);
+	void SocialLoginAssociate(SocialLoginAssociateRequestDTO SocialLoginAssociateRequestDTO);
 
-    void OauthUnregister(String provider, String providerID, String memberUUID);
+	void SocialLoginDisassociate(SocialLoginDisassociateRequestDTO SocialLoginDisassociateRequestDTO);
 
+	List<SocialLoginInfoDTO> getSocialLoginAssociations(String memberUUID);
 }

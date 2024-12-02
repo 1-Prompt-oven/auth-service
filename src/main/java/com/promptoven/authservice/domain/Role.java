@@ -1,5 +1,7 @@
 package com.promptoven.authservice.domain;
 
+import com.promptoven.authservice.domain.dto.RoleModelDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,20 +16,20 @@ public class Role {
 	private int id;
 	private String description;
 
-	public static Role createRole(String name, int id, String description) {
+	public static Role createRole(RoleModelDTO roleModelDTO) {
 		return Role.builder()
-			.name(name)
-			.id(id)
-			.description(description)
+			.name(roleModelDTO.getName())
+			.id(roleModelDTO.getId())
+			.description(roleModelDTO.getDescription())
 			.build();
 	}
 
-	public static Role updateRole(Role role, String name, String description) {
+	public static Role updateRole(Role role, RoleModelDTO newRoleModelDTO) {
 		return Role.builder()
-				.name(name)
-				.id(role.getId())
-				.description(description)
-				.build();
+			.name(newRoleModelDTO.getName())
+			.id(role.getId())
+			.description(newRoleModelDTO.getDescription())
+			.build();
 	}
 
 }

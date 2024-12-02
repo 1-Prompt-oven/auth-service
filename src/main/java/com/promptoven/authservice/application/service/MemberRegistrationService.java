@@ -2,16 +2,26 @@ package com.promptoven.authservice.application.service;
 
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.promptoven.authservice.application.port.in.dto.RegisterRequestDTO;
+import com.promptoven.authservice.application.port.in.dto.RegisterSocialRequestDTO;
 import com.promptoven.authservice.application.port.in.usecase.MemberRegistrationUseCase;
 import com.promptoven.authservice.application.port.out.call.EventPublisher;
 import com.promptoven.authservice.application.port.out.call.MemberPersistence;
-import com.promptoven.authservice.application.port.out.call.OauthInfoPersistence;
-import com.promptoven.authservice.application.port.out.dto.LoginDTO;
+import com.promptoven.authservice.application.port.out.call.SocialLoginInfoPersistence;
+import com.promptoven.authservice.application.port.out.dto.LoginResponseDTO;
+import com.promptoven.authservice.application.port.out.dto.MemberRegisterEvent;
+import com.promptoven.authservice.application.service.dto.LoginRequestDTO;
+import com.promptoven.authservice.application.service.dto.SocialLoginInfoDTO;
+import com.promptoven.authservice.application.service.dto.mapper.MemberDomainDTOMapper;
+import com.promptoven.authservice.application.service.dto.mapper.OauthInfoDomainDTOMapper;
 import com.promptoven.authservice.domain.Member;
-import com.promptoven.authservice.domain.OauthInfo;
+import com.promptoven.authservice.domain.SocialLoginInfo;
+import com.promptoven.authservice.domain.dto.MemberModelDTO;
+import com.promptoven.authservice.domain.dto.SocialLoginInfoModelDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,51 +33,72 @@ public class MemberRegistrationService implements MemberRegistrationUseCase {
 
 	private final MemberPersistence memberPersistence;
 	private final PasswordEncoder passwordEncoder;
-	private final OauthInfoPersistence oauthInfoPersistence;
-	private final AuthenticationService authenticationService;
+	private final SocialLoginInfoPersistence socialLoginInfoPersistence;
+	private final AccountAccessService accountAccessService;
 	private final EventPublisher eventPublisher;
+	private final OauthInfoDomainDTOMapper oauthInfoDomainDTOMapper;
+	private final MemberDomainDTOMapper memberDomainDTOMapper;
+	@Value("${member-register-event}")
+	private String MemberRegisteredTopic;
 
 	@Override
-	public LoginDTO register(String email, String password, String nickname) {
-		String uuid = makeMember(email, password, nickname, 1);
-		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(email, password);
+	public LoginResponseDTO register(RegisterRequestDTO registerRequestDTO) {
+		String uuid = makeMember(registerRequestDTO, 1);
+		eventPublisher.publish(MemberRegisteredTopic,
+			MemberRegisterEvent.builder().memberUUID(uuid).nickname(registerRequestDTO.getNickname()).build());
+		return accountAccessService.login(LoginRequestDTO.builder()
+			.email(registerRequestDTO.getEmail())
+			.password(registerRequestDTO.getPassword())
+			.build());
 	}
 
 	@Override
-	public boolean verifyEmail(String email) {
-		return !memberPersistence.existsByEmail(email);
+	public LoginResponseDTO registerFromSocialLogin(RegisterSocialRequestDTO registerSocialRequestDTO) {
+
+		String email = registerSocialRequestDTO.getEmail();
+		String password = registerSocialRequestDTO.getPassword();
+
+		String provider = registerSocialRequestDTO.getProvider();
+		String providerID = registerSocialRequestDTO.getProviderId();
+
+		String uuid = makeMember(registerSocialRequestDTO.toRegisterRequestDTO(), 1);
+		SocialLoginInfoModelDTO socialLoginInfoModelDTO = SocialLoginInfoModelDTO.builder()
+			.memberUUID(uuid)
+			.provider(provider)
+			.providerID(providerID)
+			.build();
+		SocialLoginInfoDTO socialLoginInfoDTO = oauthInfoDomainDTOMapper.toDTO(
+			SocialLoginInfo.createSocialLoginInfo(socialLoginInfoModelDTO));
+		socialLoginInfoPersistence.recordSocialLoginInfo(socialLoginInfoDTO);
+		eventPublisher.publish(MemberRegisteredTopic,
+			MemberRegisterEvent.builder().memberUUID(uuid).nickname(registerSocialRequestDTO.getNickname()).build());
+		return accountAccessService.login(LoginRequestDTO.builder()
+			.email(email)
+			.password(password)
+			.build());
 	}
 
 	@Override
-	public boolean verifyNickname(String nickname) {
-		return !memberPersistence.existsByNickname(nickname);
+	public void AdminRegister(RegisterRequestDTO registerRequestDTO) {
+		makeMember(registerRequestDTO, 3);
 	}
 
-	@Override
-	public LoginDTO registerFromSocialLogin(String email, String nickname, String password, String provider,
-		String providerID) {
-		String uuid = makeMember(email, password, nickname, 1);
-		OauthInfo oauthInfo = OauthInfo.createOauthInfo(provider, providerID, uuid);
-		oauthInfoPersistence.recordOauthInfo(oauthInfo);
-		eventPublisher.publish("member-registered", uuid);
-		return authenticationService.login(email, password);
-	}
+	private String makeMember(RegisterRequestDTO registerRequestDTO, int role) {
 
-	@Override
-	public void AdminRegister(String email, String password, String nickname) {
-		makeMember(email, password, nickname, 3);
-	}
-
-	private String makeMember(String email, String password, String nickname, int role) {
 		String uuid = UUID.randomUUID().toString();
-		String encodedPassword = passwordEncoder.encode(password);
+		String encodedPassword = passwordEncoder.encode(registerRequestDTO.getPassword());
 		while (memberPersistence.findByUuid(uuid) != null) {
 			uuid = UUID.randomUUID().toString();
 		}
-		Member member = Member.createMember
-			(uuid, email, encodedPassword, nickname, role);
-		memberPersistence.create(member);
+		MemberModelDTO memberModelDTO = MemberModelDTO.builder()
+			.uuid(uuid)
+			.email(registerRequestDTO.getEmail())
+			.password(encodedPassword)
+			.nickname(registerRequestDTO.getNickname())
+			.role(role)
+			.build();
+		Member member = Member.createMember(memberModelDTO);
+		memberPersistence.create(memberDomainDTOMapper.toDTO(member));
 		return uuid;
 	}
 }

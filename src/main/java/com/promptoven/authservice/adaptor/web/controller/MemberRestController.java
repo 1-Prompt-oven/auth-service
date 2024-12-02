@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.ChangePWRequestMapper;
+import com.promptoven.authservice.adaptor.web.controller.mapper.reqeust.UpdateNicknameRequestMapper;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.ChangePWRequestVO;
 import com.promptoven.authservice.adaptor.web.controller.vo.in.UpdateNicknameRequestVO;
-import com.promptoven.authservice.application.port.in.usecase.AuthenticationUseCase;
 import com.promptoven.authservice.application.service.aop.MemberManagementProxy;
+import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,16 +23,16 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberRestController {
 
 	private final MemberManagementProxy memberManagementProxy;
-	private final AuthenticationUseCase authenticationUseCase;
 
 	@PutMapping("/nickname")
-	public void updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
-		memberManagementProxy.updateNickname(updateNicknameRequestVO.getMemberUUID(),
-			updateNicknameRequestVO.getNickname());
+	public BaseResponse<Void> updateNickname(@RequestBody UpdateNicknameRequestVO updateNicknameRequestVO) {
+		memberManagementProxy.updateNickname(UpdateNicknameRequestMapper.toDTO(updateNicknameRequestVO));
+		return new BaseResponse<>();
 	}
 
 	@PostMapping("/changePW")
-	public void changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
-		authenticationUseCase.changePW(changePWRequestVO.getNewPassword(), changePWRequestVO.getMemberUUID());
+	public BaseResponse<Void> changePW(@RequestBody ChangePWRequestVO changePWRequestVO) {
+		memberManagementProxy.changePW(ChangePWRequestMapper.toDTO(changePWRequestVO));
+		return new BaseResponse<>();
 	}
 }

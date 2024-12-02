@@ -1,6 +1,5 @@
 package com.promptoven.authservice.adaptor.web.controller.vo.in;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class CreateRoleRequestVO {
 
 	private String name;
-
 	private String description;
 }
