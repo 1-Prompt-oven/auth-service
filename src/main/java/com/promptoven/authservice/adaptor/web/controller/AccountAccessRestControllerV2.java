@@ -43,6 +43,7 @@ public class AccountAccessRestControllerV2 {
 			}
 			return new BaseResponse<>(LoginResponseMapper.fromDTO(loginResponseDTO));
 		} catch (Exception e) {
+			e.printStackTrace();
 			return new BaseResponse<>(BaseResponseStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

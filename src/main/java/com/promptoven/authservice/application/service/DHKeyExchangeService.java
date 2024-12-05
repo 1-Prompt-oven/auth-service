@@ -66,8 +66,6 @@ public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 	// Decrypt password received from client
 	@Override
 	public String decryptPassword(String sessionId, String encryptedPassword) throws Exception {
-		System.out.print("Session ID = ");
-		System.out.println(sessionId);
 		DHEncryption encryption = encryptionInstances.get(sessionId);
 		if (encryption == null) {
 			throw new IllegalStateException("No encryption instance found for this session");
