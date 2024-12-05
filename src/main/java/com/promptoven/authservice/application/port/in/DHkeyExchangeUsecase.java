@@ -7,6 +7,9 @@ public interface DHkeyExchangeUsecase {
 	// Complete the key exchange with client's public key
 	void completeKeyExchange(String sessionId, String clientPublicKeyBase64) throws Exception;
 
+	// Decrypt password received from client
+	String decryptPassword(String sessionId, String encryptedPassword) throws Exception;
+
 	// Clean up when session ends
 	void cleanupSession(String sessionId);
 }

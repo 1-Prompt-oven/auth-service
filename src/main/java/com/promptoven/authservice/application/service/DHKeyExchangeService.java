@@ -10,10 +10,15 @@ import com.promptoven.authservice.application.port.in.DHkeyExchangeUsecase;
 import com.promptoven.authservice.application.service.utility.DHEncryption;
 import com.promptoven.authservice.application.service.utility.DHkeyExchanger;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 
-    // todo: 추후에 Garnet(replacement of Redis)로 변경 필요
+	// todo: 추후에 Garnet(replacement of Redis)로 변경 필요
 	// Store DH instances for each client session
 	private final Map<String, DHkeyExchanger> dhExchangers = new ConcurrentHashMap<>();
 	// Store encryption instances after key exchange
@@ -47,6 +52,7 @@ public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 	}
 
 	// Decrypt password received from client
+	@Override
 	public String decryptPassword(String sessionId, String encryptedPassword) throws Exception {
 		DHEncryption encryption = encryptionInstances.get(sessionId);
 		if (encryption == null) {

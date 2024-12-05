@@ -12,7 +12,7 @@ import com.promptoven.authservice.application.port.in.DHkeyExchangeUsecase;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/v1/auth/key-exchange")
+@RequestMapping("/v2/auth/key-exchange")
 @RequiredArgsConstructor
 public class DHKeyExchangeController {
 	private final DHkeyExchangeUsecase dHkeyExchangeUsecase;
