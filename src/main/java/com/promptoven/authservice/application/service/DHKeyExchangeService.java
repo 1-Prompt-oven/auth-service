@@ -35,20 +35,28 @@ public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 	// Complete the key exchange with client's public key
 	@Override
 	public void completeKeyExchange(String sessionId, String clientPublicKeyBase64) throws Exception {
+		if (clientPublicKeyBase64 == null || clientPublicKeyBase64.trim().isEmpty()) {
+			throw new IllegalArgumentException("Client public key cannot be null or empty");
+		}
+
 		DHkeyExchanger exchanger = dhExchangers.get(sessionId);
 		if (exchanger == null) {
 			throw new IllegalStateException("No key exchange initialized for this session");
 		}
 
-		byte[] clientPublicKey = Base64.getDecoder().decode(clientPublicKeyBase64);
-		byte[] sharedSecret = exchanger.generateSharedSecret(clientPublicKey);
-
-		// Create encryption instance for this session
-		DHEncryption encryption = new DHEncryption(sharedSecret);
-		encryptionInstances.put(sessionId, encryption);
-
-		// Clean up the exchanger as it's no longer needed
-		dhExchangers.remove(sessionId);
+		try {
+			byte[] clientPublicKey = Base64.getDecoder().decode(clientPublicKeyBase64.trim());
+			byte[] sharedSecret = exchanger.generateSharedSecret(clientPublicKey);
+			
+			// Create encryption instance for this session
+			DHEncryption encryption = new DHEncryption(sharedSecret);
+			encryptionInstances.put(sessionId, encryption);
+			
+			// Clean up the exchanger as it's no longer needed
+			dhExchangers.remove(sessionId);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Invalid Base64 encoded public key: " + e.getMessage());
+		}
 	}
 
 	// Decrypt password received from client
