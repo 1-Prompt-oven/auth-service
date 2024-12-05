@@ -47,11 +47,11 @@ public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 		try {
 			byte[] clientPublicKey = Base64.getDecoder().decode(clientPublicKeyBase64.trim());
 			byte[] sharedSecret = exchanger.generateSharedSecret(clientPublicKey);
-			
+
 			// Create encryption instance for this session
 			DHEncryption encryption = new DHEncryption(sharedSecret);
 			encryptionInstances.put(sessionId, encryption);
-			
+
 			// Clean up the exchanger as it's no longer needed
 			dhExchangers.remove(sessionId);
 		} catch (IllegalArgumentException e) {
@@ -66,6 +66,8 @@ public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 	// Decrypt password received from client
 	@Override
 	public String decryptPassword(String sessionId, String encryptedPassword) throws Exception {
+		System.out.print("Session ID = ");
+		System.out.println(sessionId);
 		DHEncryption encryption = encryptionInstances.get(sessionId);
 		if (encryption == null) {
 			throw new IllegalStateException("No encryption instance found for this session");
