@@ -55,7 +55,11 @@ public class DHKeyExchangeService implements DHkeyExchangeUsecase {
 			// Clean up the exchanger as it's no longer needed
 			dhExchangers.remove(sessionId);
 		} catch (IllegalArgumentException e) {
+			log.error("Invalid Base64 encoded public key: {}", clientPublicKeyBase64);
 			throw new IllegalArgumentException("Invalid Base64 encoded public key: " + e.getMessage());
+		} catch (Exception e) {
+			log.error("Failed to complete key exchange: {}", e.getMessage());
+			throw e;
 		}
 	}
 
