@@ -12,6 +12,8 @@ import com.promptoven.authservice.application.service.utility.DHkeyExchanger;
 
 @Service
 public class DHKeyExchangeService implements DHkeyExchangeUsecase {
+
+    // todo: 추후에 Garnet(replacement of Redis)로 변경 필요
 	// Store DH instances for each client session
 	private final Map<String, DHkeyExchanger> dhExchangers = new ConcurrentHashMap<>();
 	// Store encryption instances after key exchange
