@@ -10,7 +10,9 @@ import com.promptoven.authservice.adaptor.web.util.BaseResponse;
 import com.promptoven.authservice.application.port.in.DHkeyExchangeUsecase;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/v2/auth/key-exchange")
 @RequiredArgsConstructor
@@ -20,7 +22,9 @@ public class DHKeyExchangeController {
 	@PostMapping("/init")
 	public BaseResponse<String> initializeKeyExchange(
 		@RequestHeader("X-Session-ID") String sessionId) throws Exception {
+		log.debug("Initializing key exchange for session: {}", sessionId);
 		String serverPublicKey = dHkeyExchangeUsecase.initializeKeyExchange(sessionId);
+		log.debug("Key exchange initialized successfully for session: {}", sessionId);
 		return new BaseResponse<>(serverPublicKey);
 	}
 
@@ -28,14 +32,23 @@ public class DHKeyExchangeController {
 	public BaseResponse<Void> completeKeyExchange(
 		@RequestHeader("X-Session-ID") String sessionId,
 		@RequestBody String clientPublicKey) throws Exception {
+		if (clientPublicKey == null || clientPublicKey.trim().isEmpty()) {
+			log.warn("Empty client public key received for session: {}", sessionId);
+			throw new IllegalArgumentException("Client public key cannot be empty");
+		}
+
+		log.debug("Completing key exchange for session: {}", sessionId);
 		dHkeyExchangeUsecase.completeKeyExchange(sessionId, clientPublicKey);
+		log.debug("Key exchange completed successfully for session: {}", sessionId);
 		return new BaseResponse<>();
 	}
 
 	@PostMapping("/destroy")
 	public BaseResponse<Void> terminateDHKeySession(
 		@RequestHeader("X-Session-ID") String sessionId) throws Exception {
+		log.debug("Destroying key exchange session: {}", sessionId);
 		dHkeyExchangeUsecase.cleanupSession(sessionId);
+		log.debug("Key exchange session destroyed successfully: {}", sessionId);
 		return new BaseResponse<>();
 	}
 }
