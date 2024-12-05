@@ -5,8 +5,7 @@ package com.promptoven.authservice.application.service.utility;
 // this scenario assume as unsafe internet communication devices, like old router or and so on
 // in practical in Korea, Naver use password encrypt before client side
 
-import java.security.AlgorithmParameterGenerator;
-import java.security.AlgorithmParameters;
+import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -15,7 +14,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
@@ -25,21 +23,36 @@ import javax.crypto.spec.DHParameterSpec;
 public class DHkeyExchanger {
 	private KeyPair keyPair;
 	private KeyAgreement keyAgreement;
-	private static final int KEY_SIZE = 2048;
+
+	// Fixed DH parameters (these values should be secure for DH)
+	private static final String P_HEX = 
+		"FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
+		"29024E088A67CC74020BBEA63B139B22514A08798E3404DD" +
+		"EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" +
+		"E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" +
+		"EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3D" +
+		"C2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F" +
+		"83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
+		"670C354E4ABC9804F1746C08CA18217C32905E462E36CE3B" +
+		"E39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9" +
+		"DE2BCBF6955817183995497CEA956AE515D2261898FA0510" +
+		"15728E5A8AACAA68FFFFFFFFFFFFFFFF";
+	private static final String G_HEX = "02";
 
 	public DHkeyExchanger() throws
 		NoSuchAlgorithmException,
-		InvalidParameterSpecException,
-		InvalidAlgorithmParameterException, InvalidKeyException {
-		// Initialize key pair generator with specific parameters
-		AlgorithmParameterGenerator paramGen = AlgorithmParameterGenerator.getInstance("DH");
-		paramGen.init(KEY_SIZE);
-		AlgorithmParameters params = paramGen.generateParameters();
-		DHParameterSpec dhSpec = params.getParameterSpec(DHParameterSpec.class);
-
+		InvalidAlgorithmParameterException,
+		InvalidKeyException {
+		// Convert hex parameters to BigInteger
+		BigInteger p = new BigInteger(P_HEX, 16);
+		BigInteger g = new BigInteger(G_HEX, 16);
+		
+		// Create DH parameters
+		DHParameterSpec dhParams = new DHParameterSpec(p, g);
+		
 		// Initialize key pair generator with the parameters
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
-		keyPairGenerator.initialize(dhSpec);
+		keyPairGenerator.initialize(dhParams);
 
 		// Generate the key pair
 		this.keyPair = keyPairGenerator.generateKeyPair();
