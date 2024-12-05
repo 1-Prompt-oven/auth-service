@@ -14,11 +14,11 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPublicKeySpec;
 
 public class DHkeyExchanger {
 	private KeyPair keyPair;
@@ -71,17 +71,40 @@ public class DHkeyExchanger {
 	public byte[] generateSharedSecret(byte[] receivedPublicKey)
 		throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
 		try {
+			// Extract the actual key value from DER encoding
+			byte[] keyBytes = extractKeyBytesFromDER(receivedPublicKey);
+			
 			KeyFactory keyFactory = KeyFactory.getInstance("DH");
-			X509EncodedKeySpec keySpec = new X509EncodedKeySpec(receivedPublicKey);
+			DHPublicKeySpec keySpec = new DHPublicKeySpec(
+				new BigInteger(1, keyBytes), // Force positive BigInteger
+				new BigInteger(P_HEX, 16),   // Use our known P value
+				new BigInteger(G_HEX, 16)    // Use our known G value
+			);
+			
 			PublicKey theirPublicKey = keyFactory.generatePublic(keySpec);
-
 			keyAgreement.doPhase(theirPublicKey, true);
 			return keyAgreement.generateSecret();
-		} catch (InvalidKeySpecException e) {
-			// Log the error details
+		} catch (Exception e) {
 			System.err.println("Failed to decode public key: " +
 				Base64.getEncoder().encodeToString(receivedPublicKey));
+			e.printStackTrace();
 			throw e;
+		}
+	}
+
+	private byte[] extractKeyBytesFromDER(byte[] derEncoded) {
+		try {
+			// Skip DER encoding header (usually starts after byte 11)
+			// This is a simplified DER parser
+			int offset = 11;
+			while (offset < derEncoded.length && derEncoded[offset] == 0) {
+				offset++;
+			}
+			byte[] result = new byte[derEncoded.length - offset];
+			System.arraycopy(derEncoded, offset, result, 0, result.length);
+			return result;
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid DER encoding", e);
 		}
 	}
 }
