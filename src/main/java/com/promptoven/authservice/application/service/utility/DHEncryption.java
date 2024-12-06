@@ -12,22 +12,21 @@ import java.util.Base64;
 public class DHEncryption {
     private static final String ALGORITHM = "AES";
     private static final String CIPHER_TRANSFORM = "AES/CBC/PKCS5Padding";
-    private SecretKey secretKey;
-    private byte[] iv;
+    private final SecretKey secretKey;
 
     public DHEncryption(byte[] sharedSecret) throws Exception {
         // Use SHA-256 to derive a proper-length key from the shared secret
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] encKeyBytes = digest.digest(sharedSecret);
         this.secretKey = new SecretKeySpec(encKeyBytes, ALGORITHM);
-        
-        // Generate random IV
-        SecureRandom random = new SecureRandom();
-        this.iv = new byte[16];
-        random.nextBytes(this.iv);
     }
 
     public String encrypt(String plaintext) throws Exception {
+        // Generate random IV for each encryption
+        SecureRandom random = new SecureRandom();
+        byte[] iv = new byte[16];
+        random.nextBytes(iv);
+
         Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORM);
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
@@ -54,10 +53,5 @@ public class DHEncryption {
         
         byte[] decrypted = cipher.doFinal(encrypted);
         return new String(decrypted);
-    }
-
-    // Getter for IV if needed
-    public byte[] getIv() {
-        return iv.clone(); // Return a clone for security
     }
 } 
