@@ -61,6 +61,11 @@ public class DHkeyExchanger {
         try {
             // Convert received bytes to public key
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
+            
+            // Log the received bytes for debugging
+            logger.debug("Received public key bytes length: {}", otherPublicKeyBytes.length);
+            logger.debug("Received public key bytes (hex): {}", bytesToHex(otherPublicKeyBytes));
+            
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(otherPublicKeyBytes);
             PublicKey otherPublicKey = keyFactory.generatePublic(keySpec);
 
@@ -69,7 +74,12 @@ public class DHkeyExchanger {
 
             // Generate shared secret
             keyAgreement.doPhase(otherPublicKey, true);
-            return keyAgreement.generateSecret();
+            byte[] secret = keyAgreement.generateSecret();
+            
+            logger.debug("Generated shared secret length: {}", secret.length);
+            logger.debug("Generated shared secret (hex): {}", bytesToHex(secret));
+            
+            return secret;
         } catch (Exception e) {
             logger.error("Failed to generate shared secret", e);
             throw new GeneralSecurityException("Failed to generate shared secret", e);
@@ -88,5 +98,13 @@ public class DHkeyExchanger {
         if (y.compareTo(BigInteger.ONE) <= 0 || y.compareTo(P.subtract(BigInteger.ONE)) >= 0) {
             throw new InvalidKeyException("Invalid DH public key value");
         }
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }
