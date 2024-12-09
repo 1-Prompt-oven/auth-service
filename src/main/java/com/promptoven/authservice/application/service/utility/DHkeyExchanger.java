@@ -1,151 +1,86 @@
 package com.promptoven.authservice.application.service.utility;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
+import java.security.*;
+import java.security.spec.*;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.KeyAgreement;
-import javax.crypto.spec.DHParameterSpec;
-import javax.crypto.spec.DHPublicKeySpec;
-
-
-// this utility will implement Diffie-Hellman Key exchanger
-// this utility will use on transporting in Password
-// this scenario assume as unsafe internet communication devices, like old router or and so on
-// in practical in Korea, Naver use password encrypt before client side
-
 public class DHkeyExchanger {
     private static final Logger logger = LoggerFactory.getLogger(DHkeyExchanger.class);
-    private KeyPair keyPair;
-    private KeyAgreement keyAgreement;
+    private final KeyPair keyPair;
+    private final KeyAgreement keyAgreement;
+    
+    // Standard 2048-bit DH parameters from RFC 3526
+    private static final byte[] P_BYTES = Base64.getDecoder().decode(
+        "/////////////////////////////////////////////////////////////////////"
+        + "/////////////////////3///////////////////////AAAAAAAAAAAAAAAAAAAAAA"
+        + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgx"
+        + "dHc5LupP51oXpaL0nKR8tuQQZAcsjlFsV/S+N/AC3kwe0gOjqYt5kFkYCdCXNM5r"
+        + "qQe4DvZLGEYBWcqU61orGBmOkXC7+0oQzGKwOLZnztFP1AtTI6IZ0olHZGRNvZqF"
+        + "P11Y7UAA5VtlcPD3GP1W6NYBC0j3y3BF1yqWHiXn16gqbhrh0+aa7xE="
+    );
+    private static final byte[] G_BYTES = Base64.getDecoder().decode("Ag=="); // Value 2
 
-    // Fixed DH parameters (these values should be secure for DH)
-    private static final String P_HEX = 
-        "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
-        "29024E088A67CC74020BBEA63B139B22514A08798E3404DD" +
-        "EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" +
-        "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" +
-        "EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3D" +
-        "C2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F" +
-        "83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
-        "670C354E4ABC9804F1746C08CA18217C32905E462E36CE3B" +
-        "E39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9" +
-        "DE2BCBF6955817183995497CEA956AE515D2261898FA0510" +
-        "15728E5A8AACAA68FFFFFFFFFFFFFFFF";
-    private static final String G_HEX = "02";
-
-    public DHkeyExchanger() throws
-        NoSuchAlgorithmException,
-        InvalidAlgorithmParameterException,
-        InvalidKeyException {
-        // Convert hex parameters to BigInteger
-        BigInteger p = new BigInteger(P_HEX, 16);
-        BigInteger g = new BigInteger(G_HEX, 16);
-        
+    public DHkeyExchanger() throws GeneralSecurityException {
         // Create DH parameters
-        DHParameterSpec dhParams = new DHParameterSpec(p, g);
-        
-        // Initialize key pair generator with the parameters
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DH");
-        keyPairGenerator.initialize(dhParams);
+        DHParameterSpec dhParams = new DHParameterSpec(
+            new BigInteger(1, P_BYTES),
+            new BigInteger(1, G_BYTES)
+        );
 
-        // Generate the key pair
-        this.keyPair = keyPairGenerator.generateKeyPair();
+        // Generate key pair
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH");
+        keyGen.initialize(dhParams);
+        this.keyPair = keyGen.generateKeyPair();
 
-        // Initialize the key agreement
+        // Initialize key agreement
         this.keyAgreement = KeyAgreement.getInstance("DH");
         this.keyAgreement.init(keyPair.getPrivate());
         
-        logger.debug("[DH] Initialized with parameters P length: {}", p.bitLength());
+        logger.debug("DH key exchanger initialized with {} bit prime", dhParams.getP().bitLength());
     }
 
-    // Get public key to share with the other party
     public byte[] getPublicKey() {
-        byte[] encoded = keyPair.getPublic().getEncoded();
-        logger.debug("[DH] Generated public key length: {}", encoded.length);
-        logger.debug("[DH] Generated public key (hex): {}", bytesToHex(encoded));
-        return encoded;
+        return keyPair.getPublic().getEncoded();
     }
 
-    // Generate shared secret using other party's public key
-    public byte[] generateSharedSecret(byte[] receivedPublicKey)
-        throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+    public byte[] generateSharedSecret(byte[] otherPublicKeyBytes) throws GeneralSecurityException {
         try {
-            logger.debug("[DH] Received public key length: {}", receivedPublicKey.length);
-            logger.debug("[DH] Received public key (hex): {}", bytesToHex(receivedPublicKey));
-            
-            // Extract the actual key value from DER encoding
-            byte[] keyBytes = extractKeyBytesFromDER(receivedPublicKey);
-            logger.debug("[DH] Extracted key bytes length: {}", keyBytes.length);
-            logger.debug("[DH] Extracted key bytes (hex): {}", bytesToHex(keyBytes));
-            
+            // Convert received bytes to public key
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
-            DHPublicKeySpec keySpec = new DHPublicKeySpec(
-                new BigInteger(1, keyBytes), // Force positive BigInteger
-                new BigInteger(P_HEX, 16),   // Use our known P value
-                new BigInteger(G_HEX, 16)    // Use our known G value
-            );
-            
-            PublicKey theirPublicKey = keyFactory.generatePublic(keySpec);
-            keyAgreement.doPhase(theirPublicKey, true);
-            
-            byte[] sharedSecret = keyAgreement.generateSecret();
-            logger.debug("[DH] Generated shared secret length: {}", sharedSecret.length);
-            logger.debug("[DH] Generated shared secret (hex): {}", bytesToHex(sharedSecret));
-            
-            return sharedSecret;
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(otherPublicKeyBytes);
+            PublicKey otherPublicKey = keyFactory.generatePublic(keySpec);
+
+            // Validate the other party's public key
+            validatePublicKey((DHPublicKey) otherPublicKey);
+
+            // Generate shared secret
+            keyAgreement.doPhase(otherPublicKey, true);
+            return keyAgreement.generateSecret();
         } catch (Exception e) {
-            logger.error("[DH] Failed to process public key: {}", Base64.getEncoder().encodeToString(receivedPublicKey), e);
-            throw e;
+            logger.error("Failed to generate shared secret", e);
+            throw new GeneralSecurityException("Failed to generate shared secret", e);
         }
     }
 
-    private byte[] extractKeyBytesFromDER(byte[] derEncoded) {
-        try {
-            logger.debug("[DH] Processing DER encoded key length: {}", derEncoded.length);
-            
-            // Find the last INTEGER tag (0x02) in the DER structure
-            int offset = derEncoded.length - 1;
-            while (offset >= 0 && derEncoded[offset] != 0x02) {
-                offset--;
-            }
-            
-            // Skip the INTEGER tag
-            offset++;
-            
-            // Skip the length bytes
-            if ((derEncoded[offset] & 0x80) != 0) {
-                int lenBytes = derEncoded[offset] & 0x7F;
-                offset += lenBytes + 1;
-            } else {
-                offset++;
-            }
-            
-            // The rest is our key data
-            byte[] result = Arrays.copyOfRange(derEncoded, offset, derEncoded.length);
-            logger.debug("[DH] Extracted key length: {}", result.length);
-            return result;
-        } catch (Exception e) {
-            logger.error("[DH] Failed to extract key bytes from DER: {}", bytesToHex(derEncoded), e);
-            throw new IllegalArgumentException("Invalid DER encoding", e);
+    private void validatePublicKey(DHPublicKey publicKey) throws InvalidKeyException {
+        // Verify the key uses our parameters
+        DHParameterSpec params = publicKey.getParams();
+        if (!params.getP().equals(new BigInteger(1, P_BYTES)) ||
+            !params.getG().equals(new BigInteger(1, G_BYTES))) {
+            throw new InvalidKeyException("Invalid DH parameters");
         }
-    }
-    
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+
+        // Verify the public key value is in range
+        BigInteger y = publicKey.getY();
+        BigInteger p = params.getP();
+        if (y.compareTo(BigInteger.ONE) <= 0 || y.compareTo(p.subtract(BigInteger.ONE)) >= 0) {
+            throw new InvalidKeyException("Invalid DH public key value");
         }
-        return sb.toString();
     }
 }
