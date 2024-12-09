@@ -4,6 +4,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.AEADBadTagException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
