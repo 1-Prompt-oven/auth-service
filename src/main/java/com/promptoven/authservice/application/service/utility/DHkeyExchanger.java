@@ -54,32 +54,83 @@ public class DHkeyExchanger {
     }
 
     public byte[] getPublicKey() {
-        return keyPair.getPublic().getEncoded();
+        try {
+            DHPublicKey publicKey = (DHPublicKey) keyPair.getPublic();
+            BigInteger y = publicKey.getY();
+            
+            // Create DER encoding manually
+            byte[] yBytes = y.toByteArray();
+            byte[] pBytes = P.toByteArray();
+            
+            // Calculate lengths
+            int totalLength = 7 + yBytes.length + 3 + pBytes.length;
+            
+            // Create DER structure
+            byte[] encoded = new byte[4 + totalLength];
+            int offset = 0;
+            
+            // SEQUENCE header
+            encoded[offset++] = 0x30;
+            encoded[offset++] = (byte) 0x82;
+            encoded[offset++] = (byte) ((totalLength >> 8) & 0xff);
+            encoded[offset++] = (byte) (totalLength & 0xff);
+            
+            // y INTEGER
+            encoded[offset++] = 0x02;
+            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = (byte) yBytes.length;
+            System.arraycopy(yBytes, 0, encoded, offset, yBytes.length);
+            offset += yBytes.length;
+            
+            // g INTEGER (2)
+            encoded[offset++] = 0x02;
+            encoded[offset++] = 0x01;
+            encoded[offset++] = 0x02;
+            
+            // p INTEGER
+            encoded[offset++] = 0x02;
+            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = (byte) pBytes.length;
+            System.arraycopy(pBytes, 0, encoded, offset, pBytes.length);
+            
+            return encoded;
+        } catch (Exception e) {
+            logger.error("Failed to encode public key", e);
+            throw new RuntimeException("Failed to encode public key", e);
+        }
     }
 
     public byte[] generateSharedSecret(byte[] otherPublicKeyBytes) throws GeneralSecurityException {
         try {
-            // Convert received bytes to public key
+            // Parse DER encoding manually
+            if (otherPublicKeyBytes.length < 7) {
+                throw new InvalidKeySpecException("Invalid DER encoding");
+            }
+            
+            // Skip SEQUENCE header (4 bytes) and first INTEGER tag/length (3 bytes)
+            int offset = 7;
+            int yLength = otherPublicKeyBytes[6] & 0xff;
+            
+            if (offset + yLength > otherPublicKeyBytes.length) {
+                throw new InvalidKeySpecException("Invalid key length");
+            }
+            
+            // Extract y value
+            byte[] yBytes = new byte[yLength];
+            System.arraycopy(otherPublicKeyBytes, offset, yBytes, 0, yLength);
+            BigInteger y = new BigInteger(1, yBytes);
+            
+            // Create DHPublicKeySpec
+            DHPublicKeySpec keySpec = new DHPublicKeySpec(y, P, G);
+            
+            // Generate public key
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
-            
-            // Log the received bytes for debugging
-            logger.debug("Received public key bytes length: {}", otherPublicKeyBytes.length);
-            logger.debug("Received public key bytes (hex): {}", bytesToHex(otherPublicKeyBytes));
-            
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(otherPublicKeyBytes);
             PublicKey otherPublicKey = keyFactory.generatePublic(keySpec);
-
-            // Validate the other party's public key
+            
+            // Validate and generate shared secret
             validatePublicKey((DHPublicKey) otherPublicKey);
-
-            // Generate shared secret
             keyAgreement.doPhase(otherPublicKey, true);
-            byte[] secret = keyAgreement.generateSecret();
-            
-            logger.debug("Generated shared secret length: {}", secret.length);
-            logger.debug("Generated shared secret (hex): {}", bytesToHex(secret));
-            
-            return secret;
+            return keyAgreement.generateSecret();
         } catch (Exception e) {
             logger.error("Failed to generate shared secret", e);
             throw new GeneralSecurityException("Failed to generate shared secret", e);
