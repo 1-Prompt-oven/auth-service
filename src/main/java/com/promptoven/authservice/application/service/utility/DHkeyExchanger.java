@@ -3,10 +3,10 @@ package com.promptoven.authservice.application.service.utility;
 import javax.crypto.KeyAgreement;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.DHPublicKeySpec;
 import java.security.*;
 import java.security.spec.*;
 import java.math.BigInteger;
-import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
