@@ -30,17 +30,27 @@ public class DHKeyExchangeController {
 
 	@PostMapping("/complete")
 	public BaseResponse<Void> completeKeyExchange(
-		@RequestHeader("X-Session-ID") String sessionId,
+		@RequestHeader(value = "X-Session-ID", required = true) String sessionId,
 		@RequestBody String clientPublicKey) throws Exception {
 		if (clientPublicKey == null || clientPublicKey.trim().isEmpty()) {
 			log.warn("Empty client public key received for session: {}", sessionId);
 			throw new IllegalArgumentException("Client public key cannot be empty");
 		}
 
-		log.debug("Completing key exchange for session: {}", sessionId);
-		dHkeyExchangeUsecase.completeKeyExchange(sessionId, clientPublicKey);
-		log.debug("Key exchange completed successfully for session: {}", sessionId);
-		return new BaseResponse<>();
+		if (sessionId == null || sessionId.trim().isEmpty()) {
+			log.warn("Empty session ID received");
+			throw new IllegalArgumentException("Session ID cannot be empty");
+		}
+
+		try {
+			log.debug("Completing key exchange for session: {}", sessionId);
+			dHkeyExchangeUsecase.completeKeyExchange(sessionId, clientPublicKey);
+			log.debug("Key exchange completed successfully for session: {}", sessionId);
+			return new BaseResponse<>();
+		} catch (Exception e) {
+			log.error("Failed to complete key exchange for session {}: {}", sessionId, e.getMessage());
+			throw e;
+		}
 	}
 
 	@PostMapping("/destroy")

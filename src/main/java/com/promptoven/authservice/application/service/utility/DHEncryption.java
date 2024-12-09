@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,13 +77,16 @@ public class DHEncryption {
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, extractedIv);
         cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
         
-        byte[] decrypted = cipher.doFinal(encrypted);
-        logger.debug("[Decrypt] Decrypted length: {}", decrypted.length);
-        logger.debug("[Decrypt] Decrypted (hex): {}", bytesToHex(decrypted));
-        
-        String result = new String(decrypted);
-        logger.debug("[Decrypt] Final text length: {}", result.length());
-        return result;
+        try {
+            byte[] decrypted = cipher.doFinal(encrypted);
+            logger.debug("[Decrypt] Decrypted length: {}", decrypted.length);
+            logger.debug("[Decrypt] Decrypted (hex): {}", bytesToHex(decrypted));
+            
+            return new String(decrypted, StandardCharsets.UTF_8);
+        } catch (AEADBadTagException e) {
+            logger.error("[Decrypt] Authentication failed: {}", e.getMessage());
+            throw new SecurityException("Password decryption failed: authentication tag mismatch");
+        }
     }
 
     private static String bytesToHex(byte[] bytes) {
