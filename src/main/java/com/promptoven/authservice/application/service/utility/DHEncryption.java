@@ -19,6 +19,7 @@ public class DHEncryption {
     private static final String CIPHER_TRANSFORM = "AES/GCM/NoPadding";
     private static final int GCM_TAG_LENGTH = 128;
     private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_BYTES = GCM_TAG_LENGTH / 8;
     
     private final SecretKey secretKey;
 
@@ -42,47 +43,48 @@ public class DHEncryption {
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
 
-        // Encrypt
-        byte[] encrypted = cipher.doFinal(plaintext.getBytes());
-        logger.debug("[Encrypt] Encrypted data length: {}", encrypted.length);
-        logger.debug("[Encrypt] Encrypted data (hex): {}", bytesToHex(encrypted));
+        // Add empty AAD (additional authenticated data)
+        cipher.updateAAD(new byte[0]);
 
-        // Combine IV and encrypted data
-        byte[] combined = new byte[iv.length + encrypted.length];
-        System.arraycopy(iv, 0, combined, 0, iv.length);
-        System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
-        logger.debug("[Encrypt] Combined length: {}", combined.length);
+        // Encrypt
+        byte[] encrypted = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
         
-        String result = Base64.getEncoder().encodeToString(combined);
-        logger.debug("[Encrypt] Final base64 length: {}", result.length());
-        logger.debug("[Encrypt] Final base64: {}", result);
-        return result;
+        // The encrypted array contains both ciphertext and tag
+        byte[] ciphertext = Arrays.copyOfRange(encrypted, 0, encrypted.length - GCM_TAG_BYTES);
+        byte[] tag = Arrays.copyOfRange(encrypted, encrypted.length - GCM_TAG_BYTES, encrypted.length);
+
+        // Combine IV + ciphertext + tag
+        byte[] combined = new byte[iv.length + ciphertext.length + tag.length];
+        System.arraycopy(iv, 0, combined, 0, iv.length);
+        System.arraycopy(ciphertext, 0, combined, iv.length, ciphertext.length);
+        System.arraycopy(tag, 0, combined, iv.length + ciphertext.length, tag.length);
+
+        return Base64.getEncoder().encodeToString(combined);
     }
 
     public String decrypt(String encryptedText) throws Exception {
-        logger.debug("[Decrypt] Input base64 length: {}", encryptedText.length());
-        logger.debug("[Decrypt] Input base64: {}", encryptedText);
-        
         byte[] combined = Base64.getDecoder().decode(encryptedText);
-        logger.debug("[Decrypt] Decoded combined length: {}", combined.length);
         
-        // Extract IV and encrypted data
-        byte[] extractedIv = Arrays.copyOfRange(combined, 0, GCM_IV_LENGTH);
-        byte[] encrypted = Arrays.copyOfRange(combined, GCM_IV_LENGTH, combined.length);
-        logger.debug("[Decrypt] Extracted IV (hex): {}", bytesToHex(extractedIv));
-        logger.debug("[Decrypt] Encrypted data length: {}", encrypted.length);
-        logger.debug("[Decrypt] Encrypted data (hex): {}", bytesToHex(encrypted));
-        
+        // Extract IV, ciphertext and tag
+        byte[] iv = Arrays.copyOfRange(combined, 0, GCM_IV_LENGTH);
+        byte[] ciphertext = Arrays.copyOfRange(combined, GCM_IV_LENGTH, combined.length - GCM_TAG_BYTES);
+        byte[] tag = Arrays.copyOfRange(combined, combined.length - GCM_TAG_BYTES, combined.length);
+
+        // Combine ciphertext and tag for decryption
+        byte[] encrypted = new byte[ciphertext.length + tag.length];
+        System.arraycopy(ciphertext, 0, encrypted, 0, ciphertext.length);
+        System.arraycopy(tag, 0, encrypted, ciphertext.length, tag.length);
+
         // Initialize cipher for decryption
         Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORM);
-        GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, extractedIv);
+        GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-        
+
+        // Add empty AAD
+        cipher.updateAAD(new byte[0]);
+
         try {
             byte[] decrypted = cipher.doFinal(encrypted);
-            logger.debug("[Decrypt] Decrypted length: {}", decrypted.length);
-            logger.debug("[Decrypt] Decrypted (hex): {}", bytesToHex(decrypted));
-            
             return new String(decrypted, StandardCharsets.UTF_8);
         } catch (AEADBadTagException e) {
             logger.error("[Decrypt] Authentication failed: {}", e.getMessage());
