@@ -58,28 +58,42 @@ public class DHkeyExchanger {
             DHPublicKey publicKey = (DHPublicKey) keyPair.getPublic();
             BigInteger y = publicKey.getY();
             
-            // Create DER encoding
+            // Get the byte arrays for our values
             byte[] yBytes = y.toByteArray();
             byte[] pBytes = P.toByteArray();
             
-            // Calculate total length
-            int totalLength = 0x144;  // Fixed size for 2048-bit key
+            logger.debug("[DH] Public key Y length: {}", yBytes.length);
+            logger.debug("[DH] Prime P length: {}", pBytes.length);
             
-            byte[] encoded = new byte[totalLength];
+            // Calculate the actual sizes needed
+            int sequenceSize = 4;  // First SEQUENCE header
+            int innerSequenceSize = 3;  // Inner SEQUENCE
+            int oidSize = 11;  // Object identifier
+            int paramsSequenceSize = 3;  // Parameters SEQUENCE
+            int primeSize = 3 + pBytes.length;  // Prime INTEGER
+            int generatorSize = 3;  // Generator INTEGER
+            int publicKeySize = 4 + yBytes.length;  // BIT STRING for public key
+            
+            int totalSize = sequenceSize + innerSequenceSize + oidSize + 
+                           paramsSequenceSize + primeSize + generatorSize + publicKeySize;
+            
+            logger.debug("[DH] Total DER size needed: {}", totalSize);
+            
+            byte[] encoded = new byte[totalSize];
             int offset = 0;
             
-            // SEQUENCE
+            // Outer SEQUENCE
             encoded[offset++] = 0x30;
             encoded[offset++] = (byte) 0x82;
-            encoded[offset++] = 0x01;
-            encoded[offset++] = 0x44;
+            encoded[offset++] = (byte) ((totalSize - 4) >> 8);
+            encoded[offset++] = (byte) (totalSize - 4);
             
-            // SEQUENCE
+            // Inner SEQUENCE
             encoded[offset++] = 0x30;
             encoded[offset++] = (byte) 0x81;
-            encoded[offset++] = (byte) 0x9F;
+            encoded[offset++] = (byte) (totalSize - 7);
             
-            // Object Identifier
+            // Object Identifier for dhPublicKey
             encoded[offset++] = 0x06;
             encoded[offset++] = 0x09;
             encoded[offset++] = 0x2A;
@@ -92,15 +106,15 @@ public class DHkeyExchanger {
             encoded[offset++] = 0x03;
             encoded[offset++] = 0x01;
             
-            // SEQUENCE
+            // Parameters SEQUENCE
             encoded[offset++] = 0x30;
             encoded[offset++] = (byte) 0x81;
-            encoded[offset++] = (byte) 0x91;
+            encoded[offset++] = (byte) (primeSize + generatorSize);
             
             // Prime INTEGER
             encoded[offset++] = 0x02;
             encoded[offset++] = (byte) 0x81;
-            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = (byte) pBytes.length;
             System.arraycopy(pBytes, 0, encoded, offset, pBytes.length);
             offset += pBytes.length;
             
@@ -112,13 +126,14 @@ public class DHkeyExchanger {
             // Public Key BIT STRING
             encoded[offset++] = 0x03;
             encoded[offset++] = (byte) 0x81;
-            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = (byte) yBytes.length;
             encoded[offset++] = 0x00;  // Leading zero
             System.arraycopy(yBytes, 0, encoded, offset, yBytes.length);
             
+            logger.debug("[DH] Generated public key DER (hex): {}", bytesToHex(encoded));
             return encoded;
         } catch (Exception e) {
-            logger.error("Failed to encode public key", e);
+            logger.error("[DH] Failed to encode public key", e);
             throw new RuntimeException("Failed to encode public key", e);
         }
     }
