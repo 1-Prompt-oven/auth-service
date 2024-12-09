@@ -15,34 +15,42 @@ public class DHkeyExchanger {
     private final KeyPair keyPair;
     private final KeyAgreement keyAgreement;
     
-    // Standard 2048-bit DH parameters from RFC 3526
-    private static final byte[] P_BYTES = Base64.getDecoder().decode(
-        "/////////////////////////////////////////////////////////////////////"
-        + "/////////////////////3///////////////////////AAAAAAAAAAAAAAAAAAAAAA"
-        + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgx"
-        + "dHc5LupP51oXpaL0nKR8tuQQZAcsjlFsV/S+N/AC3kwe0gOjqYt5kFkYCdCXNM5r"
-        + "qQe4DvZLGEYBWcqU61orGBmOkXC7+0oQzGKwOLZnztFP1AtTI6IZ0olHZGRNvZqF"
-        + "P11Y7UAA5VtlcPD3GP1W6NYBC0j3y3BF1yqWHiXn16gqbhrh0+aa7xE="
-    );
-    private static final byte[] G_BYTES = Base64.getDecoder().decode("Ag=="); // Value 2
+    // RFC 3526 MODP Group 14 (2048-bit)
+    private static final BigInteger P = new BigInteger(
+        "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
+        "29024E088A67CC74020BBEA63B139B22514A08798E3404DD" +
+        "EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" +
+        "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" +
+        "EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3D" +
+        "C2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F" +
+        "83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
+        "670C354E4ABC9804F1746C08CA18217C32905E462E36CE3B" +
+        "E39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9" +
+        "DE2BCBF6955817183995497CEA956AE515D2261898FA0510" +
+        "15728E5A8AACAA68FFFFFFFFFFFFFFFF", 16);
+    
+    private static final BigInteger G = BigInteger.valueOf(2);
+    private static final int KEY_SIZE = 2048; // Standard key size
 
     public DHkeyExchanger() throws GeneralSecurityException {
-        // Create DH parameters
-        DHParameterSpec dhParams = new DHParameterSpec(
-            new BigInteger(1, P_BYTES),
-            new BigInteger(1, G_BYTES)
-        );
+        try {
+            // Create DH parameters with exact 2048-bit size
+            DHParameterSpec dhParams = new DHParameterSpec(P, G, KEY_SIZE);
 
-        // Generate key pair
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH");
-        keyGen.initialize(dhParams);
-        this.keyPair = keyGen.generateKeyPair();
+            // Generate key pair
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DH");
+            keyGen.initialize(dhParams);
+            this.keyPair = keyGen.generateKeyPair();
 
-        // Initialize key agreement
-        this.keyAgreement = KeyAgreement.getInstance("DH");
-        this.keyAgreement.init(keyPair.getPrivate());
-        
-        logger.debug("DH key exchanger initialized with {} bit prime", dhParams.getP().bitLength());
+            // Initialize key agreement
+            this.keyAgreement = KeyAgreement.getInstance("DH");
+            this.keyAgreement.init(keyPair.getPrivate());
+            
+            logger.debug("DH key exchanger initialized with {} bit prime", KEY_SIZE);
+        } catch (Exception e) {
+            logger.error("Failed to initialize DH key exchanger", e);
+            throw e;
+        }
     }
 
     public byte[] getPublicKey() {
@@ -71,15 +79,13 @@ public class DHkeyExchanger {
     private void validatePublicKey(DHPublicKey publicKey) throws InvalidKeyException {
         // Verify the key uses our parameters
         DHParameterSpec params = publicKey.getParams();
-        if (!params.getP().equals(new BigInteger(1, P_BYTES)) ||
-            !params.getG().equals(new BigInteger(1, G_BYTES))) {
+        if (!params.getP().equals(P) || !params.getG().equals(G)) {
             throw new InvalidKeyException("Invalid DH parameters");
         }
 
         // Verify the public key value is in range
         BigInteger y = publicKey.getY();
-        BigInteger p = params.getP();
-        if (y.compareTo(BigInteger.ONE) <= 0 || y.compareTo(p.subtract(BigInteger.ONE)) >= 0) {
+        if (y.compareTo(BigInteger.ONE) <= 0 || y.compareTo(P.subtract(BigInteger.ONE)) >= 0) {
             throw new InvalidKeyException("Invalid DH public key value");
         }
     }
