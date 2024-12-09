@@ -113,41 +113,25 @@ public class DHkeyExchanger {
     private byte[] extractKeyBytesFromDER(byte[] derEncoded) {
         try {
             logger.debug("[DH] Processing DER encoded key length: {}", derEncoded.length);
-            logger.debug("[DH] DER encoded key (hex): {}", bytesToHex(derEncoded));
             
-            int offset = 0;
-            
-            // Skip initial sequence
-            if (derEncoded[offset++] != 0x30) {
-                throw new IllegalArgumentException("Expected SEQUENCE");
+            // Find the last INTEGER tag (0x02) in the DER structure
+            int offset = derEncoded.length - 1;
+            while (offset >= 0 && derEncoded[offset] != 0x02) {
+                offset--;
             }
             
-            // Skip length bytes
-            if ((derEncoded[offset] & 0xFF) == 0x82) {
-                offset += 3; // Skip 0x82 and two length bytes
+            // Skip the INTEGER tag
+            offset++;
+            
+            // Skip the length bytes
+            if ((derEncoded[offset] & 0x80) != 0) {
+                int lenBytes = derEncoded[offset] & 0x7F;
+                offset += lenBytes + 1;
             } else {
-                offset += 1; // Skip single length byte
-            }
-            
-            // Skip inner sequence
-            if (derEncoded[offset++] != 0x30) {
-                throw new IllegalArgumentException("Expected inner SEQUENCE");
-            }
-            
-            // Skip inner sequence length
-            if ((derEncoded[offset] & 0xFF) == 0x82) {
-                offset += 3;
-            } else {
-                offset += 1;
-            }
-            
-            // Skip any remaining DER structure until we find the key data
-            while (offset < derEncoded.length && 
-                   (derEncoded[offset] == 0x02 || derEncoded[offset] == 0x00)) {
                 offset++;
             }
             
-            logger.debug("[DH] Found key data at offset: {}", offset);
+            // The rest is our key data
             byte[] result = Arrays.copyOfRange(derEncoded, offset, derEncoded.length);
             logger.debug("[DH] Extracted key length: {}", result.length);
             return result;
