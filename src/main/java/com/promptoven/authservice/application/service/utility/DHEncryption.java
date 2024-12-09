@@ -24,68 +24,77 @@ public class DHEncryption {
     private final SecretKey secretKey;
 
     public DHEncryption(byte[] sharedSecret) throws Exception {
-        // Use SHA-256 to derive a proper-length key
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] keyBytes = digest.digest(sharedSecret);
         this.secretKey = new SecretKeySpec(keyBytes, ALGORITHM);
         
-        logger.debug("Encryption initialized with key length: {} bits", keyBytes.length * 8);
+        logger.debug("[Init] Shared secret length: {}", sharedSecret.length);
+        logger.debug("[Init] Shared secret (hex): {}", bytesToHex(sharedSecret));
+        logger.debug("[Init] Derived key length: {}", keyBytes.length);
+        logger.debug("[Init] Derived key (hex): {}", bytesToHex(keyBytes));
     }
 
     public String encrypt(String plaintext) throws Exception {
-        // Generate random nonce
         byte[] iv = new byte[GCM_IV_LENGTH];
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
 
-        // Initialize cipher
+        logger.debug("[Encrypt] Input text length: {}", plaintext.length());
+        logger.debug("[Encrypt] Generated IV (hex): {}", bytesToHex(iv));
+
         Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORM);
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
-
-        // Add empty AAD (additional authenticated data)
         cipher.updateAAD(new byte[0]);
 
-        // Encrypt
         byte[] encrypted = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
-        
-        // The encrypted array contains both ciphertext and tag
         byte[] ciphertext = Arrays.copyOfRange(encrypted, 0, encrypted.length - GCM_TAG_BYTES);
         byte[] tag = Arrays.copyOfRange(encrypted, encrypted.length - GCM_TAG_BYTES, encrypted.length);
 
-        // Combine IV + ciphertext + tag
+        logger.debug("[Encrypt] Ciphertext length: {}", ciphertext.length);
+        logger.debug("[Encrypt] Ciphertext (hex): {}", bytesToHex(ciphertext));
+        logger.debug("[Encrypt] Tag length: {}", tag.length);
+        logger.debug("[Encrypt] Tag (hex): {}", bytesToHex(tag));
+
         byte[] combined = new byte[iv.length + ciphertext.length + tag.length];
         System.arraycopy(iv, 0, combined, 0, iv.length);
         System.arraycopy(ciphertext, 0, combined, iv.length, ciphertext.length);
         System.arraycopy(tag, 0, combined, iv.length + ciphertext.length, tag.length);
 
-        return Base64.getEncoder().encodeToString(combined);
+        String result = Base64.getEncoder().encodeToString(combined);
+        logger.debug("[Encrypt] Final combined length: {}", combined.length);
+        logger.debug("[Encrypt] Final base64: {}", result);
+        return result;
     }
 
     public String decrypt(String encryptedText) throws Exception {
-        byte[] combined = Base64.getDecoder().decode(encryptedText);
+        logger.debug("[Decrypt] Input base64: {}", encryptedText);
         
-        // Extract IV, ciphertext and tag
+        byte[] combined = Base64.getDecoder().decode(encryptedText);
         byte[] iv = Arrays.copyOfRange(combined, 0, GCM_IV_LENGTH);
         byte[] ciphertext = Arrays.copyOfRange(combined, GCM_IV_LENGTH, combined.length - GCM_TAG_BYTES);
         byte[] tag = Arrays.copyOfRange(combined, combined.length - GCM_TAG_BYTES, combined.length);
 
-        // Combine ciphertext and tag for decryption
+        logger.debug("[Decrypt] IV (hex): {}", bytesToHex(iv));
+        logger.debug("[Decrypt] Ciphertext length: {}", ciphertext.length);
+        logger.debug("[Decrypt] Ciphertext (hex): {}", bytesToHex(ciphertext));
+        logger.debug("[Decrypt] Tag length: {}", tag.length);
+        logger.debug("[Decrypt] Tag (hex): {}", bytesToHex(tag));
+
         byte[] encrypted = new byte[ciphertext.length + tag.length];
         System.arraycopy(ciphertext, 0, encrypted, 0, ciphertext.length);
         System.arraycopy(tag, 0, encrypted, ciphertext.length, tag.length);
 
-        // Initialize cipher for decryption
         Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORM);
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-
-        // Add empty AAD
         cipher.updateAAD(new byte[0]);
 
         try {
             byte[] decrypted = cipher.doFinal(encrypted);
-            return new String(decrypted, StandardCharsets.UTF_8);
+            String result = new String(decrypted, StandardCharsets.UTF_8);
+            logger.debug("[Decrypt] Decrypted text: {}", result);
+            return result;
         } catch (AEADBadTagException e) {
             logger.error("[Decrypt] Authentication failed: {}", e.getMessage());
             throw new SecurityException("Password decryption failed: authentication tag mismatch");

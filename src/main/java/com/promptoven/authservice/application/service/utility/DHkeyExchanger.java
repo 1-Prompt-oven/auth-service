@@ -102,12 +102,12 @@ public class DHkeyExchanger {
 
     public byte[] generateSharedSecret(byte[] otherPublicKeyBytes) throws GeneralSecurityException {
         try {
-            // Parse DER encoding manually
+            logger.debug("[DH] Received public key bytes (hex): {}", bytesToHex(otherPublicKeyBytes));
+            
             if (otherPublicKeyBytes.length < 7) {
                 throw new InvalidKeySpecException("Invalid DER encoding");
             }
             
-            // Skip SEQUENCE header (4 bytes) and first INTEGER tag/length (3 bytes)
             int offset = 7;
             int yLength = otherPublicKeyBytes[6] & 0xff;
             
@@ -115,24 +115,26 @@ public class DHkeyExchanger {
                 throw new InvalidKeySpecException("Invalid key length");
             }
             
-            // Extract y value
             byte[] yBytes = new byte[yLength];
             System.arraycopy(otherPublicKeyBytes, offset, yBytes, 0, yLength);
             BigInteger y = new BigInteger(1, yBytes);
             
-            // Create DHPublicKeySpec
-            DHPublicKeySpec keySpec = new DHPublicKeySpec(y, P, G);
+            logger.debug("[DH] Extracted Y value (hex): {}", y.toString(16));
             
-            // Generate public key
+            DHPublicKeySpec keySpec = new DHPublicKeySpec(y, P, G);
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
             PublicKey otherPublicKey = keyFactory.generatePublic(keySpec);
             
-            // Validate and generate shared secret
             validatePublicKey((DHPublicKey) otherPublicKey);
             keyAgreement.doPhase(otherPublicKey, true);
-            return keyAgreement.generateSecret();
+            byte[] secret = keyAgreement.generateSecret();
+            
+            logger.debug("[DH] Generated shared secret length: {}", secret.length);
+            logger.debug("[DH] Generated shared secret (hex): {}", bytesToHex(secret));
+            
+            return secret;
         } catch (Exception e) {
-            logger.error("Failed to generate shared secret", e);
+            logger.error("[DH] Failed to generate shared secret", e);
             throw new GeneralSecurityException("Failed to generate shared secret", e);
         }
     }
