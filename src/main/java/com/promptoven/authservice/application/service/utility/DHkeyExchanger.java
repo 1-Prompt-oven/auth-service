@@ -142,22 +142,23 @@ public class DHkeyExchanger {
         try {
             logger.debug("[DH] Received public key bytes (hex): {}", bytesToHex(otherPublicKeyBytes));
             
-            // Find the BIT STRING tag (0x03) that contains the public key
-            int offset = 0;
-            while (offset < otherPublicKeyBytes.length && otherPublicKeyBytes[offset] != 0x03) {
-                offset++;
+            // Find the last BIT STRING tag (0x03) in the DER structure
+            int offset = otherPublicKeyBytes.length - 1;
+            while (offset >= 0) {
+                if (otherPublicKeyBytes[offset] == 0x03 &&  // BIT STRING tag
+                    offset + 3 < otherPublicKeyBytes.length &&
+                    (otherPublicKeyBytes[offset + 1] & 0xFF) == 0x81) {  // Length in long form
+                    break;
+                }
+                offset--;
             }
             
-            if (offset >= otherPublicKeyBytes.length) {
+            if (offset < 0) {
                 throw new InvalidKeySpecException("BIT STRING tag not found in DER encoding");
             }
             
             // Skip BIT STRING tag and length bytes (0x03, 0x81, length, 0x00)
             offset += 4;
-            
-            if (offset + (KEY_SIZE / 8) > otherPublicKeyBytes.length) {
-                throw new InvalidKeySpecException("Invalid key length");
-            }
             
             // Extract the public key value
             byte[] yBytes = new byte[KEY_SIZE / 8];
