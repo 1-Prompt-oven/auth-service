@@ -142,27 +142,36 @@ public class DHkeyExchanger {
         try {
             logger.debug("[DH] Received public key bytes (hex): {}", bytesToHex(otherPublicKeyBytes));
             
-            if (otherPublicKeyBytes.length < 7) {
-                throw new InvalidKeySpecException("Invalid DER encoding");
+            // Find the BIT STRING tag (0x03) that contains the public key
+            int offset = 0;
+            while (offset < otherPublicKeyBytes.length && otherPublicKeyBytes[offset] != 0x03) {
+                offset++;
             }
             
-            int offset = 7;
-            int yLength = otherPublicKeyBytes[6] & 0xff;
+            if (offset >= otherPublicKeyBytes.length) {
+                throw new InvalidKeySpecException("BIT STRING tag not found in DER encoding");
+            }
             
-            if (offset + yLength > otherPublicKeyBytes.length) {
+            // Skip BIT STRING tag and length bytes (0x03, 0x81, length, 0x00)
+            offset += 4;
+            
+            if (offset + (KEY_SIZE / 8) > otherPublicKeyBytes.length) {
                 throw new InvalidKeySpecException("Invalid key length");
             }
             
-            byte[] yBytes = new byte[yLength];
-            System.arraycopy(otherPublicKeyBytes, offset, yBytes, 0, yLength);
+            // Extract the public key value
+            byte[] yBytes = new byte[KEY_SIZE / 8];
+            System.arraycopy(otherPublicKeyBytes, offset, yBytes, 0, yBytes.length);
             BigInteger y = new BigInteger(1, yBytes);
             
             logger.debug("[DH] Extracted Y value (hex): {}", y.toString(16));
             
+            // Create public key
             DHPublicKeySpec keySpec = new DHPublicKeySpec(y, P, G);
             KeyFactory keyFactory = KeyFactory.getInstance("DH");
             PublicKey otherPublicKey = keyFactory.generatePublic(keySpec);
             
+            // Validate and generate shared secret
             validatePublicKey((DHPublicKey) otherPublicKey);
             keyAgreement.doPhase(otherPublicKey, true);
             byte[] secret = keyAgreement.generateSecret();
