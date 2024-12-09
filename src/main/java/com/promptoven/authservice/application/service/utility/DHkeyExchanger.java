@@ -58,40 +58,63 @@ public class DHkeyExchanger {
             DHPublicKey publicKey = (DHPublicKey) keyPair.getPublic();
             BigInteger y = publicKey.getY();
             
-            // Create DER encoding manually
+            // Create DER encoding
             byte[] yBytes = y.toByteArray();
             byte[] pBytes = P.toByteArray();
             
-            // Calculate lengths
-            int totalLength = 7 + yBytes.length + 3 + pBytes.length;
+            // Calculate total length
+            int totalLength = 0x144;  // Fixed size for 2048-bit key
             
-            // Create DER structure
-            byte[] encoded = new byte[4 + totalLength];
+            byte[] encoded = new byte[totalLength];
             int offset = 0;
             
-            // SEQUENCE header
+            // SEQUENCE
             encoded[offset++] = 0x30;
             encoded[offset++] = (byte) 0x82;
-            encoded[offset++] = (byte) ((totalLength >> 8) & 0xff);
-            encoded[offset++] = (byte) (totalLength & 0xff);
+            encoded[offset++] = 0x01;
+            encoded[offset++] = 0x44;
             
-            // y INTEGER
+            // SEQUENCE
+            encoded[offset++] = 0x30;
+            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = (byte) 0x9F;
+            
+            // Object Identifier
+            encoded[offset++] = 0x06;
+            encoded[offset++] = 0x09;
+            encoded[offset++] = 0x2A;
+            encoded[offset++] = (byte) 0x86;
+            encoded[offset++] = 0x48;
+            encoded[offset++] = (byte) 0x86;
+            encoded[offset++] = (byte) 0xF7;
+            encoded[offset++] = 0x0D;
+            encoded[offset++] = 0x01;
+            encoded[offset++] = 0x03;
+            encoded[offset++] = 0x01;
+            
+            // SEQUENCE
+            encoded[offset++] = 0x30;
+            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = (byte) 0x91;
+            
+            // Prime INTEGER
             encoded[offset++] = 0x02;
             encoded[offset++] = (byte) 0x81;
-            encoded[offset++] = (byte) yBytes.length;
-            System.arraycopy(yBytes, 0, encoded, offset, yBytes.length);
-            offset += yBytes.length;
+            encoded[offset++] = (byte) 0x81;
+            System.arraycopy(pBytes, 0, encoded, offset, pBytes.length);
+            offset += pBytes.length;
             
-            // g INTEGER (2)
+            // Generator INTEGER
             encoded[offset++] = 0x02;
             encoded[offset++] = 0x01;
             encoded[offset++] = 0x02;
             
-            // p INTEGER
-            encoded[offset++] = 0x02;
+            // Public Key BIT STRING
+            encoded[offset++] = 0x03;
             encoded[offset++] = (byte) 0x81;
-            encoded[offset++] = (byte) pBytes.length;
-            System.arraycopy(pBytes, 0, encoded, offset, pBytes.length);
+            encoded[offset++] = (byte) 0x81;
+            encoded[offset++] = 0x00;  // Leading zero
+            System.arraycopy(yBytes, 0, encoded, offset, yBytes.length);
             
             return encoded;
         } catch (Exception e) {
