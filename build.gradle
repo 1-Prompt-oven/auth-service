@@ -1,12 +1,12 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.6'
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'org.springdoc.openapi-gradle-plugin' version '1.9.0'
 }
 
 ext {
-    springCloudVersion = "2023.0.3"
+    springCloudVersion = "2024.0.0"
 }
 
 group = 'com.promptoven'
@@ -34,8 +34,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.security:spring-security-crypto:6.3.3'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.46'
+    implementation 'org.springframework.security:spring-security-crypto:6.4.2'
+    implementation 'com.nimbusds:nimbus-jose-jwt:10.0.1'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
@@ -51,13 +51,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     // swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1'
     // reactive swagger
 //    implementation 'org.springdoc:springdoc-openapi-webflux-ui:2.6.0'
 
-    implementation 'ognl:ognl:3.4.3'
+    implementation 'ognl:ognl:3.4.5'
 
-    implementation 'io.lettuce:lettuce-core:6.5.1.RELEASE'
+    implementation 'io.lettuce:lettuce-core:6.5.2.RELEASE'
 
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 }
