@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    target-branch: "dev"
+    rebase-strategy: "auto"
+    commit-message:
+      prefix: "fix(dependencies)"
+      include: "scope"
+    allow:
+      - dependency-type: "production"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
